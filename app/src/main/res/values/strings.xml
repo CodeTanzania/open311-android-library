@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SimpleMajifixApp</string>
+    <string name="report_issue">Report</string>
+    <string name="see_list">See List</string>
+</resources>
