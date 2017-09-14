@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">majifix311</string>
+
+    <!--report issue form-->
+    <string name="hint_name">Full name</string>
+    <string name="hint_phone">Phone No: 255</string>
+    <string name="hint_category">Category</string>
+    <string name="hint_location">Add Location</string>
+    <string name="hint_photo">Add Photo</string>
+    <string name="hint_ward">Ward</string>
+    <string name="hint_street">Street</string>
+    <string name="hint_description">Description</string>
+    <string name="submit_button">Post Issue</string>
+    <string name="required">*Required</string>
+    <string name="content_desc_map">Map</string>
+    <string name="content_desc_photo">Photo</string>
 </resources>

@@ -1,9 +1,7 @@
 package com.example.krtonga.simplemajifixapp;
 
-import android.content.Intent;
-
-import com.example.majifix311.ProblemListActivity;
-import com.example.majifix311.ReportProblemActivity;
+import com.example.majifix311.ui.ProblemListActivity;
+import com.example.majifix311.ui.ReportProblemActivity;
 
 import org.junit.Before;
 import org.junit.Test;
