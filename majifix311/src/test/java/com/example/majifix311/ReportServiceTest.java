@@ -114,13 +114,7 @@ public class ReportServiceTest {
         String mBaseEndpoint;
 
         void setMockEndpoint(String endpoint) {
-            mBaseEndpoint = endpoint;
-        }
-
-        @Override
-        protected String getBaseUrl() {
-            System.out.println(mBaseEndpoint);
-            return mBaseEndpoint;
+            MajiFix.setBaseEndpoint(endpoint);
         }
 
 //        @Override

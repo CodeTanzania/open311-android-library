@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.majifix311.MajiFix;
 import com.example.majifix311.ui.ProblemListActivity;
 import com.example.majifix311.ui.ReportProblemActivity;
 
@@ -22,6 +23,8 @@ public class HomeActivity extends FragmentActivity implements View.OnClickListen
         mListButton = (Button) findViewById(R.id.btn_list);
         mReportButton.setOnClickListener(this);
         mListButton.setOnClickListener(this);
+
+        MajiFix.setup(getApplicationContext());
     }
 
     @Override

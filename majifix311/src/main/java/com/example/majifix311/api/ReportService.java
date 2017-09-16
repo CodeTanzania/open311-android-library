@@ -37,7 +37,7 @@ public class ReportService extends Service {
     @Override
     public void onCreate() {
         // Called once on initial create of service
-        majiFixAPI = new MajiFixAPI(getBaseUrl());
+        majiFixAPI = MajiFixAPI.getInstance();
     }
 
     @Override
@@ -52,15 +52,11 @@ public class ReportService extends Service {
         return START_REDELIVER_INTENT;
     }
 
-    protected String getBaseUrl() {
-        return BuildConfig.END_POINT;
-    }
-
     protected Consumer<Problem> onNext() {
         return new Consumer<Problem>() {
             @Override
             public void accept(Problem problem) throws Exception {
-                System.out.println("onNext! "+problem);
+                System.out.println("onRetrievedFromNetwork! "+problem);
                 EventHandler.sendResultReceived(getApplicationContext());
             }
         };
