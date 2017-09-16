@@ -1,5 +1,6 @@
 package com.example.majifix311;
 
+import android.content.Context;
 import android.location.Location;
 
 import com.example.majifix311.api.ApiModelConverter;
@@ -24,27 +25,25 @@ import static junit.framework.Assert.assertNull;
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class ProblemTest implements Problem.Builder.InvalidCallbacks {
-    private String mockName = "Test User";
-    private String mockNumber = "123456789";
-    private String mockCategory = "Leakage";
-    private Location mockLocation = new Location("");
-    private double latitude = 1.1d;
-    private double longitude = 2.2d;
-    private String mockAddress = "55 Marimbo St";
-    private String mockDescription = "Horrible horrible horrible!!";
+    static String mockName = "Test User";
+    static String mockNumber = "123456789";
+    static String mockCategory = "592029e6e8dd8e00048c1852";
+    static Location mockLocation = new Location("");
+    static double latitude = 1.1d;
+    static double longitude = 2.2d;
+    static String mockAddress = "55 Marimbo St";
+    static String mockDescription = "Horrible horrible horrible!!";
 
     private int problemCount;
 
     @Before
     public void prepare() {
         problemCount = 0;
-        mockLocation.setLatitude(latitude);
-        mockLocation.setLongitude(longitude);
     }
 
     @Test
     public void builderCanCreateProblem() {
-        Problem result = buildMockProblem();
+        Problem result = buildMockProblem(this);
 
         assertNotNull(result);
         assertEquals("All inputs should be valid", 0, problemCount);
@@ -60,7 +59,7 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
 
     @Test
     public void testConvertFromProblemToApiServiceRequest() {
-        Problem before = buildMockProblem();
+        Problem before = buildMockProblem(this);
         ApiServiceRequestPost after = ApiModelConverter.convert(before);
         assertEquals(mockName, after.getReporter().getName());
         assertEquals(mockNumber, after.getReporter().getPhone());
@@ -78,7 +77,7 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         ApiServiceRequestPost after = ApiModelConverter.convert(before);
         assertNull(after);
 
-        before = buildMockProblem();
+        before = buildMockProblem(this);
         before.setLocation(null);
         after = ApiModelConverter.convert(before);
         assertEquals(mockName, after.getReporter().getName());
@@ -123,11 +122,13 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals("All inputs should be valid", 6, problemCount);
     }
 
-    private Problem buildMockProblem() {
-        Problem.Builder builder = new Problem.Builder(this);
+    public static Problem buildMockProblem(Problem.Builder.InvalidCallbacks listener) {
+        Problem.Builder builder = new Problem.Builder(listener);
         builder.setUsername(mockName);
         builder.setPhoneNumber(mockNumber);
         builder.setCategory(mockCategory);
+        mockLocation.setLatitude(latitude);
+        mockLocation.setLongitude(longitude);
         builder.setLocation(mockLocation);
         builder.setAddress(mockAddress);
         builder.setDescription(mockDescription);

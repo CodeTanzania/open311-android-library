@@ -108,10 +108,7 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         Problem problem = mBuilder.build();
 
         if (problem != null) {
-            Intent startIntent = new Intent(ReportProblemActivity.this, ReportService.class);
-            startIntent.setAction(ReportService.STARTFOREGROUND_ACTION);
-            startIntent.putExtra(ReportService.NEW_PROBLEM_INTENT, problem);
-            startService(startIntent);
+            ReportService.postNewProblem(ReportProblemActivity.this, problem);
         }
     }
 

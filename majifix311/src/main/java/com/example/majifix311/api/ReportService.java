@@ -1,13 +1,16 @@
 package com.example.majifix311.api;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.example.majifix311.BuildConfig;
 import com.example.majifix311.EventHandler;
 import com.example.majifix311.Problem;
+import com.example.majifix311.ui.ReportProblemActivity;
 
 import io.reactivex.functions.Consumer;
 
@@ -23,12 +26,18 @@ public class ReportService extends Service {
 
     private final ProblemReportBinder mBinder = new ProblemReportBinder();
     private MajiFixAPI majiFixAPI;
-//    private Observable<String> mObservable;
+
+    public static void postNewProblem(Activity activity, Problem problem) {
+        Intent startIntent = new Intent(activity, ReportService.class);
+        startIntent.setAction(ReportService.STARTFOREGROUND_ACTION);
+        startIntent.putExtra(ReportService.NEW_PROBLEM_INTENT, problem);
+        activity.startService(startIntent);
+    }
 
     @Override
     public void onCreate() {
         // Called once on initial create of service
-        majiFixAPI = new MajiFixAPI();
+        majiFixAPI = new MajiFixAPI(getBaseUrl());
     }
 
     @Override
@@ -41,6 +50,10 @@ public class ReportService extends Service {
         // and call onStartCommand() with the last intent that was delivered to the service.
         // Any pending intents are delivered in turn.
         return START_REDELIVER_INTENT;
+    }
+
+    protected String getBaseUrl() {
+        return BuildConfig.END_POINT;
     }
 
     protected Consumer<Problem> onNext() {

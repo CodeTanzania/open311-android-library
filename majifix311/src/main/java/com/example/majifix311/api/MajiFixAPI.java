@@ -4,7 +4,6 @@ import com.example.majifix311.BuildConfig;
 import com.example.majifix311.Problem;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
-import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -12,6 +11,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.Header;
@@ -30,14 +30,14 @@ class MajiFixAPI {
     private Retrofit mRetrofit;
     private MajiFixRetrofitApi mApi;
 
-    MajiFixAPI() {
-        initRetrofit();
+    MajiFixAPI(String baseUrl) {
+        initRetrofit(baseUrl);
     }
 
-    private void initRetrofit() {
+    private void initRetrofit(String baseUrl) {
         // Configures retrofit
         mRetrofit = new Retrofit.Builder()
-                .baseUrl(BuildConfig.END_POINT)
+                .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
