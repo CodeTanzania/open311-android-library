@@ -1,19 +1,27 @@
 package com.example.majifix311.ui;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.majifix311.EventHandler;
 import com.example.majifix311.Problem;
 import com.example.majifix311.R;
+import com.example.majifix311.api.ReportService;
 import com.example.majifix311.utils.EmptyErrorTrigger;
 
 /**
@@ -77,9 +85,20 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
 
         // initialize problem builder
         mBuilder = new Problem.Builder(this);
+        registerForPostUpdates();
     }
 
-    public void submit() {
+    private void registerForPostUpdates() {
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                // TODO replace with real logic
+                Toast.makeText(getApplicationContext(), "Hello Receiver!", Toast.LENGTH_LONG).show();
+            }
+        }, new IntentFilter(EventHandler.BROADCAST_REPORT_RECIEVED));
+    }
+
+    private void submit() {
         // Creates a problem using a builder which will validate required inputs
         mBuilder.setUsername(mEtName.getText().toString());
         mBuilder.setPhoneNumber(mEtPhone.getText().toString());
@@ -88,7 +107,12 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         mBuilder.setDescription(mEtDescription.getText().toString());
         Problem problem = mBuilder.build();
 
-        //TODO submit
+        if (problem != null) {
+            Intent startIntent = new Intent(ReportProblemActivity.this, ReportService.class);
+            startIntent.setAction(ReportService.STARTFOREGROUND_ACTION);
+            startIntent.putExtra(ReportService.NEW_PROBLEM_INTENT, problem);
+            startService(startIntent);
+        }
     }
 
     public void setGpsPoint(Location location) {
@@ -108,7 +132,6 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
             mTvLocationError.setVisibility(View.INVISIBLE);
         }
     }
-
 
     @Override
     public void onInvalidUsername() {

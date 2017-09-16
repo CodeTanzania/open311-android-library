@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.majifix311.api.ReportService;
 import com.example.majifix311.ui.ReportProblemActivity;
 
 import org.junit.Before;
@@ -98,14 +99,28 @@ public class ReportProblemActivityTest {
     }
 
     @Test
-    public void submitTriggersPost() {
-        // TODO
-
+    public void submitTriggersReportService() {
         setFieldsAndSubmit(mockName, mockNumber, mockCategory,
                 mockLocation, mockAddress, mockDescription);
 
         Intent receivedIntent = shadowOf(mActivity).getNextStartedService();
-//        String sentName = receivedIntent.getStringExtra()
+        assertNotNull("Started service should not be null", receivedIntent);
+        assertEquals("Should start ReportService",
+                receivedIntent.getComponent().getClassName(), ReportService.class.getName());
+
+        Problem sent = receivedIntent.getParcelableExtra(ReportService.NEW_PROBLEM_INTENT);
+        assertNotNull("Newly created problem should be sent to service", sent);
+        assertEquals("Name should be correct", sent.getUsername(), mockName);
+        assertEquals("Phone should be correct", sent.getPhoneNumber(), mockNumber);
+        assertEquals("Category should be correct", sent.getCategory(), mockCategory);
+        assertEquals("Location should be correct", sent.getLocation(), mockLocation);
+        assertEquals("Address should be correct", sent.getAddress(), mockAddress);
+        assertEquals("Description should be correct", sent.getDescription(), mockDescription);
+    }
+
+    @Test
+    public void isRegisteredForBroadcasts() {
+        // TODO
     }
 
     private void setFieldsAndSubmit(String username, String phone, String category,
