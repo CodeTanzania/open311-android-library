@@ -36,7 +36,11 @@ public class CategoriesManager {
             public void accept(ApiServiceGroup categories) throws Exception {
                 System.out.println("onRetrievedFromNetwork! "+categories);
                 //EventHandler.sendResultReceived(mContext);
-                mDatabaseHelper.setCategories(categories, onSavedInDatabase(), onError());
+                if (categories != null
+                        && categories.getServices() != null
+                        && !categories.getServices().isEmpty()) {
+                    mDatabaseHelper.setCategories(categories, onSavedInDatabase(), onError(), true);
+                }
             }
         };
     }

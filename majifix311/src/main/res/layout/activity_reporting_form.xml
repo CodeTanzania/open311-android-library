@@ -45,22 +45,27 @@
     </android.support.design.widget.TextInputLayout>
 
     <!-- Category -->
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/til_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <!--<android.support.design.widget.TextInputLayout-->
+        <!--android:id="@+id/til_category"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
 
-        <android.support.design.widget.TextInputEditText
-            android:id="@+id/et_category"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:singleLine="true"
-            android:imeOptions="actionNext"
-            android:nextFocusDown="@+id/et_address"
-            android:nextFocusForward="@id/et_address"
-            android:hint="@string/hint_category"/>
-    </android.support.design.widget.TextInputLayout>
+        <!--<android.support.design.widget.TextInputEditText-->
+            <!--android:id="@+id/et_category"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:maxLines="1"-->
+            <!--android:singleLine="true"-->
+            <!--android:imeOptions="actionNext"-->
+            <!--android:nextFocusDown="@+id/et_address"-->
+            <!--android:nextFocusForward="@id/et_address"-->
+            <!--android:hint="@string/hint_category"/>-->
+    <!--</android.support.design.widget.TextInputLayout>-->
+
+    <Spinner
+        android:id="@+id/spnr_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <LinearLayout
         android:baselineAligned="false"

@@ -99,7 +99,7 @@ public class ApiServiceRequestGet extends ApiServiceRequest {
                                 double latitude, double longitude, String address,
                                 String description) {
         setReporter(new ApiReporter(username, phone));
-        service = new ApiService(serviceId);
+        service = new ApiService(serviceId, null);
         setLocation(new ApiLocation(latitude, longitude));
         setAddress(address);
         setDescription(description);

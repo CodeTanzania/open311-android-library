@@ -77,14 +77,14 @@ public class ReportProblemActivityTest {
     public void errorMessagesAreShown() {
         TextInputLayout tilName = (TextInputLayout) mActivity.findViewById(R.id.til_name);
         TextInputLayout tilNumber = (TextInputLayout) mActivity.findViewById(R.id.til_phone);
-        TextInputLayout tilCategory = (TextInputLayout) mActivity.findViewById(R.id.til_category);
+//        TextInputLayout tilCategory = (TextInputLayout) mActivity.findViewById(R.id.til_category);
         TextInputLayout tilAddress = (TextInputLayout) mActivity.findViewById(R.id.til_address);
         TextInputLayout tilDescription = (TextInputLayout) mActivity.findViewById(R.id.til_description);
 
         setFieldsAndSubmit(null, null, null, null, null, null);
         assertNotNull(tilName.getError());
         assertNotNull(tilNumber.getError());
-        assertNotNull(tilCategory.getError());
+//        assertNotNull(tilCategory.getError());
         assertEquals(View.VISIBLE, mLocationError.getVisibility());
         assertNotNull(tilAddress.getError());
         assertNotNull(tilDescription.getError());
@@ -92,7 +92,7 @@ public class ReportProblemActivityTest {
         setFieldsAndSubmit(null, mockNumber, null, mockLocation, null, mockDescription);
         assertNull(tilNumber.getError());
         assertNull(tilDescription.getError());
-        assertNotNull(tilCategory.getError());
+//        assertNotNull(tilCategory.getError());
         assertEquals(View.INVISIBLE, mLocationError.getVisibility());
         assertNotNull(tilName.getError());
         assertNotNull(tilAddress.getError());

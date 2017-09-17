@@ -14,4 +14,7 @@
     <string name="required">*Required</string>
     <string name="content_desc_map">Map</string>
     <string name="content_desc_photo">Photo</string>
+    <string name="action_select_category">What type of problem is this?</string>
+    <string name="action_select">Select</string>
+    <string name="action_close">Close</string>
 </resources>

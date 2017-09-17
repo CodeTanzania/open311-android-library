@@ -1,5 +1,7 @@
 package com.example.majifix311.api.models;
 
+import android.support.annotation.VisibleForTesting;
+
 import java.util.List;
 
 /**
@@ -13,5 +15,10 @@ public class ApiServiceGroup {
 
     public List<ApiService> getServices() {
         return services;
+    }
+
+    @VisibleForTesting
+    public void setServices(List<ApiService> services) {
+        this.services = services;
     }
 }

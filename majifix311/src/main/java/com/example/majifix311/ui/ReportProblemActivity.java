@@ -11,10 +11,12 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,25 +24,33 @@ import com.example.majifix311.EventHandler;
 import com.example.majifix311.Problem;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
+import com.example.majifix311.db.DatabaseHelper;
 import com.example.majifix311.utils.EmptyErrorTrigger;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import io.reactivex.functions.Consumer;
 
 /**
  * This activity is for submitting problems to a municipal company that uses the majifix system.
  */
 
-public class ReportProblemActivity extends FragmentActivity implements View.OnClickListener, Problem.Builder.InvalidCallbacks {
+public class ReportProblemActivity extends FragmentActivity implements View.OnClickListener, Problem.Builder.InvalidCallbacks, CategoryPickerDialog.onItemSelected {
     private Problem.Builder mBuilder;
     private boolean mIsLocation;
 
     private TextInputLayout mTilName;
     private TextInputLayout mTilNumber;
-    private TextInputLayout mTilCategory;
+//    private TextInputLayout mTilCategory;
     private TextInputLayout mTilAddress;
     private TextInputLayout mTilDescription;
     private EditText mEtName;
 
     private EditText mEtPhone;
-    private EditText mEtCategory;
+    private Spinner mSpnrCategory;
+    private ArrayAdapter<String> mCategoryAdapter;
+//    private EditText mEtCategory;
     private EditText mEtAddress;
     private EditText mEtDescription;
 
@@ -59,12 +69,12 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         // find all views
         mTilName = (TextInputLayout) findViewById(R.id.til_name);
         mTilNumber = (TextInputLayout) findViewById(R.id.til_phone);
-        mTilCategory = (TextInputLayout) findViewById(R.id.til_category);
+//        mTilCategory = (TextInputLayout) findViewById(R.id.til_category);
         mTilAddress = (TextInputLayout) findViewById(R.id.til_address);
         mTilDescription = (TextInputLayout) findViewById(R.id.til_description);
         mEtName = (EditText) findViewById(R.id.et_name);
         mEtPhone = (EditText) findViewById(R.id.et_phone);
-        mEtCategory = (EditText) findViewById(R.id.et_category);
+//        mEtCategory = (EditText) findViewById(R.id.et_category);
         mEtAddress = (EditText) findViewById(R.id.et_address);
         mEtDescription = (EditText) findViewById(R.id.et_description);
         mLlLocation = (LinearLayout) findViewById(R.id.ll_add_location);
@@ -72,16 +82,43 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         mTvLocationError = (TextView) findViewById(R.id.tv_location_error);
         mLlPhoto = (LinearLayout) findViewById(R.id.ll_add_photo);
 
+        // populate the category spinner
+        mSpnrCategory = (Spinner) findViewById(R.id.spnr_category);
+        DatabaseHelper helper = new DatabaseHelper(this);
+        helper.getCategories(onCategoriesRetrievedFromDb(), onError(), false);
+
         // for required fields: watch for text changes, and if empty, display error
         mEtName.addTextChangedListener(new EmptyErrorTrigger(mTilName));
         mEtPhone.addTextChangedListener(new EmptyErrorTrigger(mTilNumber));
-        mEtCategory.addTextChangedListener(new EmptyErrorTrigger(mTilCategory));
+//        mEtCategory.addTextChangedListener(new EmptyErrorTrigger(mTilCategory));
         mEtAddress.addTextChangedListener(new EmptyErrorTrigger(mTilAddress));
         mEtDescription.addTextChangedListener(new EmptyErrorTrigger(mTilDescription));
 
-        // add click listener to submit button
+        // add click listeners
         mSubmitButton = (Button) findViewById(R.id.btn_submit);
         mSubmitButton.setOnClickListener(this);
+//        mTilCategory.setEnabled(false);
+//        mEtCategory.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//            @Override
+//            public void onFocusChange(View v, boolean hasFocus) {
+//                System.out.println("Focus changed to: "+hasFocus);
+//                CategoryPickerDialog dialog = null;
+//                if (hasFocus) {
+//                    List<String> mock = new ArrayList<>();
+//                    mock.add("Leak");
+//                    mock.add("Lack");
+//                    mock.add("Thief");
+//
+//                    dialog = new CategoryPickerDialog(ReportProblemActivity.this, mock);
+//                    dialog.setSelected("Lack");
+//                    dialog.setListener(ReportProblemActivity.this);
+//                    dialog.show();
+//                }
+//                else if (dialog != null) {
+//                    dialog.dismiss();
+//                }
+//            }
+//        });
 
         // initialize problem builder
         mBuilder = new Problem.Builder(this);
@@ -102,7 +139,7 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         // Creates a problem using a builder which will validate required inputs
         mBuilder.setUsername(mEtName.getText().toString());
         mBuilder.setPhoneNumber(mEtPhone.getText().toString());
-        mBuilder.setCategory(mEtCategory.getText().toString());
+//        mBuilder.setCategory(mEtCategory.getText().toString());
         mBuilder.setAddress(mEtAddress.getText().toString());
         mBuilder.setDescription(mEtDescription.getText().toString());
         Problem problem = mBuilder.build();
@@ -142,7 +179,7 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
 
     @Override
     public void onInvalidCategory() {
-        mTilCategory.setError(getString(R.string.required));
+//        mTilCategory.setError(getString(R.string.required));
     }
 
     @Override
@@ -165,5 +202,38 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         if (v.getId() == R.id.btn_submit) {
             submit();
         }
+    }
+
+    @Override
+    public void onItemSelected(String item, int position) {
+        Toast.makeText(getApplicationContext(), "Selected "+item, Toast.LENGTH_LONG).show();
+    }
+
+    protected Consumer<List<String>> onCategoriesRetrievedFromDb() {
+        return new Consumer<List<String>>() {
+            @Override
+            public void accept(List<String> strings) throws Exception {
+                System.out.println("onRetrievedFromDb! " + strings);
+                if (strings.size() > 0) {
+                    mCategoryAdapter = new ArrayAdapter<>(
+                            getApplicationContext(), R.layout.item_category_selector, strings);
+                    mSpnrCategory.setAdapter(mCategoryAdapter);
+                } else {
+                    onError().accept(null);
+                }
+            }
+        };
+    }
+
+    protected Consumer<Throwable> onError() {
+        return new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable error) throws Exception {
+                System.out.println("onError! "+error);
+                Toast.makeText(getApplicationContext(),
+                        "Please check your internet connection and try again", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        };
     }
 }

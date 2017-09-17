@@ -44,8 +44,9 @@ public class ApiService {
     private String _id;
 
     @VisibleForTesting
-    ApiService(String id) {
+    public ApiService(String id, String name) {
         _id = id;
+        this.name = name;
     }
 
     public String getCode() {

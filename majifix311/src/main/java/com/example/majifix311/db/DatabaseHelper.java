@@ -46,7 +46,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public void setCategories(final ApiServiceGroup categories, Consumer<List<String>> onNext, Consumer<Throwable> onError) {
+    public void setCategories(final ApiServiceGroup categories, Consumer<List<String>> onNext, Consumer<Throwable> onError, boolean async) {
         Observable<List<String>> categoriesTask = Observable.create(new ObservableOnSubscribe<List<String>>() {
             @Override
             public void subscribe(ObservableEmitter<List<String>> e) throws Exception {
@@ -56,8 +56,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 e.onComplete();
             }
         });
+        if (async) {
+            categoriesTask.subscribe(onNext, onError);
+        } else {
+            categoriesTask.blockingSubscribe(onNext, onError);
+        }
+    }
 
-        categoriesTask.subscribe(onNext, onError);
+    public void getCategories(Consumer<List<String>> onNext, Consumer<Throwable> onError, boolean async) {
+        Observable<List<String>> categoriesTask = Observable.create(new ObservableOnSubscribe<List<String>>() {
+            @Override
+            public void subscribe(ObservableEmitter<List<String>> e) throws Exception {
+                List<String> result = CategoryContract.readCategories(DatabaseHelper.this);
+                e.onNext(result);
+                e.onComplete();
+            }
+        });
+
+        if (async) {
+            categoriesTask.subscribe(onNext, onError);
+        } else {
+            categoriesTask.blockingSubscribe(onNext, onError);
+        }
     }
 
 }
