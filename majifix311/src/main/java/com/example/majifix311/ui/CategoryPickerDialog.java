@@ -1,7 +1,12 @@
 package com.example.majifix311.ui;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StyleRes;
@@ -13,113 +18,71 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.majifix311.R;
+import com.example.majifix311.db.DatabaseHelper;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.functions.Consumer;
 
 /**
  * This is used to pick between categories/services.
  */
 
-public class CategoryPickerDialog extends AlertDialog {
-    private List<String> mCategories;
-    private onItemSelected mListener;
+public class CategoryPickerDialog extends DialogFragment {
+    private static final String OPTIONS_EXTRA = "list";
+    private int mSelected = 0;
+    private String[] mOptions;
+    private OnItemSelected mListener;
 
-    private ListView mListView;
-    private Button mBtnSelect;
-    private Button mBtnCancel;
-
-    private int mSelected;
-
-    protected CategoryPickerDialog(@NonNull Context context, List<String> categories) {
-        super(context);
-        mCategories = categories;
-        prepView();
+    public static CategoryPickerDialog newInstance(String[] options) {
+        CategoryPickerDialog dialog = new CategoryPickerDialog();
+        Bundle args = new Bundle();
+        args.putStringArray(OPTIONS_EXTRA, options);
+        dialog.setArguments(args);
+        return dialog;
     }
 
-    protected CategoryPickerDialog(@NonNull Context context, List<String> categories,
-                                   @StyleRes int themeResId) {
-        super(context, themeResId);
-        mCategories = categories;
-        prepView();
-    }
-
-    protected CategoryPickerDialog(@NonNull Context context, List<String> categories,
-                                   boolean cancelable, @Nullable OnCancelListener cancelListener) {
-        super(context, cancelable, cancelListener);
-        mCategories = categories;
-        prepView();
-    }
-
-    public void setSelected(String category) {
-        mSelected = mCategories.indexOf(category);
-    }
-
-    public void setListener(onItemSelected listener) {
+    public void setListener(OnItemSelected listener) {
         mListener = listener;
     }
 
-    private void prepView() {
-        Activity activity = getOwnerActivity();
-        if (activity == null) {
-            return;
-        }
-        final View view = activity.getLayoutInflater().inflate(R.layout.dialog_category_selector, null);
-        mListView = (ListView) view.findViewById(R.id.dialogList);
-        mListView.setAdapter(getArrayAdapter());
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        mOptions = getArguments().getStringArray(OPTIONS_EXTRA);
 
-        mBtnSelect = (Button) view.findViewById(R.id.select);
-        mBtnSelect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mListener != null) {
-                    mListener.onItemSelected(mCategories.get(mSelected), mSelected);
-                }
-                dismiss();
-            }
-        });
-
-        mBtnCancel = (Button) view.findViewById(R.id.close);
-        mBtnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
-    }
-
-    private ArrayAdapter<String> getArrayAdapter() {
-        return new ArrayAdapter<String>(getContext(), R.layout.item_category_selector, mCategories) {
-
-            @NonNull
-            @Override
-            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-                Activity activity = getOwnerActivity();
-                if (activity != null) {
-                    View view = getOwnerActivity().getLayoutInflater().inflate(
-                            R.layout.item_category_selector, null);
-
-                    CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkbox);
-                    checkBox.setChecked(position == mSelected);
-                    checkBox.setTag(position);
-                    checkBox.setText(mCategories.get(position));
-                    checkBox.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            mSelected = (int) v.getTag();
-                            notifyDataSetChanged();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.hint_category)
+                .setSingleChoiceItems(mOptions, mSelected, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.out.println("Is selected: "+which);
+                        mSelected = which;
+                    }
+                })
+                .setPositiveButton(R.string.action_select, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.out.println("Category selected: "+which);
+                        if (mListener != null) {
+                            mListener.onItemSelected(mOptions[mSelected], mSelected);
                         }
-                    });
+                    }
+                })
+                .setNegativeButton(R.string.action_close, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        System.out.println("Dialog canceled");
+                    }
+                });
 
-                    return view;
-                }
-                return null;
-            }
-        };
+        return builder.create();
     }
 
-    interface onItemSelected {
+    interface OnItemSelected {
         void onItemSelected(String item, int position);
     }
 }
