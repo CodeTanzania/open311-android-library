@@ -161,8 +161,12 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         // Creates a problem using a builder which will validate required inputs
         mBuilder.setUsername(mEtName.getText().toString());
         mBuilder.setPhoneNumber(mEtPhone.getText().toString());
-        mBuilder.setCategory(mEtCategory.getText().toString());
+//        mBuilder.setCategory(mEtCategory.getText().toString());
+        //TODO: Don't hardcode category
+        mBuilder.setCategory("5968b64148dfc224bb47748d");
         mBuilder.setAddress(mEtAddress.getText().toString());
+        //TODO: Don't hardcode location
+//        mBuilder.setLocation(new Location(""));
         mBuilder.setDescription(mEtDescription.getText().toString());
         Problem problem = mBuilder.build();
 

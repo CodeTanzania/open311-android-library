@@ -2,6 +2,7 @@ package com.example.majifix311.api;
 
 import android.app.Activity;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -27,11 +28,11 @@ public class ReportService extends Service {
     private final ProblemReportBinder mBinder = new ProblemReportBinder();
     private MajiFixAPI majiFixAPI;
 
-    public static void postNewProblem(Activity activity, Problem problem) {
-        Intent startIntent = new Intent(activity, ReportService.class);
+    public static void postNewProblem(Context context, Problem problem) {
+        Intent startIntent = new Intent(context, ReportService.class);
         startIntent.setAction(ReportService.STARTFOREGROUND_ACTION);
         startIntent.putExtra(ReportService.NEW_PROBLEM_INTENT, problem);
-        activity.startService(startIntent);
+        context.startService(startIntent);
     }
 
     @Override

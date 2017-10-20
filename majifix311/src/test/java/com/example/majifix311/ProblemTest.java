@@ -27,7 +27,7 @@ import static junit.framework.Assert.assertNull;
 public class ProblemTest implements Problem.Builder.InvalidCallbacks {
     static String mockName = "Test User";
     static String mockNumber = "123456789";
-    static String mockCategory = "592029e6e8dd8e00048c1852";
+    static String mockCategory = "5968b64148dfc224bb47748d";
     static Location mockLocation = new Location("");
     static double latitude = 1.1d;
     static double longitude = 2.2d;

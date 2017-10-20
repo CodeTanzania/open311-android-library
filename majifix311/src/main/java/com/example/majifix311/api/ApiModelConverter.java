@@ -24,7 +24,7 @@ public class ApiModelConverter {
         ApiServiceRequestPost request = new ApiServiceRequestPost();
         convertShared(request, problem);
 //        request.setService(problem.getCategory()); // TODO: with id
-        request.setService("592029e6e8dd8e00048c1852"); // hardcoded to lack of water for testing purposes
+        request.setService("5968b64148dfc224bb47748d"); // hardcoded to lack of water for testing purposes
         return request;
     }
 

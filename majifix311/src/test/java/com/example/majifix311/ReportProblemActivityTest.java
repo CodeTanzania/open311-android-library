@@ -42,7 +42,7 @@ public class ReportProblemActivityTest {
 
     private String mockName = "Test User";
     private String mockNumber = "123456789";
-    private String mockCategory = "Leakage";
+    private String mockCategory = "5968b64148dfc224bb47748d";
     private Location mockLocation = new Location("");
     private String mockAddress = "55 Marimbo St";
     private String mockDescription = "Horrible horrible horrible!!";
@@ -113,7 +113,8 @@ public class ReportProblemActivityTest {
         assertEquals("Name should be correct", sent.getUsername(), mockName);
         assertEquals("Phone should be correct", sent.getPhoneNumber(), mockNumber);
         assertEquals("Category should be correct", sent.getCategory(), mockCategory);
-        assertEquals("Location should be correct", sent.getLocation(), mockLocation);
+        assertEquals("Latitude should be correct", sent.getLocation().getLatitude(), mockLocation.getLatitude());
+        assertEquals("Longitude should be correct", sent.getLocation().getLongitude(), mockLocation.getLongitude());
         assertEquals("Address should be correct", sent.getAddress(), mockAddress);
         assertEquals("Description should be correct", sent.getDescription(), mockDescription);
     }
