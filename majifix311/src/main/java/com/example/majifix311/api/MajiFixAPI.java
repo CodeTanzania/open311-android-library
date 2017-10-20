@@ -1,19 +1,25 @@
 package com.example.majifix311.api;
 
+import com.example.majifix311.BuildConfig;
 import com.example.majifix311.MajiFix;
 import com.example.majifix311.Problem;
 import com.example.majifix311.api.models.ApiService;
 import com.example.majifix311.api.models.ApiServiceGroup;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
+import com.google.gson.GsonBuilder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -22,6 +28,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
 
 /**
  * This provides the endpoints for the MajiFix API.
@@ -41,7 +48,7 @@ class MajiFixAPI {
         initRetrofit();
     }
 
-    public static MajiFixAPI getInstance() {
+    static MajiFixAPI getInstance() {
         if (mSingleton == null) {
             mSingleton = new MajiFixAPI();
         }
@@ -61,7 +68,8 @@ class MajiFixAPI {
     }
 
     void getServices(Consumer<ApiServiceGroup> onNext, Consumer<Throwable> onError) {
-        Observable<ApiServiceGroup> call = mApi.getCategories(getAuthToken());
+        //  limit the response to return publicly displayed service categories
+        Observable<ApiServiceGroup> call = mApi.getCategories(getAuthToken(), "{\"isExternal\":\"true\"}");
         call.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(onNext, onError);
@@ -69,6 +77,7 @@ class MajiFixAPI {
 
     void reportProblem(Problem problem, Consumer<Problem> onNext, Consumer<Throwable> onError) {
         System.out.println("report problem started");
+        // TODO convert in thread??
         // Convert problem into the format needed by the server
         ApiServiceRequestPost request = ApiModelConverter.convert(problem);
         // Define call
@@ -89,14 +98,17 @@ class MajiFixAPI {
 
     private String getAuthToken() {
         //TODO obfuscate token
-        return "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU5YjFlM2U0ZTkxNDFkMDAwNDJjMjMwNiIsImlhdCI6MTUwNDgzMDQzNiwiZXhwIjozMzA2MjQzMDQzNiwiYXVkIjoib3BlbjMxMSJ9.WhkA4bI5O0UJHvoYtIwa9o-LdDu51rr9TuTa0r0nG2A";
+        String authToken = "Bearer "+ BuildConfig.APP_TOKEN;
+        System.out.println("Auth token: "+authToken);
+        return "Bearer "+ BuildConfig.APP_TOKEN;
     }
 
     private interface MajiFixRetrofitApi {
         @GET("/services")
         @Headers({"Accept: application/json", "Content-Type: application/json"})
         Observable<ApiServiceGroup> getCategories(
-                @Header("Authorization") String authHeader);
+                @Header("Authorization") String authHeader,
+                @Query("query") String query);
 
         @POST("/servicerequests")
         @Headers({"Content-Type: application/json"})
