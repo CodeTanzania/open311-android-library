@@ -1,6 +1,5 @@
 package com.example.majifix311.api;
 
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -8,10 +7,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.example.majifix311.BuildConfig;
 import com.example.majifix311.EventHandler;
 import com.example.majifix311.Problem;
-import com.example.majifix311.ui.ReportProblemActivity;
 
 import io.reactivex.functions.Consumer;
 
@@ -58,7 +55,7 @@ public class ReportService extends Service {
             @Override
             public void accept(Problem problem) throws Exception {
                 System.out.println("onRetrievedFromNetwork! "+problem);
-                EventHandler.sendResultReceived(getApplicationContext());
+                EventHandler.sendReportReceived(getApplicationContext(), problem);
             }
         };
     }
@@ -68,7 +65,7 @@ public class ReportService extends Service {
             @Override
             public void accept(Throwable error) throws Exception {
                 System.out.println("onError! "+error);
-                EventHandler.sendResultReceived(getApplicationContext());
+                EventHandler.sendReportError(getApplicationContext(), error);
             }
         };
     }

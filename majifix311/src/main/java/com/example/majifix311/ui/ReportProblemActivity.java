@@ -1,6 +1,5 @@
 package com.example.majifix311.ui;
 
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,16 +10,13 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +27,6 @@ import com.example.majifix311.api.ReportService;
 import com.example.majifix311.db.DatabaseHelper;
 import com.example.majifix311.utils.EmptyErrorTrigger;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
@@ -152,7 +147,11 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
             @Override
             public void onReceive(Context context, Intent intent) {
                 // TODO replace with real logic
-                Toast.makeText(getApplicationContext(), "Hello Receiver!", Toast.LENGTH_LONG).show();
+                if (intent.getBooleanExtra(EventHandler.IS_SUCCESS, false)) {
+                    Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Failure!", Toast.LENGTH_LONG).show();
+                }
             }
         }, new IntentFilter(EventHandler.BROADCAST_REPORT_RECIEVED));
     }
