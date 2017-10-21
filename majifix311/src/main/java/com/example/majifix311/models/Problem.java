@@ -1,8 +1,9 @@
-package com.example.majifix311;
+package com.example.majifix311.models;
 
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 
@@ -13,17 +14,20 @@ import static android.text.TextUtils.isEmpty;
  */
 
 public class Problem implements Parcelable {
-    private String mUsername;
-    private String mPhone;
+    private Reporter mReporter;
     private String mCategory;
     private Location mLocation;
     private String mAddress;
     private String mDescription;
 
-    private Problem(String username, String phone, String category,
-                    Location location, String address, String description) {
-        mUsername = username;
-        mPhone = phone;
+    private Problem(String username, String phone, String email, String account,
+                    String category, Location location, String address, String description) {
+        mReporter = new Reporter();
+        mReporter.setName(username);
+        mReporter.setPhone(phone);
+        mReporter.setEmail(email);
+        mReporter.setAccount(account);
+
         mCategory = category;
         mLocation = location;
         mAddress = address;
@@ -31,8 +35,10 @@ public class Problem implements Parcelable {
     }
 
     private Problem(Parcel in) {
-        mUsername = in.readString();
-        mPhone = in.readString();
+        mReporter = new Reporter();
+        mReporter.setName(in.readString());
+        mReporter.setPhone(in.readString());
+
         mCategory = in.readString();
         mLocation = in.readParcelable(Location.class.getClassLoader());
         mAddress = in.readString();
@@ -51,12 +57,24 @@ public class Problem implements Parcelable {
         }
     };
 
+    public Reporter getReporter() {
+        return mReporter;
+    }
+
     public String getUsername() {
-        return mUsername;
+        return mReporter == null ? null : mReporter.getName();
     }
 
     public String getPhoneNumber() {
-        return mPhone;
+        return  mReporter == null ? null : mReporter.getPhone();
+    }
+
+    public String getEmail() {
+        return  mReporter == null ? null : mReporter.getEmail();
+    }
+
+    public String getAccount() {
+        return  mReporter == null ? null : mReporter.getAccount();
     }
 
     public String getCategory() {
@@ -86,8 +104,8 @@ public class Problem implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mUsername);
-        dest.writeString(mPhone);
+        dest.writeString(mReporter.getName());
+        dest.writeString(mReporter.getPhone());
         dest.writeString(mCategory);
         dest.writeParcelable(mLocation, flags);
         dest.writeString(mAddress);
@@ -99,6 +117,8 @@ public class Problem implements Parcelable {
 
         String tempUsername;
         String tempPhone;
+        String tempEmail;
+        String tempAccount;
         String tempCategory;
         Location tempLocation;
         String tempAddress;
@@ -120,6 +140,25 @@ public class Problem implements Parcelable {
                 return;
             }
             tempPhone = phoneNumber.trim();
+        }
+
+        public void setEmail(String email) {
+            if (email == null) {
+                return;
+            }
+            tempEmail = email.trim();
+        }
+
+        public boolean isValidEmail(String email) {
+            return TextUtils.isEmpty(email)
+                    && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        }
+
+        public void setAccountNumber(String accountNumber) {
+            if (accountNumber == null) {
+                return;
+            }
+            tempAccount = accountNumber.trim();
         }
 
         public void setCategory(String category) {
@@ -154,8 +193,8 @@ public class Problem implements Parcelable {
             //TODO add back the validation when location is added
 //            return new Problem(tempUsername, tempPhone, tempCategory,
 //                    tempLocation, tempAddress, tempDescription);
-            return validate() ? new Problem(tempUsername, tempPhone, tempCategory,
-                    tempLocation, tempAddress, tempDescription) : null;
+            return validate() ? new Problem(tempUsername, tempPhone, tempEmail, tempAccount,
+                    tempCategory, tempLocation, tempAddress, tempDescription) : null;
         }
 
         // TODO Does this go here?
@@ -166,6 +205,8 @@ public class Problem implements Parcelable {
             }
             tempUsername = response.getReporter().getName();
             tempPhone = response.getReporter().getPhone();
+            tempEmail = response.getReporter().getEmail();
+            tempAccount = response.getReporter().getAccount();
             tempCategory = response.getService().getId();
             if (response.getLocation() != null) {
                 tempLocation = new Location("");
@@ -175,7 +216,7 @@ public class Problem implements Parcelable {
             tempAddress = response.getAddress();
             tempDescription = response.getDescription();
 
-            return new Problem(tempUsername, tempPhone, tempCategory,
+            return new Problem(tempUsername, tempPhone, tempEmail, tempAccount, tempCategory,
                     tempLocation, tempAddress, tempDescription);
         }
 
@@ -216,6 +257,5 @@ public class Problem implements Parcelable {
             void onInvalidAddress();
             void onInvalidDescription();
         }
-
     }
 }

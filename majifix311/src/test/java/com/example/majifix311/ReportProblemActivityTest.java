@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.majifix311.api.ReportService;
+import com.example.majifix311.models.Problem;
 import com.example.majifix311.ui.ReportProblemActivity;
 
 import org.junit.Before;
@@ -16,12 +17,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import static com.google.common.base.Predicates.notNull;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 import static org.robolectric.Shadows.shadowOf;
 
 /**
@@ -121,7 +123,11 @@ public class ReportProblemActivityTest {
 
     @Test
     public void isRegisteredForBroadcasts() {
-        // TODO
+        // TODO Test error
+
+        // TODO Add dialog
+        EventHandler.sendReportReceived(RuntimeEnvironment.application, null);
+        assertTrue(mActivity.isFinishing());
     }
 
     private void setFieldsAndSubmit(String username, String phone, String category,

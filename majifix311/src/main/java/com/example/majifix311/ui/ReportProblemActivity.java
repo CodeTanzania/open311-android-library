@@ -21,7 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.majifix311.EventHandler;
-import com.example.majifix311.Problem;
+import com.example.majifix311.models.Problem;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
 import com.example.majifix311.db.DatabaseHelper;
@@ -149,6 +149,7 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
                 // TODO replace with real logic
                 if (intent.getBooleanExtra(EventHandler.IS_SUCCESS, false)) {
                     Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_LONG).show();
+                    finish();
                 } else {
                     Toast.makeText(getApplicationContext(), "Failure!", Toast.LENGTH_LONG).show();
                 }

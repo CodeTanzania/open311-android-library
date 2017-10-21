@@ -8,7 +8,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.example.majifix311.EventHandler;
-import com.example.majifix311.Problem;
+import com.example.majifix311.models.Problem;
 
 import io.reactivex.functions.Consumer;
 

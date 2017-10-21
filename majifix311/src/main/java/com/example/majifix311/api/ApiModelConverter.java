@@ -1,12 +1,13 @@
 package com.example.majifix311.api;
 
-import com.example.majifix311.Problem;
+import com.example.majifix311.models.Problem;
 import com.example.majifix311.api.models.ApiAttachment;
 import com.example.majifix311.api.models.ApiServiceRequest;
 import com.example.majifix311.api.models.ApiLocation;
 import com.example.majifix311.api.models.ApiReporter;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
+import com.example.majifix311.models.Reporter;
 
 import java.util.Date;
 
@@ -35,11 +36,20 @@ public class ApiModelConverter {
         return new Problem.Builder(null).build(response);
     }
 
+    public static Reporter convert(ApiReporter apiReporter) {
+        Reporter reporter = new Reporter();
+        reporter.setName(apiReporter.getName());
+        reporter.setPhone(apiReporter.getPhone());
+        reporter.setEmail(apiReporter.getEmail());
+        reporter.setAccount(apiReporter.getAccount());
+        return reporter;
+    }
+
     private static ApiServiceRequest convertShared(ApiServiceRequest request, Problem problem) {
         if (problem == null || request == null) {
             return null;
         }
-        request.setReporter(new ApiReporter(problem.getUsername(), problem.getPhoneNumber()));
+        request.setReporter(new ApiReporter(problem.getReporter()));
         if (problem.getLocation() != null) {
             request.setLocation(new ApiLocation(problem.getLocation().getLatitude(),
                             problem.getLocation().getLongitude()));

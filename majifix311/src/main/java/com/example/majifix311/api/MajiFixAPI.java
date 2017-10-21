@@ -2,24 +2,16 @@ package com.example.majifix311.api;
 
 import com.example.majifix311.BuildConfig;
 import com.example.majifix311.MajiFix;
-import com.example.majifix311.Problem;
-import com.example.majifix311.api.models.ApiService;
+import com.example.majifix311.models.Problem;
 import com.example.majifix311.api.models.ApiServiceGroup;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
-import com.google.gson.GsonBuilder;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
