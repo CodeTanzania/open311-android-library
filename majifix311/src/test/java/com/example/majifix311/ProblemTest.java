@@ -1,14 +1,14 @@
 package com.example.majifix311;
 
-import android.content.Context;
 import android.location.Location;
 
 import com.example.majifix311.api.ApiModelConverter;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
+import com.example.majifix311.models.Problem;
+import com.example.majifix311.models.Reporter;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -27,6 +27,8 @@ import static junit.framework.Assert.assertNull;
 public class ProblemTest implements Problem.Builder.InvalidCallbacks {
     static String mockName = "Test User";
     static String mockNumber = "123456789";
+    static String mockEmail = "a@b.com";
+    static String mockAccount = "A123";
     static String mockCategory = "5968b64148dfc224bb47748d";
     static Location mockLocation = new Location("");
     static double latitude = 1.1d;
@@ -50,6 +52,8 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
 
         assertEquals("Username should be correct", mockName, result.getUsername());
         assertEquals("Phone number should be correct", mockNumber, result.getPhoneNumber());
+        assertEquals("Email should be correct", mockEmail, result.getEmail());
+        assertEquals("Account should be correct", mockAccount, result.getAccount());
         assertEquals("Category should be correct", mockCategory, result.getCategory());
         assertEquals("Latitude should be correct", latitude, result.getLocation().getLatitude());
         assertEquals("Longitude should be correct", longitude, result.getLocation().getLongitude());
@@ -63,6 +67,8 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         ApiServiceRequestPost after = ApiModelConverter.convert(before);
         assertEquals(mockName, after.getReporter().getName());
         assertEquals(mockNumber, after.getReporter().getPhone());
+        assertEquals(mockEmail, after.getReporter().getEmail());
+        assertEquals(mockAccount , after.getReporter().getAccount());
         assertEquals(mockCategory, after.getService());
         assertEquals(latitude, after.getLocation().getLatitude());
         assertEquals(longitude, after.getLocation().getLongitude());
@@ -91,6 +97,8 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         Problem after = ApiModelConverter.convert(before);
         assertEquals(mockName, after.getUsername());
         assertEquals(mockNumber, after.getPhoneNumber());
+        assertEquals(mockEmail, after.getEmail());
+        assertEquals(mockAccount, after.getAccount());
         assertEquals(mockCategory, after.getCategory());
         assertEquals(latitude, after.getLocation().getLatitude());
         assertEquals(longitude, after.getLocation().getLongitude());
@@ -126,6 +134,8 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         Problem.Builder builder = new Problem.Builder(listener);
         builder.setUsername(mockName);
         builder.setPhoneNumber(mockNumber);
+        builder.setEmail(mockEmail);
+        builder.setAccountNumber(mockAccount);
         builder.setCategory(mockCategory);
         mockLocation.setLatitude(latitude);
         mockLocation.setLongitude(longitude);
@@ -136,7 +146,13 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
     }
 
     private ApiServiceRequestGet buildMockServerResponse() {
-        return new ApiServiceRequestGet(mockName, mockNumber,
+        Reporter mockReporter = new Reporter();
+        mockReporter.setName(mockName);
+        mockReporter.setPhone(mockNumber);
+        mockReporter.setEmail(mockEmail);
+        mockReporter.setAccount(mockAccount);
+
+        return new ApiServiceRequestGet(mockReporter,
                 mockCategory, latitude, longitude, mockAddress, mockDescription);
     }
 

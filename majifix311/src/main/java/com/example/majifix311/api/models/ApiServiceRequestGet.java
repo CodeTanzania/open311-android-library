@@ -3,6 +3,8 @@ package com.example.majifix311.api.models;
 import android.location.Location;
 import android.support.annotation.VisibleForTesting;
 
+import com.example.majifix311.models.Reporter;
+
 /**
  * This is returned from the server after submitting a new issue.
  * It's a massive block that looks something like this:
@@ -95,10 +97,10 @@ public class ApiServiceRequestGet extends ApiServiceRequest {
     private ApiService service;
 
     @VisibleForTesting
-    public ApiServiceRequestGet(String username, String phone, String serviceId,
+    public ApiServiceRequestGet(Reporter reporter, String serviceId,
                                 double latitude, double longitude, String address,
                                 String description) {
-        setReporter(new ApiReporter(username, phone));
+        setReporter(new ApiReporter(reporter));
         service = new ApiService(serviceId, null);
         setLocation(new ApiLocation(latitude, longitude));
         setAddress(address);
@@ -117,6 +119,8 @@ public class ApiServiceRequestGet extends ApiServiceRequest {
         return "ApiServiceRequest { " +
             "\n  tempUsername ="+ getReporter().getName() +
             "\n  tempPhone = "+getReporter().getPhone()+
+            "\n  tempEmail = "+getReporter().getEmail()+
+            "\n  tempAccount = "+getReporter().getAccount()+
             "\n  tempCategory = "+getService().getName()+
             "\n  tempLocation = "+locationString+
             "\n  tempAddress = "+getAddress()+

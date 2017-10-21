@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.example.majifix311.models.Problem;
+
 /**
  * This is used for sending updates throughout the application.
  */
