@@ -5,6 +5,7 @@ import android.location.Location;
 import com.example.majifix311.api.ApiModelConverter;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
+import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.models.Reporter;
 
@@ -29,7 +30,7 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
     static String mockNumber = "123456789";
     static String mockEmail = "a@b.com";
     static String mockAccount = "A123";
-    static String mockCategory = "5968b64148dfc224bb47748d";
+    static Category mockCategory = new Category("Puddle","5968b64148dfc224bb47748d");
     static Location mockLocation = new Location("");
     static double latitude = 1.1d;
     static double longitude = 2.2d;
@@ -69,7 +70,7 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals(mockNumber, after.getReporter().getPhone());
         assertEquals(mockEmail, after.getReporter().getEmail());
         assertEquals(mockAccount , after.getReporter().getAccount());
-        assertEquals(mockCategory, after.getService());
+        assertEquals(mockCategory.getId(), after.getService());
         assertEquals(latitude, after.getLocation().getLatitude());
         assertEquals(longitude, after.getLocation().getLongitude());
         assertEquals(mockAddress, after.getAddress());
@@ -99,7 +100,8 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals(mockNumber, after.getPhoneNumber());
         assertEquals(mockEmail, after.getEmail());
         assertEquals(mockAccount, after.getAccount());
-        assertEquals(mockCategory, after.getCategory());
+        assertEquals(mockCategory.getName(), after.getCategory().getName());
+        assertEquals(mockCategory.getId(), after.getCategory().getId());
         assertEquals(latitude, after.getLocation().getLatitude());
         assertEquals(longitude, after.getLocation().getLongitude());
         assertEquals(mockAddress, after.getAddress());

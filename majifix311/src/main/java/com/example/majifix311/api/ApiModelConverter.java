@@ -1,5 +1,7 @@
 package com.example.majifix311.api;
 
+import com.example.majifix311.api.models.ApiService;
+import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.api.models.ApiAttachment;
 import com.example.majifix311.api.models.ApiServiceRequest;
@@ -33,6 +35,7 @@ public class ApiModelConverter {
         if (response == null) {
             return null;
         }
+        // This logic is in the builder because the Problem constructor is protected
         return new Problem.Builder(null).build(response);
     }
 
@@ -43,6 +46,10 @@ public class ApiModelConverter {
         reporter.setEmail(apiReporter.getEmail());
         reporter.setAccount(apiReporter.getAccount());
         return reporter;
+    }
+
+    public static Category convert(ApiService apiCategory) {
+        return new Category(apiCategory.getName(), apiCategory.getId());
     }
 
     private static ApiServiceRequest convertShared(ApiServiceRequest request, Problem problem) {

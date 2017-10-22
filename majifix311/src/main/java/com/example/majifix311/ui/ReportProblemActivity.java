@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.majifix311.EventHandler;
+import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
@@ -40,8 +41,9 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     private Problem.Builder mBuilder;
     private boolean mIsLocation;
 
-    private String[] mCategories;
+    private Category[] mCategories;
     private CategoryPickerDialog mCategoryDialog;
+    private Category mSelectedCategory;
 
     private TextInputLayout mTilName;
     private TextInputLayout mTilNumber;
@@ -129,7 +131,7 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         });
     }
 
-    private void createCategoryPickerDialog(String[] categories) {
+    private void createCategoryPickerDialog(Category[] categories) {
         if (mCategoryDialog == null) {
             System.out.println("...Category Dialog was null...");
             // creates new dialog
@@ -161,9 +163,7 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         // Creates a problem using a builder which will validate required inputs
         mBuilder.setUsername(mEtName.getText().toString());
         mBuilder.setPhoneNumber(mEtPhone.getText().toString());
-//        mBuilder.setCategory(mEtCategory.getText().toString());
-        //TODO: Don't hardcode category
-        mBuilder.setCategory("5968b64148dfc224bb47748d");
+        mBuilder.setCategory(mSelectedCategory);
         mBuilder.setAddress(mEtAddress.getText().toString());
         //TODO: Don't hardcode location
 //        mBuilder.setLocation(new Location(""));
@@ -223,12 +223,13 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         mTilDescription.setError(getString(R.string.required));
     }
 
-    protected Consumer<List<String>> onCategoriesRetrievedFromDb() {
-        return new Consumer<List<String>>() {
+    protected Consumer<List<Category>> onCategoriesRetrievedFromDb() {
+        return new Consumer<List<Category>>() {
             @Override
-            public void accept(List<String> strings) throws Exception {
-                if (strings.size() > 0) {
-                    mCategories = strings.toArray(new String[strings.size()]);
+            public void accept(List<Category> categories) throws Exception {
+                if (categories.size() > 0) {
+                    mCategories = categories.toArray(new Category[categories.size()]);
+                    mSelectedCategory = mCategories[0];
                 } else {
                     onError().accept(null);
                 }
@@ -256,8 +257,11 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     }
 
     @Override
-    public void onItemSelected(String item, int position) {
-        mEtCategory.setText(item);
-        mEtCategory.setText(item);
+    public void onItemSelected(Category item, int position) {
+        if (item == null) {
+            return;
+        }
+        mEtCategory.setText(item.getName());
+        mSelectedCategory = item;
     }
 }

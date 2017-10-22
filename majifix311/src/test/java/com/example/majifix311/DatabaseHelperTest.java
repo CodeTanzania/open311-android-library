@@ -3,6 +3,7 @@ package com.example.majifix311;
 import com.example.majifix311.api.models.ApiService;
 import com.example.majifix311.api.models.ApiServiceGroup;
 import com.example.majifix311.db.DatabaseHelper;
+import com.example.majifix311.models.Category;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +28,7 @@ import static junit.framework.Assert.assertNotNull;
 @Config(constants = BuildConfig.class)
 public class DatabaseHelperTest {
     private DatabaseHelper mHelper;
-    private List<String> mResult;
+    private List<Category> mResult;
 
     @Before
     public void setup() {
@@ -49,14 +50,16 @@ public class DatabaseHelperTest {
 
         assertNotNull(mResult);
         assertEquals(2, mResult.size());
-        assertEquals("cat1", mResult.get(0));
-        assertEquals("cat2", mResult.get(1));
+        assertEquals("cat1", mResult.get(0).getName());
+        assertEquals("1", mResult.get(0).getId());
+        assertEquals("cat2", mResult.get(1).getName());
+        assertEquals("2", mResult.get(1).getId());
     }
 
-    private Consumer<List<String>> onSavedInDatabase() {
-        return new Consumer<List<String>>() {
+    private Consumer<List<Category>> onSavedInDatabase() {
+        return new Consumer<List<Category>>() {
             @Override
-            public void accept(List<String> categories) throws Exception {
+            public void accept(List<Category> categories) throws Exception {
                 System.out.println("onRetrievedFromNetwork after Database save! "+categories);
                 mResult = categories;
                 //EventHandler.sendResultReceived(mContext);

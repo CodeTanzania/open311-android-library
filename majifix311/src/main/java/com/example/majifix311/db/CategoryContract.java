@@ -7,6 +7,7 @@ import android.provider.BaseColumns;
 
 import com.example.majifix311.api.models.ApiService;
 import com.example.majifix311.api.models.ApiServiceGroup;
+import com.example.majifix311.models.Category;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,21 +49,24 @@ class CategoryContract {
         }
     }
 
-    static List<String> readCategories(DatabaseHelper helper) {
+    static List<Category> readCategories(DatabaseHelper helper) {
         SQLiteDatabase db = helper.getReadableDatabase();
 
         String[] projection =  {
-                Entry.COLUMN_NAME
+                Entry.COLUMN_NAME,
+                Entry.COLUMN_ID
         };
 
         Cursor cursor = db.query(TABLE_NAME, projection,null,null,null,null,null);
 
         // Currently all we use in the app is the category name
-        List<String> categoryNames = new ArrayList<>();
+        List<Category> categoryNames = new ArrayList<>();
         while (cursor.moveToNext()) {
             String name = cursor.getString(
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME));
-            categoryNames.add(name);
+            String id = cursor.getString(
+                    cursor.getColumnIndexOrThrow(Entry.COLUMN_ID));
+            categoryNames.add(new Category(name,id));
         }
         cursor.close();
 

@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.majifix311.api.models.ApiServiceGroup;
+import com.example.majifix311.models.Category;
 
 import java.util.List;
 
@@ -46,12 +47,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public void setCategories(final ApiServiceGroup categories, Consumer<List<String>> onNext, Consumer<Throwable> onError, boolean async) {
-        Observable<List<String>> categoriesTask = Observable.create(new ObservableOnSubscribe<List<String>>() {
+    public void setCategories(final ApiServiceGroup categories, Consumer<List<Category>> onNext, Consumer<Throwable> onError, boolean async) {
+        Observable<List<Category>> categoriesTask = Observable.create(new ObservableOnSubscribe<List<Category>>() {
             @Override
-            public void subscribe(ObservableEmitter<List<String>> e) throws Exception {
+            public void subscribe(ObservableEmitter<List<Category>> e) throws Exception {
                 CategoryContract.writeCategories(DatabaseHelper.this, categories);
-                List<String> proof = CategoryContract.readCategories(DatabaseHelper.this);
+                List<Category> proof = CategoryContract.readCategories(DatabaseHelper.this);
                 e.onNext(proof);
                 e.onComplete();
             }
@@ -63,11 +64,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void getCategories(Consumer<List<String>> onNext, Consumer<Throwable> onError, boolean async) {
-        Observable<List<String>> categoriesTask = Observable.create(new ObservableOnSubscribe<List<String>>() {
+    public void getCategories(Consumer<List<Category>> onNext, Consumer<Throwable> onError, boolean async) {
+        Observable<List<Category>> categoriesTask = Observable.create(new ObservableOnSubscribe<List<Category>>() {
             @Override
-            public void subscribe(ObservableEmitter<List<String>> e) throws Exception {
-                List<String> result = CategoryContract.readCategories(DatabaseHelper.this);
+            public void subscribe(ObservableEmitter<List<Category>> e) throws Exception {
+                List<Category> result = CategoryContract.readCategories(DatabaseHelper.this);
                 e.onNext(result);
                 e.onComplete();
             }

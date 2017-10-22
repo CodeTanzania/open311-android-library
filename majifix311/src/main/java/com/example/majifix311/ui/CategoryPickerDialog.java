@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.majifix311.R;
 import com.example.majifix311.db.DatabaseHelper;
+import com.example.majifix311.models.Category;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,13 +36,14 @@ import io.reactivex.functions.Consumer;
 public class CategoryPickerDialog extends DialogFragment {
     private static final String OPTIONS_EXTRA = "list";
     private int mSelected = 0;
-    private String[] mOptions;
+    private Category[] mOptions;
+    private String[] mTitles;
     private OnItemSelected mListener;
 
-    public static CategoryPickerDialog newInstance(String[] options) {
+    public static CategoryPickerDialog newInstance(Category[] options) {
         CategoryPickerDialog dialog = new CategoryPickerDialog();
         Bundle args = new Bundle();
-        args.putStringArray(OPTIONS_EXTRA, options);
+        args.putParcelableArray(OPTIONS_EXTRA, options);
         dialog.setArguments(args);
         return dialog;
     }
@@ -52,11 +54,14 @@ public class CategoryPickerDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        mOptions = getArguments().getStringArray(OPTIONS_EXTRA);
+        mOptions = (Category[]) getArguments().getParcelableArray(OPTIONS_EXTRA);
+        for (int i = 0; i < mOptions.length; i++) {
+            mTitles[i] = mOptions[i].getName();
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.hint_category)
-                .setSingleChoiceItems(mOptions, mSelected, new DialogInterface.OnClickListener() {
+                .setSingleChoiceItems(mTitles, mSelected, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         System.out.println("Is selected: "+which);
@@ -83,6 +88,6 @@ public class CategoryPickerDialog extends DialogFragment {
     }
 
     interface OnItemSelected {
-        void onItemSelected(String item, int position);
+        void onItemSelected(Category item, int position);
     }
 }

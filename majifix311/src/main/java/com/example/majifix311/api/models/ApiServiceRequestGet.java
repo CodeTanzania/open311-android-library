@@ -3,6 +3,7 @@ package com.example.majifix311.api.models;
 import android.location.Location;
 import android.support.annotation.VisibleForTesting;
 
+import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Reporter;
 
 /**
@@ -97,11 +98,11 @@ public class ApiServiceRequestGet extends ApiServiceRequest {
     private ApiService service;
 
     @VisibleForTesting
-    public ApiServiceRequestGet(Reporter reporter, String serviceId,
+    public ApiServiceRequestGet(Reporter reporter, Category category,
                                 double latitude, double longitude, String address,
                                 String description) {
         setReporter(new ApiReporter(reporter));
-        service = new ApiService(serviceId, null);
+        service = new ApiService(category.getId(), category.getName());
         setLocation(new ApiLocation(latitude, longitude));
         setAddress(address);
         setDescription(description);

@@ -93,7 +93,7 @@ public class ReportServiceTest {
         assertNotNull(intent);
         assertEquals("Username should be correct", ProblemTest.mockName, intent.getReporter().getName());
         assertEquals("Phone number should be correct", mockNumber, intent.getReporter().getPhone());
-        assertEquals("Category should be correct", mockCategory, intent.getService());
+        assertEquals("Only Category Id, as string, should be sent to server", mockCategory.getId(), intent.getService());
         assertEquals("Latitude should be correct", latitude, intent.getLocation().getLatitude());
         assertEquals("Longitude should be correct", longitude, intent.getLocation().getLongitude());
         assertEquals("Address should be correct", mockAddress, intent.getAddress());

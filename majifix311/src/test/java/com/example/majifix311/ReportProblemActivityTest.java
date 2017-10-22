@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.majifix311.api.ReportService;
+import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.ui.ReportProblemActivity;
 
@@ -44,7 +45,7 @@ public class ReportProblemActivityTest {
 
     private String mockName = "Test User";
     private String mockNumber = "123456789";
-    private String mockCategory = "5968b64148dfc224bb47748d";
+    private Category mockCategory = new Category("Puddle","5968b64148dfc224bb47748d");
     private Location mockLocation = new Location("");
     private String mockAddress = "55 Marimbo St";
     private String mockDescription = "Horrible horrible horrible!!";
@@ -130,11 +131,11 @@ public class ReportProblemActivityTest {
         assertTrue(mActivity.isFinishing());
     }
 
-    private void setFieldsAndSubmit(String username, String phone, String category,
+    private void setFieldsAndSubmit(String username, String phone, Category category,
                                     Location location, String address, String description) {
         mNameView.setText(username);
         mPhoneView.setText(phone);
-        mCategoryView.setText(category);
+        mActivity.onItemSelected(category, 0);
         mActivity.setGpsPoint(location);
         mAddressView.setText(address);
         mDescriptionView.setText(description);

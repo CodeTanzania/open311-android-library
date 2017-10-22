@@ -5,7 +5,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.example.majifix311.api.ApiModelConverter;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
+
+import java.util.Calendar;
+import java.util.List;
 
 import static android.text.TextUtils.isEmpty;
 
@@ -14,14 +18,25 @@ import static android.text.TextUtils.isEmpty;
  */
 
 public class Problem implements Parcelable {
+    // for post
     private Reporter mReporter;
-    private String mCategory;
+    private Category mCategory;
     private Location mLocation;
     private String mAddress;
     private String mDescription;
+    // private List<Attachment> mAttachments;
+
+    // for get
+    // private String mTicketNumber;
+    // private Status mStatus;
+    // private Calendar mCreatedAt;
+    // private Calendar mUpdatedAt;
+    // private Calendar mResolvedAt;
+    // private List<Comment> mComments;
+
 
     private Problem(String username, String phone, String email, String account,
-                    String category, Location location, String address, String description) {
+                    Category category, Location location, String address, String description) {
         mReporter = new Reporter();
         mReporter.setName(username);
         mReporter.setPhone(phone);
@@ -39,7 +54,7 @@ public class Problem implements Parcelable {
         mReporter.setName(in.readString());
         mReporter.setPhone(in.readString());
 
-        mCategory = in.readString();
+        mCategory = in.readParcelable(Category.class.getClassLoader());
         mLocation = in.readParcelable(Location.class.getClassLoader());
         mAddress = in.readString();
         mDescription = in.readString();
@@ -77,7 +92,7 @@ public class Problem implements Parcelable {
         return  mReporter == null ? null : mReporter.getAccount();
     }
 
-    public String getCategory() {
+    public Category getCategory() {
         return mCategory;
     }
 
@@ -106,7 +121,7 @@ public class Problem implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mReporter.getName());
         dest.writeString(mReporter.getPhone());
-        dest.writeString(mCategory);
+        dest.writeParcelable(mCategory, flags);
         dest.writeParcelable(mLocation, flags);
         dest.writeString(mAddress);
         dest.writeString(mDescription);
@@ -119,7 +134,7 @@ public class Problem implements Parcelable {
         String tempPhone;
         String tempEmail;
         String tempAccount;
-        String tempCategory;
+        Category tempCategory;
         Location tempLocation;
         String tempAddress;
         String tempDescription;
@@ -161,11 +176,11 @@ public class Problem implements Parcelable {
             tempAccount = accountNumber.trim();
         }
 
-        public void setCategory(String category) {
+        public void setCategory(Category category) {
             if (category == null) {
                 return;
             }
-            tempCategory = category.trim();
+            tempCategory = category;
         }
 
         public void setLocation(Location location) {
@@ -207,7 +222,7 @@ public class Problem implements Parcelable {
             tempPhone = response.getReporter().getPhone();
             tempEmail = response.getReporter().getEmail();
             tempAccount = response.getReporter().getAccount();
-            tempCategory = response.getService().getId();
+            tempCategory = ApiModelConverter.convert(response.getService());
             if (response.getLocation() != null) {
                 tempLocation = new Location("");
                 tempLocation.setLatitude(response.getLocation().getLatitude());
@@ -230,7 +245,7 @@ public class Problem implements Parcelable {
                 mListener.onInvalidPhoneNumber();
                 isValid = false;
             }
-            if (isEmpty(tempCategory)) {
+            if (tempCategory == null) {
                 mListener.onInvalidCategory();
                 isValid = false;
             }
