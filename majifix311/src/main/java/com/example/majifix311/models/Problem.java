@@ -61,10 +61,7 @@ public class Problem implements Parcelable {
     }
 
     private Problem(Parcel in) {
-        mReporter = new Reporter();
-        mReporter.setName(in.readString());
-        mReporter.setPhone(in.readString());
-
+        mReporter = in.readParcelable(Reporter.class.getClassLoader());
         mCategory = in.readParcelable(Category.class.getClassLoader());
         mLocation = in.readParcelable(Location.class.getClassLoader());
         mAddress = in.readString();
@@ -73,12 +70,22 @@ public class Problem implements Parcelable {
 //        mAttachments = in.readList(Attachment.class.getClassLoader());
         mTicketNumber = in.readString();
         mStatus = in.readParcelable(Status.class.getClassLoader());
-        mCreatedAt = Calendar.getInstance();
-        mCreatedAt.setTimeInMillis(in.readLong());
-        mUpdatedAt = Calendar.getInstance();
-        mUpdatedAt.setTimeInMillis(in.readLong());
-        mResolvedAt = Calendar.getInstance();
-        mResolvedAt.setTimeInMillis(in.readLong());
+
+        long mills = in.readLong();
+        if (mills != -1) {
+            mCreatedAt = Calendar.getInstance();
+            mCreatedAt.setTimeInMillis(mills);
+        }
+        mills = in.readLong();
+        if (mills != -1) {
+            mUpdatedAt = Calendar.getInstance();
+            mUpdatedAt.setTimeInMillis(mills);
+        }
+        mills = in.readLong();
+        if (mills != -1) {
+            mResolvedAt = Calendar.getInstance();
+            mResolvedAt.setTimeInMillis(mills);
+        }
 //        mComments = in.readList(Comment.class.getClassLoader());
     }
 
@@ -169,8 +176,7 @@ public class Problem implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mReporter.getName());
-        dest.writeString(mReporter.getPhone());
+        dest.writeParcelable(mReporter, flags);
         dest.writeParcelable(mCategory, flags);
         dest.writeParcelable(mLocation, flags);
         dest.writeString(mAddress);
@@ -179,9 +185,9 @@ public class Problem implements Parcelable {
 //        dest.writeList(mAttachments);
         dest.writeString(mTicketNumber);
         dest.writeParcelable(mStatus, flags);
-        dest.writeLong(mCreatedAt.getTimeInMillis());
-        dest.writeLong(mUpdatedAt.getTimeInMillis());
-        dest.writeLong(mResolvedAt.getTimeInMillis());
+        dest.writeLong(mCreatedAt == null ? -1 : mCreatedAt.getTimeInMillis());
+        dest.writeLong(mUpdatedAt == null ? -1 : mUpdatedAt.getTimeInMillis());
+        dest.writeLong(mResolvedAt == null ? -1 : mResolvedAt.getTimeInMillis());
 //        dest.writeList(mComments, flags);
     }
 
