@@ -5,6 +5,7 @@ import android.content.Context;
 import com.example.majifix311.api.models.ApiService;
 import com.example.majifix311.api.models.ApiServiceGroup;
 import com.example.majifix311.db.DatabaseHelper;
+import com.example.majifix311.models.Category;
 import com.google.gson.Gson;
 
 import java.util.List;
@@ -45,10 +46,10 @@ public class CategoriesManager {
         };
     }
 
-    private Consumer<List<String>> onSavedInDatabase() {
-        return new Consumer<List<String>>() {
+    private Consumer<List<Category>> onSavedInDatabase() {
+        return new Consumer<List<Category>>() {
             @Override
-            public void accept(List<String> categories) throws Exception {
+            public void accept(List<Category> categories) throws Exception {
                 System.out.println("onRetrievedFromNetwork after Database save! "+categories);
                 //EventHandler.sendResultReceived(mContext);
             }

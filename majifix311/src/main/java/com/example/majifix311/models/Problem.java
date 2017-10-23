@@ -5,7 +5,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.example.majifix311.api.ApiModelConverter;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
+
+import java.util.Calendar;
+import java.util.List;
 
 import static android.text.TextUtils.isEmpty;
 
@@ -14,14 +18,24 @@ import static android.text.TextUtils.isEmpty;
  */
 
 public class Problem implements Parcelable {
+    // for post
     private Reporter mReporter;
-    private String mCategory;
+    private Category mCategory;
     private Location mLocation;
     private String mAddress;
     private String mDescription;
+//    private List<Attachment> mAttachments; //TODO Implement
+
+    // for get
+    private String mTicketNumber;
+    private Status mStatus;
+    private Calendar mCreatedAt;
+    private Calendar mUpdatedAt;
+    private Calendar mResolvedAt;
+//    private List<Comment> mComments; //TODO Implement
 
     private Problem(String username, String phone, String email, String account,
-                    String category, Location location, String address, String description) {
+                    Category category, Location location, String address, String description) {
         mReporter = new Reporter();
         mReporter.setName(username);
         mReporter.setPhone(phone);
@@ -34,15 +48,38 @@ public class Problem implements Parcelable {
         mDescription = description;
     }
 
+    private Problem(String username, String phone, String email, String account,
+                    Category category, Location location, String address, String description,
+                    String ticketNumber, Status status, Calendar createdAt, Calendar updatedAt, Calendar resolvedAt) {
+        this(username, phone, email, account, category, location, address, description);
+
+        mTicketNumber = ticketNumber;
+        mStatus = status;
+        mCreatedAt = createdAt;
+        mUpdatedAt = updatedAt;
+        mResolvedAt = resolvedAt;
+    }
+
     private Problem(Parcel in) {
         mReporter = new Reporter();
         mReporter.setName(in.readString());
         mReporter.setPhone(in.readString());
 
-        mCategory = in.readString();
+        mCategory = in.readParcelable(Category.class.getClassLoader());
         mLocation = in.readParcelable(Location.class.getClassLoader());
         mAddress = in.readString();
         mDescription = in.readString();
+
+//        mAttachments = in.readList(Attachment.class.getClassLoader());
+        mTicketNumber = in.readString();
+        mStatus = in.readParcelable(Status.class.getClassLoader());
+        mCreatedAt = Calendar.getInstance();
+        mCreatedAt.setTimeInMillis(in.readLong());
+        mUpdatedAt = Calendar.getInstance();
+        mUpdatedAt.setTimeInMillis(in.readLong());
+        mResolvedAt = Calendar.getInstance();
+        mResolvedAt.setTimeInMillis(in.readLong());
+//        mComments = in.readList(Comment.class.getClassLoader());
     }
 
     public static final Creator<Problem> CREATOR = new Creator<Problem>() {
@@ -66,18 +103,18 @@ public class Problem implements Parcelable {
     }
 
     public String getPhoneNumber() {
-        return  mReporter == null ? null : mReporter.getPhone();
+        return mReporter == null ? null : mReporter.getPhone();
     }
 
     public String getEmail() {
-        return  mReporter == null ? null : mReporter.getEmail();
+        return mReporter == null ? null : mReporter.getEmail();
     }
 
     public String getAccount() {
-        return  mReporter == null ? null : mReporter.getAccount();
+        return mReporter == null ? null : mReporter.getAccount();
     }
 
-    public String getCategory() {
+    public Category getCategory() {
         return mCategory;
     }
 
@@ -97,6 +134,34 @@ public class Problem implements Parcelable {
         return mDescription;
     }
 
+    public String getTicketNumber() {
+        return mTicketNumber;
+    }
+
+    public Status getStatus() {
+        return mStatus;
+    }
+
+    public Calendar getCreatedAt() {
+        return mCreatedAt;
+    }
+
+    public Calendar getUpdatedAt() {
+        return mUpdatedAt;
+    }
+
+    public Calendar getResolvedAt() {
+        return mResolvedAt;
+    }
+
+//    public List<Attachment> getAttachments() {
+//        return mAttachments;
+//    }
+
+//    public List<Comment> getComments() {
+//        return mComments;
+//    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -106,10 +171,18 @@ public class Problem implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mReporter.getName());
         dest.writeString(mReporter.getPhone());
-        dest.writeString(mCategory);
+        dest.writeParcelable(mCategory, flags);
         dest.writeParcelable(mLocation, flags);
         dest.writeString(mAddress);
         dest.writeString(mDescription);
+
+//        dest.writeList(mAttachments);
+        dest.writeString(mTicketNumber);
+        dest.writeParcelable(mStatus, flags);
+        dest.writeLong(mCreatedAt.getTimeInMillis());
+        dest.writeLong(mUpdatedAt.getTimeInMillis());
+        dest.writeLong(mResolvedAt.getTimeInMillis());
+//        dest.writeList(mComments, flags);
     }
 
     public static class Builder {
@@ -119,7 +192,7 @@ public class Problem implements Parcelable {
         String tempPhone;
         String tempEmail;
         String tempAccount;
-        String tempCategory;
+        Category tempCategory;
         Location tempLocation;
         String tempAddress;
         String tempDescription;
@@ -161,11 +234,11 @@ public class Problem implements Parcelable {
             tempAccount = accountNumber.trim();
         }
 
-        public void setCategory(String category) {
+        public void setCategory(Category category) {
             if (category == null) {
                 return;
             }
-            tempCategory = category.trim();
+            tempCategory = category;
         }
 
         public void setLocation(Location location) {
@@ -199,7 +272,7 @@ public class Problem implements Parcelable {
 
         // TODO Does this go here?
         public Problem build(ApiServiceRequestGet response) {
-            System.out.println("Converting ApiServiceResponseGet into Problem. \n"+response);
+            System.out.println("Converting ApiServiceResponseGet into Problem. \n" + response);
             if (response == null) {
                 return null;
             }
@@ -207,7 +280,7 @@ public class Problem implements Parcelable {
             tempPhone = response.getReporter().getPhone();
             tempEmail = response.getReporter().getEmail();
             tempAccount = response.getReporter().getAccount();
-            tempCategory = response.getService().getId();
+            tempCategory = ApiModelConverter.convert(response.getService());
             if (response.getLocation() != null) {
                 tempLocation = new Location("");
                 tempLocation.setLatitude(response.getLocation().getLatitude());
@@ -216,8 +289,14 @@ public class Problem implements Parcelable {
             tempAddress = response.getAddress();
             tempDescription = response.getDescription();
 
+            // TODO: Is there a better way to set these fields?
+            String ticketNumber = response.getTicketId();
+            Status status = new Status(response.isOpen(),
+                    response.getStatus().getName(), response.getStatus().getColor());
+
             return new Problem(tempUsername, tempPhone, tempEmail, tempAccount, tempCategory,
-                    tempLocation, tempAddress, tempDescription);
+                    tempLocation, tempAddress, tempDescription, ticketNumber, status,
+                    response.getCreatedAt(), response.getUpdatedAt(), response.getResolvedAt());
         }
 
         private boolean validate() {
@@ -230,7 +309,7 @@ public class Problem implements Parcelable {
                 mListener.onInvalidPhoneNumber();
                 isValid = false;
             }
-            if (isEmpty(tempCategory)) {
+            if (tempCategory == null) {
                 mListener.onInvalidCategory();
                 isValid = false;
             }
@@ -251,10 +330,15 @@ public class Problem implements Parcelable {
 
         public interface InvalidCallbacks {
             void onInvalidUsername();
+
             void onInvalidPhoneNumber();
+
             void onInvalidCategory();
+
             void onInvalidLocation();
+
             void onInvalidAddress();
+
             void onInvalidDescription();
         }
     }

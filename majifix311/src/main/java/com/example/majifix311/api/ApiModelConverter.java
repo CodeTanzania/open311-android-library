@@ -1,5 +1,7 @@
 package com.example.majifix311.api;
 
+import com.example.majifix311.api.models.ApiService;
+import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.api.models.ApiAttachment;
 import com.example.majifix311.api.models.ApiServiceRequest;
@@ -24,8 +26,7 @@ public class ApiModelConverter {
 
         ApiServiceRequestPost request = new ApiServiceRequestPost();
         convertShared(request, problem);
-//        request.setService(problem.getCategory()); // TODO: with id
-        request.setService("5968b64148dfc224bb47748d"); // hardcoded to lack of water for testing purposes
+        request.setService(problem.getCategory().getId());
         return request;
     }
 
@@ -33,6 +34,7 @@ public class ApiModelConverter {
         if (response == null) {
             return null;
         }
+        // This logic is in the builder because the Problem constructor is protected
         return new Problem.Builder(null).build(response);
     }
 
@@ -43,6 +45,10 @@ public class ApiModelConverter {
         reporter.setEmail(apiReporter.getEmail());
         reporter.setAccount(apiReporter.getAccount());
         return reporter;
+    }
+
+    public static Category convert(ApiService apiCategory) {
+        return new Category(apiCategory.getName(), apiCategory.getId());
     }
 
     private static ApiServiceRequest convertShared(ApiServiceRequest request, Problem problem) {
@@ -56,10 +62,10 @@ public class ApiModelConverter {
         }
         request.setAddress(problem.getAddress());
         request.setDescription(problem.getDescription());
-        request.setAttachments(new ApiAttachment[] {
-                new ApiAttachment("Issue_" + (new Date()).getTime(),
-                        problem.getDescription(), "bytes") // TODO: implement this
-        });
+//        request.setAttachments(new ApiAttachment[] {
+//                new ApiAttachment("Issue_" + (new Date()).getTime(),
+//                        problem.getDescription(), "bytes") // TODO: implement this
+//        });
         return request;
     }
 }

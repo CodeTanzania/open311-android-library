@@ -34,12 +34,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
-import static com.example.majifix311.ProblemTest.latitude;
-import static com.example.majifix311.ProblemTest.longitude;
-import static com.example.majifix311.ProblemTest.mockAddress;
-import static com.example.majifix311.ProblemTest.mockCategory;
-import static com.example.majifix311.ProblemTest.mockDescription;
-import static com.example.majifix311.ProblemTest.mockNumber;
+import static com.example.majifix311.Mocks.*;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
@@ -91,9 +86,9 @@ public class ReportServiceTest {
         ApiServiceRequestPost intent =
                 gson.fromJson(request.getBody().readUtf8(), ApiServiceRequestPost.class);
         assertNotNull(intent);
-        assertEquals("Username should be correct", ProblemTest.mockName, intent.getReporter().getName());
+        assertEquals("Username should be correct", mockName, intent.getReporter().getName());
         assertEquals("Phone number should be correct", mockNumber, intent.getReporter().getPhone());
-        assertEquals("Category should be correct", mockCategory, intent.getService());
+        assertEquals("Only Category Id, as string, should be sent to server", mockCategoryId, intent.getService());
         assertEquals("Latitude should be correct", latitude, intent.getLocation().getLatitude());
         assertEquals("Longitude should be correct", longitude, intent.getLocation().getLongitude());
         assertEquals("Address should be correct", mockAddress, intent.getAddress());
