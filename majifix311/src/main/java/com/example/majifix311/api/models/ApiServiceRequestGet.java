@@ -5,6 +5,10 @@ import android.support.annotation.VisibleForTesting;
 
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Reporter;
+import com.example.majifix311.models.Status;
+import com.example.majifix311.utils.DateUtils;
+
+import java.util.Calendar;
 
 /**
  * This is returned from the server after submitting a new issue.
@@ -96,20 +100,38 @@ import com.example.majifix311.models.Reporter;
 
 public class ApiServiceRequestGet extends ApiServiceRequest {
     private ApiService service;
-
-    @VisibleForTesting
-    public ApiServiceRequestGet(Reporter reporter, Category category,
-                                double latitude, double longitude, String address,
-                                String description) {
-        setReporter(new ApiReporter(reporter));
-        service = new ApiService(category.getId(), category.getName());
-        setLocation(new ApiLocation(latitude, longitude));
-        setAddress(address);
-        setDescription(description);
-    }
+    private ApiStatus status;
+    private String code;
+    private String createdAt;
+    private String updatedAt;
+    private String resolvedAt;
 
     public ApiService getService() {
         return service;
+    }
+
+    public String getTicketId() {
+        return code;
+    }
+
+    public boolean isOpen() {
+        return resolvedAt == null;
+    }
+
+    public ApiStatus getStatus() {
+        return status;
+    }
+
+    public Calendar getCreatedAt() {
+        return DateUtils.getCalendarFromMajiFixApiString(createdAt);
+    }
+
+    public Calendar getUpdatedAt() {
+        return DateUtils.getCalendarFromMajiFixApiString(updatedAt);
+    }
+
+    public Calendar getResolvedAt() {
+        return DateUtils.getCalendarFromMajiFixApiString(resolvedAt);
     }
 
     @Override

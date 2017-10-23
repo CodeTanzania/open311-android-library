@@ -24,16 +24,15 @@ public class Problem implements Parcelable {
     private Location mLocation;
     private String mAddress;
     private String mDescription;
-    // private List<Attachment> mAttachments;
+//    private List<Attachment> mAttachments; //TODO Implement
 
     // for get
-    // private String mTicketNumber;
-    // private Status mStatus;
-    // private Calendar mCreatedAt;
-    // private Calendar mUpdatedAt;
-    // private Calendar mResolvedAt;
-    // private List<Comment> mComments;
-
+    private String mTicketNumber;
+    private Status mStatus;
+    private Calendar mCreatedAt;
+    private Calendar mUpdatedAt;
+    private Calendar mResolvedAt;
+//    private List<Comment> mComments; //TODO Implement
 
     private Problem(String username, String phone, String email, String account,
                     Category category, Location location, String address, String description) {
@@ -49,6 +48,18 @@ public class Problem implements Parcelable {
         mDescription = description;
     }
 
+    private Problem(String username, String phone, String email, String account,
+                    Category category, Location location, String address, String description,
+                    String ticketNumber, Status status, Calendar createdAt, Calendar updatedAt, Calendar resolvedAt) {
+        this(username, phone, email, account, category, location, address, description);
+
+        mTicketNumber = ticketNumber;
+        mStatus = status;
+        mCreatedAt = createdAt;
+        mUpdatedAt = updatedAt;
+        mResolvedAt = resolvedAt;
+    }
+
     private Problem(Parcel in) {
         mReporter = new Reporter();
         mReporter.setName(in.readString());
@@ -58,6 +69,17 @@ public class Problem implements Parcelable {
         mLocation = in.readParcelable(Location.class.getClassLoader());
         mAddress = in.readString();
         mDescription = in.readString();
+
+//        mAttachments = in.readList(Attachment.class.getClassLoader());
+        mTicketNumber = in.readString();
+        mStatus = in.readParcelable(Status.class.getClassLoader());
+        mCreatedAt = Calendar.getInstance();
+        mCreatedAt.setTimeInMillis(in.readLong());
+        mUpdatedAt = Calendar.getInstance();
+        mUpdatedAt.setTimeInMillis(in.readLong());
+        mResolvedAt = Calendar.getInstance();
+        mResolvedAt.setTimeInMillis(in.readLong());
+//        mComments = in.readList(Comment.class.getClassLoader());
     }
 
     public static final Creator<Problem> CREATOR = new Creator<Problem>() {
@@ -81,15 +103,15 @@ public class Problem implements Parcelable {
     }
 
     public String getPhoneNumber() {
-        return  mReporter == null ? null : mReporter.getPhone();
+        return mReporter == null ? null : mReporter.getPhone();
     }
 
     public String getEmail() {
-        return  mReporter == null ? null : mReporter.getEmail();
+        return mReporter == null ? null : mReporter.getEmail();
     }
 
     public String getAccount() {
-        return  mReporter == null ? null : mReporter.getAccount();
+        return mReporter == null ? null : mReporter.getAccount();
     }
 
     public Category getCategory() {
@@ -112,6 +134,34 @@ public class Problem implements Parcelable {
         return mDescription;
     }
 
+    public String getTicketNumber() {
+        return mTicketNumber;
+    }
+
+    public Status getStatus() {
+        return mStatus;
+    }
+
+    public Calendar getCreatedAt() {
+        return mCreatedAt;
+    }
+
+    public Calendar getUpdatedAt() {
+        return mUpdatedAt;
+    }
+
+    public Calendar getResolvedAt() {
+        return mResolvedAt;
+    }
+
+//    public List<Attachment> getAttachments() {
+//        return mAttachments;
+//    }
+
+//    public List<Comment> getComments() {
+//        return mComments;
+//    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -125,6 +175,14 @@ public class Problem implements Parcelable {
         dest.writeParcelable(mLocation, flags);
         dest.writeString(mAddress);
         dest.writeString(mDescription);
+
+//        dest.writeList(mAttachments);
+        dest.writeString(mTicketNumber);
+        dest.writeParcelable(mStatus, flags);
+        dest.writeLong(mCreatedAt.getTimeInMillis());
+        dest.writeLong(mUpdatedAt.getTimeInMillis());
+        dest.writeLong(mResolvedAt.getTimeInMillis());
+//        dest.writeList(mComments, flags);
     }
 
     public static class Builder {
@@ -214,7 +272,7 @@ public class Problem implements Parcelable {
 
         // TODO Does this go here?
         public Problem build(ApiServiceRequestGet response) {
-            System.out.println("Converting ApiServiceResponseGet into Problem. \n"+response);
+            System.out.println("Converting ApiServiceResponseGet into Problem. \n" + response);
             if (response == null) {
                 return null;
             }
@@ -231,8 +289,14 @@ public class Problem implements Parcelable {
             tempAddress = response.getAddress();
             tempDescription = response.getDescription();
 
+            // TODO: Is there a better way to set these fields?
+            String ticketNumber = response.getTicketId();
+            Status status = new Status(response.isOpen(),
+                    response.getStatus().getName(), response.getStatus().getColor());
+
             return new Problem(tempUsername, tempPhone, tempEmail, tempAccount, tempCategory,
-                    tempLocation, tempAddress, tempDescription);
+                    tempLocation, tempAddress, tempDescription, ticketNumber, status,
+                    response.getCreatedAt(), response.getUpdatedAt(), response.getResolvedAt());
         }
 
         private boolean validate() {
@@ -266,10 +330,15 @@ public class Problem implements Parcelable {
 
         public interface InvalidCallbacks {
             void onInvalidUsername();
+
             void onInvalidPhoneNumber();
+
             void onInvalidCategory();
+
             void onInvalidLocation();
+
             void onInvalidAddress();
+
             void onInvalidDescription();
         }
     }

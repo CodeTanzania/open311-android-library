@@ -26,8 +26,7 @@ public class ApiModelConverter {
 
         ApiServiceRequestPost request = new ApiServiceRequestPost();
         convertShared(request, problem);
-//        request.setService(problem.getCategory()); // TODO: with id
-        request.setService("5968b64148dfc224bb47748d"); // hardcoded to lack of water for testing purposes
+        request.setService(problem.getCategory().getId());
         return request;
     }
 
@@ -63,10 +62,10 @@ public class ApiModelConverter {
         }
         request.setAddress(problem.getAddress());
         request.setDescription(problem.getDescription());
-        request.setAttachments(new ApiAttachment[] {
-                new ApiAttachment("Issue_" + (new Date()).getTime(),
-                        problem.getDescription(), "bytes") // TODO: implement this
-        });
+//        request.setAttachments(new ApiAttachment[] {
+//                new ApiAttachment("Issue_" + (new Date()).getTime(),
+//                        problem.getDescription(), "bytes") // TODO: implement this
+//        });
         return request;
     }
 }
