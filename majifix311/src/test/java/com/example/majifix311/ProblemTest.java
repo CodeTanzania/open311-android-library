@@ -22,8 +22,10 @@ import java.util.Calendar;
 
 import static com.example.majifix311.Mocks.*;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * This is used to test the problem model.
@@ -166,6 +168,15 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
 
         Problem fromParcel = Problem.CREATOR.createFromParcel(parcel);
         assertGetMatchesMock(fromParcel);
+    }
+
+    @Test
+    public void verifyEmailIsCorrect() {
+        String valid = "kri@gm.com";
+        String invalid = "kkjsf!";
+        Problem.Builder builder = new Problem.Builder(this);
+        assertTrue(builder.isValidEmail(valid));
+        assertFalse(builder.isValidEmail(invalid));
     }
 
     public static Problem buildMockProblem(Problem.Builder.InvalidCallbacks listener) {

@@ -229,7 +229,7 @@ public class Problem implements Parcelable {
         }
 
         public boolean isValidEmail(String email) {
-            return TextUtils.isEmpty(email)
+            return !TextUtils.isEmpty(email)
                     && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
         }
 
