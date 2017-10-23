@@ -1,6 +1,7 @@
 package com.example.majifix311;
 
 import android.location.Location;
+import android.os.Parcel;
 
 import com.example.majifix311.api.ApiModelConverter;
 import com.example.majifix311.api.models.ApiServiceRequest;
@@ -143,6 +144,30 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals("All inputs should be valid", 6, problemCount);
     }
 
+    @Test
+    public void testParcelProblemToPost() {
+        Problem original = buildMockProblem(this);
+        Parcel parcel = Parcel.obtain();
+        original.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        Problem fromParcel = Problem.CREATOR.createFromParcel(parcel);
+        assertPostMatchesMock(fromParcel);
+    }
+
+    @Test
+    public void testParcelProblemOnGet() {
+        ApiServiceRequestGet before = buildMockServerResponse();
+        Problem original = ApiModelConverter.convert(before);
+
+        Parcel parcel = Parcel.obtain();
+        original.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+
+        Problem fromParcel = Problem.CREATOR.createFromParcel(parcel);
+        assertGetMatchesMock(fromParcel);
+    }
+
     public static Problem buildMockProblem(Problem.Builder.InvalidCallbacks listener) {
         Problem.Builder builder = new Problem.Builder(listener);
         builder.setUsername(mockName);
@@ -163,15 +188,6 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertNotNull(fromJson);
 
         return fromJson;
-
-//        Reporter mockReporter = new Reporter();
-//        mockReporter.setName(mockName);
-//        mockReporter.setPhone(mockNumber);
-//        mockReporter.setEmail(mockEmail);
-//        mockReporter.setAccount(mockAccount);
-//
-//        return new ApiServiceRequestGet(mockReporter,
-//                mockCategory, latitude, longitude, mockAddress, mockDescription);
     }
 
     @Override
