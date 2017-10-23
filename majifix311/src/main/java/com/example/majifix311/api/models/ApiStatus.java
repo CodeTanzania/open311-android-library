@@ -14,7 +14,7 @@ package com.example.majifix311.api.models;
  *   }
  */
 
-class ApiStatus {
+public class ApiStatus {
     private String name;
     private String color;
 
