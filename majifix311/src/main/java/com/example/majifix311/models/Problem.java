@@ -18,13 +18,15 @@ import static android.text.TextUtils.isEmpty;
  */
 
 public class Problem implements Parcelable {
+    // TODO add posted status: SAVED, REPORTED
+
     // for post
     private Reporter mReporter;
     private Category mCategory;
     private Location mLocation;
     private String mAddress;
     private String mDescription;
-//    private List<Attachment> mAttachments; //TODO Implement
+    private List<Attachment> mAttachments; //TODO Implement
 
     // for get
     private String mTicketNumber;
@@ -274,6 +276,13 @@ public class Problem implements Parcelable {
 //                    tempLocation, tempAddress, tempDescription);
             return validate() ? new Problem(tempUsername, tempPhone, tempEmail, tempAccount,
                     tempCategory, tempLocation, tempAddress, tempDescription) : null;
+        }
+
+        public Problem buildWithoutValidation(String username, String phone, String email, String accountNumber, Category category,
+                                              Location location, String address, String description, String ticketNumber, Status status,
+                                              Calendar createdAt, Calendar updatedAt, Calendar resolvedAt) {
+            return new Problem(username, phone, email, accountNumber,
+                    category, location, address, description, ticketNumber, status, createdAt, updatedAt, resolvedAt);
         }
 
         // TODO Does this go here?

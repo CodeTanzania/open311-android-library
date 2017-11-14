@@ -22,12 +22,23 @@ import static junit.framework.Assert.assertEquals;
 public class DateUtilTest {
 
     @Test
-    public void testDateCreatedConversion() throws ParseException {
+    public void testDateCreatedConversionFromString() throws ParseException {
         String fromServer = "2015-10-22T09:03:46.845Z";
 
         Calendar calendar = DateUtils.getCalendarFromMajiFixApiString(fromServer);
 
         testCalendar(calendar, 2015, Calendar.OCTOBER, 22, 9, 3, 46);
+    }
+
+    @Test
+    public void testDateCreatedConversionFromMills() throws ParseException {
+        String fromServer = "2015-10-22T09:03:46.845Z";
+        Calendar calendar = DateUtils.getCalendarFromMajiFixApiString(fromServer);
+        long mills = calendar.getTimeInMillis();
+
+        Calendar fromMills = DateUtils.getCalendarFromDbMills(mills);
+
+        testCalendar(fromMills, 2015, Calendar.OCTOBER, 22, 9, 3, 46);
     }
 
     public static void testCalendar(Calendar cal, int year, int month, int date,

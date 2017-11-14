@@ -126,12 +126,27 @@ public class ApiServiceRequestGet extends ApiServiceRequest {
         return DateUtils.getCalendarFromMajiFixApiString(createdAt);
     }
 
+    public long getCreatedAtMills() {
+        Calendar calendar = getCreatedAt();
+        return calendar == null ? -1 : calendar.getTimeInMillis();
+    }
+
     public Calendar getUpdatedAt() {
         return DateUtils.getCalendarFromMajiFixApiString(updatedAt);
     }
 
+    public long getUpdatedAtMills() {
+        Calendar calendar = getUpdatedAt();
+        return calendar == null ? -1 : calendar.getTimeInMillis();
+    }
+
     public Calendar getResolvedAt() {
         return DateUtils.getCalendarFromMajiFixApiString(resolvedAt);
+    }
+
+    public long getResolvedAtMills() {
+        Calendar calendar = getResolvedAt();
+        return calendar == null ? -1 : calendar.getTimeInMillis();
     }
 
     @Override

@@ -13,6 +13,7 @@
 
         <activity
             android:name=".ui.ReportProblemActivity"
+            android:label=""
             android:launchMode="singleTask"/>
     </application>
 

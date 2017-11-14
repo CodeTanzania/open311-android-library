@@ -3,6 +3,7 @@ package com.example.majifix311.utils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * This is used to manage date formats.
@@ -24,5 +25,14 @@ public class DateUtils {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static Calendar getCalendarFromDbMills(long fromDb) {
+        if (fromDb == -1) {
+            return null;
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(fromDb));
+        return calendar;
     }
 }

@@ -2,23 +2,27 @@ package com.example.majifix311.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 /**
  * This is used for categories (api calls them 'services').
  */
 
-public class Category implements Parcelable {
+public class Category implements Parcelable, Comparable<Category> {
     private String mName;
     private String mId;
+    private int mPriority;
 
-    public Category(String name, String id) {
+    public Category(String name, String id, int priority) {
         mName = name;
         mId = id;
+        mPriority = priority;
     }
 
     protected Category(Parcel in) {
         mName = in.readString();
         mId = in.readString();
+        mPriority = in.readInt();
     }
 
     public static final Creator<Category> CREATOR = new Creator<Category>() {
@@ -49,6 +53,14 @@ public class Category implements Parcelable {
         this.mId = id;
     }
 
+    public int getPriority() {
+        return mPriority;
+    }
+
+    public void setPriority(int priority) {
+        mPriority = priority;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -58,5 +70,13 @@ public class Category implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mName);
         dest.writeString(mId);
+        dest.writeInt(mPriority);
+    }
+
+
+    @Override
+    public int compareTo(@NonNull Category o) {
+        return getPriority() == o.getPriority() ? 0 :
+                getPriority() > o.getPriority() ? -1 : 1;
     }
 }

@@ -48,7 +48,9 @@ public class ApiModelConverter {
     }
 
     public static Category convert(ApiService apiCategory) {
-        return new Category(apiCategory.getName(), apiCategory.getId());
+        return new Category(apiCategory.getName(),
+                apiCategory.getId(),
+                apiCategory.getPriority());
     }
 
     private static ApiServiceRequest convertShared(ApiServiceRequest request, Problem problem) {

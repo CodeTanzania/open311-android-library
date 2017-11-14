@@ -54,20 +54,9 @@ public class CategoryPickerDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        mOptions = (Category[]) getArguments().getParcelableArray(OPTIONS_EXTRA);
-        for (int i = 0; i < mOptions.length; i++) {
-            mTitles[i] = mOptions[i].getName();
-        }
-
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
         builder.setTitle(R.string.hint_category)
-                .setSingleChoiceItems(mTitles, mSelected, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        System.out.println("Is selected: "+which);
-                        mSelected = which;
-                    }
-                })
                 .setPositiveButton(R.string.action_select, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -83,6 +72,21 @@ public class CategoryPickerDialog extends DialogFragment {
                         System.out.println("Dialog canceled");
                     }
                 });
+
+        mOptions = (Category[]) getArguments().getParcelableArray(OPTIONS_EXTRA);
+        if (mOptions != null) {
+            mTitles = new String[mOptions.length];
+            for (int i = 0; i < mOptions.length; i++) {
+                mTitles[i] = mOptions[i].getName();
+            }
+            builder.setSingleChoiceItems(mTitles, mSelected, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    System.out.println("Is selected: "+which);
+                    mSelected = which;
+                }
+            });
+        }
 
         return builder.create();
     }
