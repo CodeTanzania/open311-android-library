@@ -12,12 +12,17 @@ import com.example.majifix311.api.models.ApiReporter;
 import com.example.majifix311.api.models.ApiService;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiStatus;
+import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.models.Status;
 import com.example.majifix311.utils.DateUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -42,14 +47,14 @@ class ProblemContract {
             Entry.COLUMN_LONGITUDE +" DECIMAL, "+
             Entry.COLUMN_ADDRESS +" TEXT, "+
             Entry.COLUMN_DESCRIPTION +" TEXT, "+
-            Entry.COLUMN_ATTACHMENT_IDS +" TEXT, "+
+            Entry.COLUMN_ATTACHMENT_JSON +" TEXT, "+
             Entry.COLUMN_STATUS_IS_OPEN + " INTEGER,"+
             Entry.COLUMN_STATUS_NAME + " TEXT,"+
             Entry.COLUMN_STATUS_COLOR + " TEXT,"+
             Entry.COLUMN_CREATED_AT + " INTEGER,"+
             Entry.COLUMN_UPDATED_AT + " INTEGER,"+
             Entry.COLUMN_RESOLVED_AT + " INTEGER,"+
-            Entry.COLUMN_COMMENT_IDS + " TEXT,"+
+            Entry.COLUMN_COMMENT_JSON + " TEXT,"+
             Entry.COLUMN_POSTED + " INTEGER)";
 
     static final String DELETE_PROBLEM_TABLE = "DROP TABLE IF EXISTS "+ TABLE_NAME;
@@ -85,12 +90,11 @@ class ProblemContract {
             values.put(Entry.COLUMN_ADDRESS, problem.getAddress());
             values.put(Entry.COLUMN_DESCRIPTION, problem.getDescription());
             //TODO implement
-            //ApiAttachment[] attachments = problem.getAttachments();
-            //for (ApiAttachment attachment : attachments) {
-                // save to db
-                // save id to problem
-                //values.put(Entry.COLUMN_ATTACHMENT_IDS, problem.getAttachments());
-            //}
+            ApiAttachment[] attachments = problem.getAttachments();
+            if (attachments != null && attachments.length > 0) {
+                String json = new Gson().toJson(attachments);
+                values.put(Entry.COLUMN_ATTACHMENT_JSON, json);
+            }
             values.put(Entry.COLUMN_STATUS_IS_OPEN, problem.isOpen() ? 0 : 1);
             ApiStatus status = problem.getStatus();
             if (status != null) {
@@ -101,7 +105,7 @@ class ProblemContract {
             values.put(Entry.COLUMN_UPDATED_AT, problem.getUpdatedAtMills());
             values.put(Entry.COLUMN_RESOLVED_AT, problem.getResolvedAtMills());
             //TODO implement
-            //values.put(Entry.COLUMN_COMMENT_IDS, problem.getTicketNumber());
+            //values.put(Entry.COLUMN_COMMENT_JSON, problem.getTicketNumber());
             values.put(Entry.COLUMN_POSTED, 1);
 
             long newRowId = db.insert(TABLE_NAME, null, values);
@@ -125,14 +129,14 @@ class ProblemContract {
                 Entry.COLUMN_LONGITUDE,
                 Entry.COLUMN_ADDRESS,
                 Entry.COLUMN_DESCRIPTION,
-                Entry.COLUMN_ATTACHMENT_IDS,
+                Entry.COLUMN_ATTACHMENT_JSON,
                 Entry.COLUMN_STATUS_IS_OPEN,
                 Entry.COLUMN_STATUS_NAME,
                 Entry.COLUMN_STATUS_COLOR,
                 Entry.COLUMN_CREATED_AT,
                 Entry.COLUMN_UPDATED_AT,
                 Entry.COLUMN_RESOLVED_AT,
-                Entry.COLUMN_COMMENT_IDS,
+                Entry.COLUMN_COMMENT_JSON,
                 Entry.COLUMN_POSTED
         };
 
@@ -179,8 +183,11 @@ class ProblemContract {
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_DESCRIPTION));
 
             //TODO Implement attachments
-            //String attachmentIds = cursor.getString(
-            //        cursor.getColumnIndexOrThrow(Entry.COLUMN_ATTACHMENT_IDS));
+            String attachmentJson = cursor.getString(
+                    cursor.getColumnIndexOrThrow(Entry.COLUMN_ATTACHMENT_JSON));
+
+            Type listType = new TypeToken<ArrayList<Attachment>>(){}.getType();
+            List<Attachment> attachments = new Gson().fromJson(attachmentJson, listType);
 
             // status
             boolean isOpen = cursor.getInt(
@@ -200,13 +207,13 @@ class ProblemContract {
 
             // TODO Implement comments
             //String commentIds = cursor.getString(
-            //        cursor.getColumnIndexOrThrow(Entry.COLUMN_COMMENT_IDS));
+            //        cursor.getColumnIndexOrThrow(Entry.COLUMN_COMMENT_JSON));
 
             Problem problem = builder.buildWithoutValidation(username, phone, email, accountNumber,
                     new Category(categoryName, categoryId, categoryPriority),
                     location, address, description, ticketNumber,
                     new Status(isOpen, statusName, statusColor),
-                    createdAt, updatedAt, resolvedAt);
+                    createdAt, updatedAt, resolvedAt, attachments);
 
             problems.add(problem);
         }
@@ -232,14 +239,14 @@ class ProblemContract {
         static final String COLUMN_LONGITUDE = "longitude";
         static final String COLUMN_ADDRESS = "address";
         static final String COLUMN_DESCRIPTION = "description";
-        static final String COLUMN_ATTACHMENT_IDS = "attachment_ids";
+        static final String COLUMN_ATTACHMENT_JSON = "attachment_ids";
         static final String COLUMN_STATUS_IS_OPEN = "status_is_open";
         static final String COLUMN_STATUS_NAME = "status_name";
         static final String COLUMN_STATUS_COLOR = "status_color";
         static final String COLUMN_CREATED_AT = "created_at";
         static final String COLUMN_UPDATED_AT = "updated_at";
         static final String COLUMN_RESOLVED_AT = "resolved_at";
-        static final String COLUMN_COMMENT_IDS = "comment_ids";
+        static final String COLUMN_COMMENT_JSON = "comment_ids";
 
         static final String COLUMN_POSTED = "is_posted";
     }

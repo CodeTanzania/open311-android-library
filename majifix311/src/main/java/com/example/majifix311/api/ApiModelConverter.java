@@ -1,6 +1,7 @@
 package com.example.majifix311.api;
 
 import com.example.majifix311.api.models.ApiService;
+import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.api.models.ApiAttachment;
@@ -11,7 +12,9 @@ import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
 import com.example.majifix311.models.Reporter;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * This is used to convert between the objects from the server, and the objects
@@ -69,5 +72,24 @@ public class ApiModelConverter {
 //                        problem.getDescription(), "bytes") // TODO: implement this
 //        });
         return request;
+    }
+
+    public static Attachment convert(ApiAttachment apiAttachment) {
+        if (apiAttachment == null) {
+            return null;
+        }
+        return new Attachment(apiAttachment.getName(), apiAttachment.getCaption(),
+                apiAttachment.getMime(), apiAttachment.getContent());
+    }
+
+    public static List<Attachment> convert(ApiAttachment[] apiAttachments) {
+        if (apiAttachments == null) {
+            return null;
+        }
+        List<Attachment> attachments = new ArrayList<>(apiAttachments.length);
+        for (ApiAttachment attachment : apiAttachments) {
+            attachments.add(convert(attachment));
+        }
+        return attachments;
     }
 }

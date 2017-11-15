@@ -6,8 +6,10 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.example.majifix311.api.ApiModelConverter;
+import com.example.majifix311.api.models.ApiAttachment;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -52,7 +54,8 @@ public class Problem implements Parcelable {
 
     private Problem(String username, String phone, String email, String account,
                     Category category, Location location, String address, String description,
-                    String ticketNumber, Status status, Calendar createdAt, Calendar updatedAt, Calendar resolvedAt) {
+                    String ticketNumber, Status status, Calendar createdAt, Calendar updatedAt,
+                    Calendar resolvedAt, List<Attachment> attachments) {
         this(username, phone, email, account, category, location, address, description);
 
         mTicketNumber = ticketNumber;
@@ -60,6 +63,7 @@ public class Problem implements Parcelable {
         mCreatedAt = createdAt;
         mUpdatedAt = updatedAt;
         mResolvedAt = resolvedAt;
+        mAttachments = attachments;
     }
 
     private Problem(Parcel in) {
@@ -69,7 +73,9 @@ public class Problem implements Parcelable {
         mAddress = in.readString();
         mDescription = in.readString();
 
-//        mAttachments = in.readList(Attachment.class.getClassLoader());
+        mAttachments = new ArrayList<>();
+        in.readList(mAttachments, Attachment.class.getClassLoader());
+
         mTicketNumber = in.readString();
         mStatus = in.readParcelable(Status.class.getClassLoader());
 
@@ -163,9 +169,9 @@ public class Problem implements Parcelable {
         return mResolvedAt;
     }
 
-//    public List<Attachment> getAttachments() {
-//        return mAttachments;
-//    }
+    public List<Attachment> getAttachments() {
+        return mAttachments;
+    }
 
 //    public List<Comment> getComments() {
 //        return mComments;
@@ -184,7 +190,7 @@ public class Problem implements Parcelable {
         dest.writeString(mAddress);
         dest.writeString(mDescription);
 
-//        dest.writeList(mAttachments);
+        dest.writeList(mAttachments);
         dest.writeString(mTicketNumber);
         dest.writeParcelable(mStatus, flags);
         dest.writeLong(mCreatedAt == null ? -1 : mCreatedAt.getTimeInMillis());
@@ -278,11 +284,15 @@ public class Problem implements Parcelable {
                     tempCategory, tempLocation, tempAddress, tempDescription) : null;
         }
 
-        public Problem buildWithoutValidation(String username, String phone, String email, String accountNumber, Category category,
-                                              Location location, String address, String description, String ticketNumber, Status status,
-                                              Calendar createdAt, Calendar updatedAt, Calendar resolvedAt) {
+        public Problem buildWithoutValidation(String username, String phone, String email,
+                                              String accountNumber, Category category,
+                                              Location location, String address, String description,
+                                              String ticketNumber, Status status,
+                                              Calendar createdAt, Calendar updatedAt, Calendar resolvedAt,
+                                              List<Attachment> attachments) {
             return new Problem(username, phone, email, accountNumber,
-                    category, location, address, description, ticketNumber, status, createdAt, updatedAt, resolvedAt);
+                    category, location, address, description, ticketNumber, status,
+                    createdAt, updatedAt, resolvedAt, attachments);
         }
 
         // TODO Does this go here?
@@ -308,10 +318,12 @@ public class Problem implements Parcelable {
             String ticketNumber = response.getTicketId();
             Status status = new Status(response.isOpen(),
                     response.getStatus().getName(), response.getStatus().getColor());
+            List<Attachment> attachments = ApiModelConverter.convert(response.getAttachments());
 
             return new Problem(tempUsername, tempPhone, tempEmail, tempAccount, tempCategory,
                     tempLocation, tempAddress, tempDescription, ticketNumber, status,
-                    response.getCreatedAt(), response.getUpdatedAt(), response.getResolvedAt());
+                    response.getCreatedAt(), response.getUpdatedAt(), response.getResolvedAt(),
+                    attachments);
         }
 
         private boolean validate() {

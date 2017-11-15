@@ -7,6 +7,7 @@ import com.example.majifix311.api.ApiModelConverter;
 import com.example.majifix311.api.models.ApiServiceRequest;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
+import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.models.Reporter;
@@ -197,8 +198,12 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         DateUtilTest.testCalendar(problem.getUpdatedAt(), 2016, Calendar.OCTOBER, 22, 9, 3, 46);
         DateUtilTest.testCalendar(problem.getResolvedAt(), 2017, Calendar.OCTOBER, 22, 9, 3, 46);
 
-        //assertEquals("Attachments should be correct", );
-        //assertEquals("Comments should be correct", );
+        assertEquals("There should be one attachment", 1, problem.getAttachments().size());
+        Attachment attachment = problem.getAttachments().get(0);
+        assertEquals("Attachment name should be correct", Mocks.mockAttachmentTitle, attachment.getName());
+        assertEquals("Attachment caption should be correct", Mocks.mockAttachmentCaption, attachment.getCaption());
+        assertEquals("Attachment mime should be correct", Mocks.mockAttachmentMime, attachment.getMime());
+        assertEquals("Attachment content should be correct", Mocks.mockAttachmentContent, attachment.getContent());
     }
 
     @Override
