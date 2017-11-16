@@ -2,6 +2,7 @@
     <string name="app_name">majifix311</string>
 
     <!--report issue form-->
+    <string name="title_report">Report</string>
     <string name="hint_name">Full name</string>
     <string name="hint_phone">Phone No: 255</string>
     <string name="hint_category">Category</string>

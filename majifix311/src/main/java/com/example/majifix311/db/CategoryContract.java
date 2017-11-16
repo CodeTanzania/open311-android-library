@@ -10,6 +10,7 @@ import com.example.majifix311.api.models.ApiServiceGroup;
 import com.example.majifix311.models.Category;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.example.majifix311.db.CategoryContract.Entry.TABLE_NAME;
@@ -20,12 +21,13 @@ import static com.example.majifix311.db.CategoryContract.Entry.TABLE_NAME;
  */
 
 class CategoryContract {
-    static final String CREATE_CATEGORY_TABLE = "CREATE TABLE "+ TABLE_NAME +"("+
+    static final String CREATE_CATEGORY_TABLE = "CREATE TABLE IF NOT EXISTS "+ TABLE_NAME +"("+
             Entry.COLUMN_ID +" TEXT PRIMARY KEY, "+
             Entry.COLUMN_NAME +" TEXT, "+
             Entry.COLUMN_CODE +" TEXT, "+
             Entry.COLUMN_COLOR +" TEXT, "+
-            Entry.COLUMN_DESCRIPTION +" TEXT)";
+            Entry.COLUMN_DESCRIPTION +" TEXT, "+
+            Entry.COLUMN_PRIORITY + " INT)";
 
     static final String DELETE_CATEGORY_TABLE = "DROP TABLE IF EXISTS "+ TABLE_NAME;
     private static final String CLEAR_CATEGORY_TABLE = "DELETE FROM " + TABLE_NAME;
@@ -43,6 +45,7 @@ class CategoryContract {
             values.put(Entry.COLUMN_CODE, service.getCode());
             values.put(Entry.COLUMN_COLOR, service.getColor());
             values.put(Entry.COLUMN_ID, service.getId());
+            values.put(Entry.COLUMN_PRIORITY, service.getPriority());
 
             long newRowId = db.insert(TABLE_NAME, null, values);
             System.out.println("New row inserted: "+ newRowId);
@@ -54,23 +57,27 @@ class CategoryContract {
 
         String[] projection =  {
                 Entry.COLUMN_NAME,
-                Entry.COLUMN_ID
+                Entry.COLUMN_ID,
+                Entry.COLUMN_PRIORITY
         };
 
         Cursor cursor = db.query(TABLE_NAME, projection,null,null,null,null,null);
 
-        // Currently all we use in the app is the category name
-        List<Category> categoryNames = new ArrayList<>();
+        // Currently all we use in the app is the category name & id
+        List<Category> categories = new ArrayList<>();
         while (cursor.moveToNext()) {
             String name = cursor.getString(
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME));
             String id = cursor.getString(
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_ID));
-            categoryNames.add(new Category(name,id));
+            int priority = cursor.getInt(cursor.getColumnIndexOrThrow(Entry.COLUMN_PRIORITY));
+            categories.add(new Category(name,id, priority));
         }
         cursor.close();
 
-        return categoryNames;
+        Collections.sort(categories);
+
+        return categories;
     }
 
     static class Entry implements BaseColumns {
@@ -81,5 +88,6 @@ class CategoryContract {
         static final String COLUMN_CODE = "code";
         static final String COLUMN_COLOR = "color";
         static final String COLUMN_DESCRIPTION = "description";
+        static final String COLUMN_PRIORITY = "priority";
     }
 }

@@ -7,6 +7,7 @@ import com.example.majifix311.api.ApiModelConverter;
 import com.example.majifix311.api.models.ApiServiceRequest;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
+import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.models.Reporter;
@@ -34,7 +35,7 @@ import static junit.framework.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class ProblemTest implements Problem.Builder.InvalidCallbacks {
-    private static Category mockCategory = new Category(mockCategoryName, mockCategoryId);
+    private static Category mockCategory = new Category(mockCategoryName, mockCategoryId, 0);
     private static Location mockLocation = new Location("");
     private int problemCount;
 
@@ -53,52 +54,12 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertPostMatchesMock(result);
     }
 
-    private void assertPostMatchesMock(Problem problem) {
-        assertEquals("Username should be correct", mockName, problem.getUsername());
-        assertEquals("Phone number should be correct", mockNumber, problem.getPhoneNumber());
-        assertEquals("Email should be correct", mockEmail, problem.getEmail());
-        assertEquals("Account should be correct", mockAccount, problem.getAccount());
-        assertEquals("Category should be correct", mockCategoryName, problem.getCategory().getName());
-        assertEquals("Category should be correct", mockCategoryId, problem.getCategory().getId());
-        assertEquals("Latitude should be correct", latitude, problem.getLocation().getLatitude());
-        assertEquals("Longitude should be correct", longitude, problem.getLocation().getLongitude());
-        assertEquals("Address should be correct", mockAddress, problem.getAddress());
-        assertEquals("Description should be correct", mockDescription, problem.getDescription());
-    }
-
-    private void assertGetMatchesMock(Problem problem) {
-        assertPostMatchesMock(problem);
-        assertEquals("Ticket number should be correct", mockTicketNumber, problem.getTicketNumber());
-        assertEquals("Status name should be correct", mockStatusName, problem.getStatus().getName());
-        assertEquals("Status color should be correct", mockStatusColor, problem.getStatus().getColor());
-
-        DateUtilTest.testCalendar(problem.getCreatedAt(), 2015, Calendar.OCTOBER, 22, 9, 3, 46);
-        DateUtilTest.testCalendar(problem.getUpdatedAt(), 2016, Calendar.OCTOBER, 22, 9, 3, 46);
-        DateUtilTest.testCalendar(problem.getResolvedAt(), 2017, Calendar.OCTOBER, 22, 9, 3, 46);
-
-        //assertEquals("Attachments should be correct", );
-        //assertEquals("Comments should be correct", );
-    }
-
-    private void assertApiServiceRequestMatchesMock(ApiServiceRequestPost post) {
-        assertEquals(mockName, post.getReporter().getName());
-        assertEquals(mockNumber, post.getReporter().getPhone());
-        assertEquals(mockEmail, post.getReporter().getEmail());
-        assertEquals(mockAccount , post.getReporter().getAccount());
-        assertEquals(mockCategory.getId(), post.getService());
-        assertEquals(latitude, post.getLocation().getLatitude());
-        assertEquals(longitude, post.getLocation().getLongitude());
-        assertEquals(mockAddress, post.getAddress());
-        assertEquals(mockDescription, post.getDescription());
-    }
-
     @Test
     public void testConvertFromProblemToApiServiceRequest() {
         Problem before = buildMockProblem(this);
         ApiServiceRequestPost after = ApiModelConverter.convert(before);
         assertApiServiceRequestMatchesMock(after);
     }
-
 
     @Test
     public void testConvertFromProblemToApiServiceRequestHandlesNulls() {
@@ -194,11 +155,55 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         return builder.build();
     }
 
-    private ApiServiceRequestGet buildMockServerResponse() {
+    public static ApiServiceRequestGet buildMockServerResponse() {
         ApiServiceRequestGet fromJson = new Gson().fromJson(VALID_SERVICE_REQUEST_GET, ApiServiceRequestGet.class);
         assertNotNull(fromJson);
 
         return fromJson;
+    }
+
+    private void assertApiServiceRequestMatchesMock(ApiServiceRequestPost post) {
+        assertEquals(mockName, post.getReporter().getName());
+        assertEquals(mockNumber, post.getReporter().getPhone());
+        assertEquals(mockEmail, post.getReporter().getEmail());
+        assertEquals(mockAccount , post.getReporter().getAccount());
+        assertEquals(mockCategory.getId(), post.getService());
+        assertEquals(latitude, post.getLocation().getLatitude());
+        assertEquals(longitude, post.getLocation().getLongitude());
+        assertEquals(mockAddress, post.getAddress());
+        assertEquals(mockDescription, post.getDescription());
+    }
+
+    public static void assertPostMatchesMock(Problem problem) {
+        assertEquals("Username should be correct", mockName, problem.getUsername());
+        assertEquals("Phone number should be correct", mockNumber, problem.getPhoneNumber());
+        assertEquals("Email should be correct", mockEmail, problem.getEmail());
+        assertEquals("Account should be correct", mockAccount, problem.getAccount());
+        assertEquals("Category name should be correct", mockCategoryName, problem.getCategory().getName());
+        assertEquals("Category id should be correct", mockCategoryId, problem.getCategory().getId());
+        assertEquals("Category priority should be correct", 0, problem.getCategory().getPriority());
+        assertEquals("Latitude should be correct", latitude, problem.getLocation().getLatitude());
+        assertEquals("Longitude should be correct", longitude, problem.getLocation().getLongitude());
+        assertEquals("Address should be correct", mockAddress, problem.getAddress());
+        assertEquals("Description should be correct", mockDescription, problem.getDescription());
+    }
+
+    public static void assertGetMatchesMock(Problem problem) {
+        assertPostMatchesMock(problem);
+        assertEquals("Ticket number should be correct", mockTicketNumber, problem.getTicketNumber());
+        assertEquals("Status name should be correct", mockStatusName, problem.getStatus().getName());
+        assertEquals("Status color should be correct", mockStatusColor, problem.getStatus().getColor());
+
+        DateUtilTest.testCalendar(problem.getCreatedAt(), 2015, Calendar.OCTOBER, 22, 9, 3, 46);
+        DateUtilTest.testCalendar(problem.getUpdatedAt(), 2016, Calendar.OCTOBER, 22, 9, 3, 46);
+        DateUtilTest.testCalendar(problem.getResolvedAt(), 2017, Calendar.OCTOBER, 22, 9, 3, 46);
+
+        assertEquals("There should be one attachment", 1, problem.getAttachments().size());
+        Attachment attachment = problem.getAttachments().get(0);
+        assertEquals("Attachment name should be correct", Mocks.mockAttachmentTitle, attachment.getName());
+        assertEquals("Attachment caption should be correct", Mocks.mockAttachmentCaption, attachment.getCaption());
+        assertEquals("Attachment mime should be correct", Mocks.mockAttachmentMime, attachment.getMime());
+        assertEquals("Attachment content should be correct", Mocks.mockAttachmentContent, attachment.getContent());
     }
 
     @Override

@@ -24,4 +24,20 @@ public class ApiAttachment {
         this.caption = caption;
         this.content = content;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getCaption() {
+        return caption;
+    }
+
+    public String getMime() {
+        return mime;
+    }
+
+    public String getContent() {
+        return content;
+    }
 }

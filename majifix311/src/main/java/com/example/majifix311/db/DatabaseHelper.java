@@ -5,7 +5,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.majifix311.api.models.ApiServiceGroup;
+import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.models.Category;
+import com.example.majifix311.models.Problem;
 
 import java.util.List;
 
@@ -22,7 +24,7 @@ import io.reactivex.functions.Consumer;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "MajiFix.db";
 
     public DatabaseHelper(Context context) {
@@ -32,12 +34,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CategoryContract.CREATE_CATEGORY_TABLE);
+        db.execSQL(ProblemContract.CREATE_PROBLEM_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // as this is a cache for online data, so throw out existing data and start over
         db.execSQL(CategoryContract.DELETE_CATEGORY_TABLE);
+        db.execSQL(ProblemContract.DELETE_PROBLEM_TABLE);
         onCreate(db);
     }
 
@@ -57,11 +61,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 e.onComplete();
             }
         });
-        if (async) {
-            categoriesTask.subscribe(onNext, onError);
-        } else {
-            categoriesTask.blockingSubscribe(onNext, onError);
-        }
+
+        triggerTask(categoriesTask, onNext, onError, async);
     }
 
     public void getCategories(Consumer<List<Category>> onNext, Consumer<Throwable> onError, boolean async) {
@@ -74,10 +75,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         });
 
+        triggerTask(categoriesTask, onNext, onError, async);
+    }
+
+    public void saveMyReportedProblems(final List<ApiServiceRequestGet> serverResponse, Consumer<List<Problem>> onNext, Consumer<Throwable> onError, boolean async) {
+        Observable<List<Problem>> problemTask = Observable.create(new ObservableOnSubscribe<List<Problem>>() {
+            @Override
+            public void subscribe(ObservableEmitter<List<Problem>> e) throws Exception {
+                ProblemContract.writeProblems(DatabaseHelper.this, serverResponse);
+                List<Problem> proof = ProblemContract.readProblems(DatabaseHelper.this);
+                e.onNext(proof);
+                e.onComplete();
+            }
+        });
+
+        triggerTask(problemTask, onNext, onError, async);
+    }
+
+    private void triggerTask(Observable<?> task, Consumer onNext, Consumer<Throwable> onError, boolean async) {
         if (async) {
-            categoriesTask.subscribe(onNext, onError);
+            task.subscribe(onNext, onError);
         } else {
-            categoriesTask.blockingSubscribe(onNext, onError);
+            task.blockingSubscribe(onNext, onError);
         }
     }
 
