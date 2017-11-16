@@ -1,4 +1,4 @@
-*(Updated September 22, 2017)*
+*(Updated November 16, 2017)*
 
 # open311-android-library
 This is a library that can be easily ported into any android project that wishes to use the CodeTanzania/open311-api
@@ -57,6 +57,10 @@ startActivity(startReportIntent);
 
 I've only put a few days into development so far. It is still the early days... I appreciate feedback and contributions. I will try to keep this README updated on a regular basis, but I'll admit, like many developers, sometimes I get behind on my documentation. 
 
+## Want to contribute?
+
+We are using gitflow to manage this project. Please see https://github.com/nvie/gitflow for more details.
+There are tasks in development by the Tanzanian team. For more information take a look at our Taiga board: https://tree.taiga.io/project/krtonga-majifix/us/64?kanban-status=1396627
 
 
 
