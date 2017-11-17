@@ -15,6 +15,11 @@
             android:name=".ui.ReportProblemActivity"
             android:label=""
             android:launchMode="singleTask"/>
+
+        <activity
+            android:name=".ui.ProblemListActivity"
+            android:label=""
+            android:launchMode="singleTask"/>
     </application>
 
 </manifest>

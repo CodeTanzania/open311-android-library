@@ -64,6 +64,19 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
 
     private Button mSubmitButton;
 
+    private BroadcastReceiver mPostResponse = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO replace with real logic
+            if (intent.getBooleanExtra(EventHandler.IS_SUCCESS, false)) {
+                Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_LONG).show();
+                finish();
+            } else {
+                Toast.makeText(getApplicationContext(), "Failure!", Toast.LENGTH_LONG).show();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         DatabaseHelper helper = new DatabaseHelper(this);
@@ -105,6 +118,12 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         registerForPostUpdates();
     }
 
+    @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mPostResponse);
+        super.onDestroy();
+    }
+
     private void setupCategoryPicker() {
         // ensures keyboard stays closed on click
         mEtCategory.setInputType(InputType.TYPE_NULL);
@@ -122,7 +141,9 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
                 if (hasFocus) {
                     // close keyboard if open (for example, when pressing next)
                     InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(mEtCategory.getWindowToken(), 0);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(mEtCategory.getWindowToken(), 0);
+                    }
 
                     // start dialog
                     createCategoryPickerDialog(mCategories);
@@ -145,18 +166,8 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     }
 
     private void registerForPostUpdates() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                // TODO replace with real logic
-                if (intent.getBooleanExtra(EventHandler.IS_SUCCESS, false)) {
-                    Toast.makeText(getApplicationContext(), "Success!", Toast.LENGTH_LONG).show();
-                    finish();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Failure!", Toast.LENGTH_LONG).show();
-                }
-            }
-        }, new IntentFilter(EventHandler.BROADCAST_REPORT_RECIEVED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mPostResponse,
+                new IntentFilter(EventHandler.BROADCAST_REPORT_RECIEVED));
     }
 
     private void submit() {

@@ -51,13 +51,6 @@ public class ReportProblemActivityTest {
     private String mockAddress = "55 Marimbo St";
     private String mockDescription = "Horrible horrible horrible!!";
 
-    private class WorkaroundReportProblemActivity extends ReportProblemActivity {
-        @Override
-        public void setContentView(View view) {
-            super.setContentView(view);
-        }
-    }
-
     @Before
     public void startActivity() {
         mActivity = Robolectric.setupActivity(ReportProblemActivity.class);

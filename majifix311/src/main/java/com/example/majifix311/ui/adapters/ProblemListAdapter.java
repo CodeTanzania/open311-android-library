@@ -47,7 +47,7 @@ public class ProblemListAdapter extends  RecyclerView.Adapter<RecyclerView.ViewH
         int categoryIconColor;
         try {
             categoryIconColor = Color.parseColor(problem.getStatus().getColor());
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             categoryIconColor = ContextCompat.getColor(srViewHolder.cardView.getContext(),
                     problem.getStatus().isOpen() ? R.color.open : R.color.resolved);
         }
@@ -68,7 +68,7 @@ public class ProblemListAdapter extends  RecyclerView.Adapter<RecyclerView.ViewH
         return mProblems.size();
     }
 
-    private static class ProblemViewHolder extends RecyclerView.ViewHolder {
+    static class ProblemViewHolder extends RecyclerView.ViewHolder {
         View cardView;
         TextView tvCategoryIcon;
         TextView tvTitle;
