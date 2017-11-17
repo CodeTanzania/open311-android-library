@@ -43,6 +43,7 @@ class ProblemContract {
             Entry.COLUMN_CATEGORY_NAME +" TEXT, "+
             Entry.COLUMN_CATEGORY_ID +" TEXT, "+
             Entry.COLUMN_CATEGORY_PRIORITY +" INTEGER, "+
+            Entry.COLUMN_CATEGORY_CODE +" STRING, "+
             Entry.COLUMN_LATITUDE +" DECIMAL, "+
             Entry.COLUMN_LONGITUDE +" DECIMAL, "+
             Entry.COLUMN_ADDRESS +" TEXT, "+
@@ -81,6 +82,7 @@ class ProblemContract {
                 values.put(Entry.COLUMN_CATEGORY_NAME, category.getName());
                 values.put(Entry.COLUMN_CATEGORY_ID, category.getId());
                 values.put(Entry.COLUMN_CATEGORY_PRIORITY, category.getPriority());
+                values.put(Entry.COLUMN_CATEGORY_CODE, category.getCode());
             }
             ApiLocation location = problem.getLocation();
             if (location != null) {
@@ -125,6 +127,7 @@ class ProblemContract {
                 Entry.COLUMN_CATEGORY_NAME,
                 Entry.COLUMN_CATEGORY_ID,
                 Entry.COLUMN_CATEGORY_PRIORITY,
+                Entry.COLUMN_CATEGORY_CODE,
                 Entry.COLUMN_LATITUDE,
                 Entry.COLUMN_LONGITUDE,
                 Entry.COLUMN_ADDRESS,
@@ -167,6 +170,8 @@ class ProblemContract {
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_CATEGORY_ID));
             int categoryPriority = cursor.getInt(
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_CATEGORY_PRIORITY));
+            String categoryCode = cursor.getString(
+                    cursor.getColumnIndexOrThrow(Entry.COLUMN_CATEGORY_CODE));
 
             // location info
             Location location = new Location("");
@@ -210,7 +215,7 @@ class ProblemContract {
             //        cursor.getColumnIndexOrThrow(Entry.COLUMN_COMMENT_JSON));
 
             Problem problem = builder.buildWithoutValidation(username, phone, email, accountNumber,
-                    new Category(categoryName, categoryId, categoryPriority),
+                    new Category(categoryName, categoryId, categoryPriority, categoryCode),
                     location, address, description, ticketNumber,
                     new Status(isOpen, statusName, statusColor),
                     createdAt, updatedAt, resolvedAt, attachments);
@@ -235,6 +240,7 @@ class ProblemContract {
         static final String COLUMN_CATEGORY_NAME = "category_name";
         static final String COLUMN_CATEGORY_ID = "category_id";
         static final String COLUMN_CATEGORY_PRIORITY = "category_priority";
+        static final String COLUMN_CATEGORY_CODE = "category_code";
         static final String COLUMN_LATITUDE = "latitude";
         static final String COLUMN_LONGITUDE = "longitude";
         static final String COLUMN_ADDRESS = "address";

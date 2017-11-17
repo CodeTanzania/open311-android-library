@@ -43,8 +43,8 @@ public class DatabaseHelperTest {
     @Test
     public void canWriteCategoriesToDatabase() {
         List<ApiService> mockServices = new ArrayList<>(2);
-        ApiService mockService1 = new ApiService("1","cat1", 1);
-        ApiService mockService2 = new ApiService("2","cat2", 2);
+        ApiService mockService1 = new ApiService("1","cat1", 1, "one");
+        ApiService mockService2 = new ApiService("2","cat2", 2, "two");
         mockServices.add(mockService1);
         mockServices.add(mockService2);
 
@@ -58,9 +58,11 @@ public class DatabaseHelperTest {
         assertEquals("cat2", mCategoriesResult.get(0).getName());
         assertEquals("2", mCategoriesResult.get(0).getId());
         assertEquals(2, mCategoriesResult.get(0).getPriority());
+        assertEquals("two", mCategoriesResult.get(0).getCode());
         assertEquals("cat1", mCategoriesResult.get(1).getName());
         assertEquals("1", mCategoriesResult.get(1).getId());
         assertEquals(1, mCategoriesResult.get(1).getPriority());
+        assertEquals("one", mCategoriesResult.get(1).getCode());
     }
 
     @Test

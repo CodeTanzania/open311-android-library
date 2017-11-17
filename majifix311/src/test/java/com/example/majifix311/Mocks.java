@@ -15,6 +15,7 @@ class Mocks {
     static String mockAccount = "A123";
     static String mockCategoryName = "Puddle";
     static String mockCategoryId = "5968b64148dfc224bb47748d";
+    static String mockCategoryCode = "PU";
     static double latitude = 1.1d;
     static double longitude = 2.2d;
     static String mockAddress = "55 Marimbo St";
@@ -36,7 +37,7 @@ class Mocks {
             "    \"service\": {\n" +
             "        \"jurisdiction\": {},\n" +
             "        \"group\": {},\n" +
-            "        \"code\": \"LW\",\n" +
+            "        \"code\": \""+mockCategoryCode+"\",\n" +
             "        \"name\": \""+mockCategoryName+"\",\n" +
             "        \"description\": \"Lack of Water related service request(issue)\",\n" +
             "        \"color\": \"#C62828\",\n" +

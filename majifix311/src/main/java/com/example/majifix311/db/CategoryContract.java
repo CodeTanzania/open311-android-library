@@ -58,7 +58,8 @@ class CategoryContract {
         String[] projection =  {
                 Entry.COLUMN_NAME,
                 Entry.COLUMN_ID,
-                Entry.COLUMN_PRIORITY
+                Entry.COLUMN_PRIORITY,
+                Entry.COLUMN_CODE
         };
 
         Cursor cursor = db.query(TABLE_NAME, projection,null,null,null,null,null);
@@ -71,7 +72,9 @@ class CategoryContract {
             String id = cursor.getString(
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_ID));
             int priority = cursor.getInt(cursor.getColumnIndexOrThrow(Entry.COLUMN_PRIORITY));
-            categories.add(new Category(name,id, priority));
+            String code = cursor.getString(
+                    cursor.getColumnIndexOrThrow(Entry.COLUMN_CODE));
+            categories.add(new Category(name,id, priority, code));
         }
         cursor.close();
 
