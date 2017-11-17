@@ -13,6 +13,7 @@ import java.util.Locale;
 
 import static java.util.Locale.*;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.fail;
 
 /**
  * This is used to test string to date object conversions.
@@ -39,6 +40,15 @@ public class DateUtilTest {
         Calendar fromMills = DateUtils.getCalendarFromDbMills(mills);
 
         testCalendar(fromMills, 2015, Calendar.OCTOBER, 22, 9, 3, 46);
+    }
+
+    @Test
+    public void testDisplayFormat() {
+        String fromServer = "2015-10-22T09:03:46.845Z";
+        Calendar calendar = DateUtils.getCalendarFromMajiFixApiString(fromServer);
+
+        String forDisplay = DateUtils.formatForDisplay(calendar);
+        assertEquals("Oct 22 09:03", forDisplay);
     }
 
     public static void testCalendar(Calendar cal, int year, int month, int date,

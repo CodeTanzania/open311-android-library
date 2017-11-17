@@ -24,10 +24,11 @@ public class CategoryTest {
     private String mockName = "colors";
     private String mockId = "000000";
     private int mockPriority = 5;
+    private String mockCode = "RGB";
 
     @Test
     public void category_isParcelable() {
-        Category category = new Category(mockName, mockId, mockPriority);
+        Category category = new Category(mockName, mockId, mockPriority, mockCode);
         assertMatchesMock(category);
 
         Parcel parcel = Parcel.obtain();
@@ -41,9 +42,9 @@ public class CategoryTest {
     @Test
     public void category_isSortedByPriority() {
         List<Category> categories = new ArrayList<>(3);
-        categories.add(new Category(mockName, "0", 3));
-        categories.add(new Category(mockName, "1", 5));
-        categories.add(new Category(mockName, "2", 1));
+        categories.add(new Category(mockName, "0", 3, mockCode));
+        categories.add(new Category(mockName, "1", 5, mockCode));
+        categories.add(new Category(mockName, "2", 1, mockCode));
 
         assertEquals("0", categories.get(0).getId());
         assertEquals("1", categories.get(1).getId());
@@ -60,5 +61,6 @@ public class CategoryTest {
         assertEquals(mockName, category.getName());
         assertEquals(mockId, category.getId());
         assertEquals(mockPriority, category.getPriority());
+        assertEquals(mockCode, category.getCode());
     }
 }

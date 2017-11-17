@@ -21,6 +21,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import static com.example.majifix311.Mocks.mockCategoryCode;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -45,17 +46,10 @@ public class ReportProblemActivityTest {
 
     private String mockName = "Test User";
     private String mockNumber = "123456789";
-    private Category mockCategory = new Category("Puddle","5968b64148dfc224bb47748d", 0);
+    private Category mockCategory = new Category("Puddle","5968b64148dfc224bb47748d", 0, mockCategoryCode);
     private Location mockLocation = new Location("");
     private String mockAddress = "55 Marimbo St";
     private String mockDescription = "Horrible horrible horrible!!";
-
-    private class WorkaroundReportProblemActivity extends ReportProblemActivity {
-        @Override
-        public void setContentView(View view) {
-            super.setContentView(view);
-        }
-    }
 
     @Before
     public void startActivity() {

@@ -35,7 +35,8 @@ import static junit.framework.Assert.assertTrue;
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
 public class ProblemTest implements Problem.Builder.InvalidCallbacks {
-    private static Category mockCategory = new Category(mockCategoryName, mockCategoryId, 0);
+    private static Category mockCategory = new Category(
+            mockCategoryName, mockCategoryId, 0, mockCategoryCode);
     private static Location mockLocation = new Location("");
     private int problemCount;
 
@@ -182,6 +183,7 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals("Category name should be correct", mockCategoryName, problem.getCategory().getName());
         assertEquals("Category id should be correct", mockCategoryId, problem.getCategory().getId());
         assertEquals("Category priority should be correct", 0, problem.getCategory().getPriority());
+        assertEquals("Category code should be correct", mockCategoryCode, problem.getCategory().getCode());
         assertEquals("Latitude should be correct", latitude, problem.getLocation().getLatitude());
         assertEquals("Longitude should be correct", longitude, problem.getLocation().getLongitude());
         assertEquals("Address should be correct", mockAddress, problem.getAddress());

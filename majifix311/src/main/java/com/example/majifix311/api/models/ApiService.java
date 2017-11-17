@@ -65,11 +65,12 @@ public class ApiService {
     private ApiPriority priority;
 
     @VisibleForTesting
-    public ApiService(String id, String name, int priority) {
+    public ApiService(String id, String name, int priority, String code) {
         _id = id;
         this.name = name;
         this.priority = new ApiPriority();
         this.priority.setWeight(priority);
+        this.code = code;
     }
 
     public String getCode() {

@@ -6,12 +6,16 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.example.majifix311.models.Problem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This is used for sending updates throughout the application.
  */
 
 public class EventHandler {
     public final static String BROADCAST_REPORT_RECIEVED = "com.majifix311.broadcast.REPORT_RECEIVED";
+    public final static String BROADCAST_MY_REPORTED_RECIEVED = "com.majifix311.broadcast.MY_REPORTED_RECEIVED";
     public final static String IS_SUCCESS = "is success";
     public final static String PROBLEM_INTENT = "problem";
     public final static String ERROR_INTENT = "error";
@@ -29,6 +33,16 @@ public class EventHandler {
         resultIntent.setAction(BROADCAST_REPORT_RECIEVED);
         resultIntent.putExtra(IS_SUCCESS, false);
         resultIntent.putExtra(ERROR_INTENT, error);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(resultIntent);
+    }
+
+    public static void sendMyReportedProblemsList(Context context, ArrayList<Problem> problemList) {
+        System.out.println("Sending list of problems: "+problemList.size());
+
+        Intent resultIntent = new Intent();
+        resultIntent.setAction(BROADCAST_MY_REPORTED_RECIEVED);
+        resultIntent.putExtra(IS_SUCCESS, true);
+        resultIntent.putExtra(PROBLEM_INTENT, problemList);
         LocalBroadcastManager.getInstance(context).sendBroadcast(resultIntent);
     }
 
