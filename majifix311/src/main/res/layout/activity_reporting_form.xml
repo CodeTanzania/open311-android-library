@@ -117,6 +117,7 @@
             android:gravity="center">
 
             <ImageView
+                android:id="@+id/iv_add_photo"
                 android:src="@drawable/ic_add_photo_black"
                 android:contentDescription="@string/content_desc_photo"
                 android:layout_width="@dimen/form_icon"
