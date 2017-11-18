@@ -24,19 +24,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
-import android.widget.ListPopupWindow;
-import android.widget.PopupMenu;
-import android.widget.SimpleAdapter;
 
-import com.example.majifix311.R;
 import com.example.majifix311.models.Attachment;
-import com.example.majifix311.ui.views.AttachmentButton;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;

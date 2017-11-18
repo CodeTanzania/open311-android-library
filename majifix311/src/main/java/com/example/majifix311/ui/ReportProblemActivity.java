@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
 import android.support.annotation.NonNull;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,11 +33,13 @@ import com.example.majifix311.EventHandler;
 import com.example.majifix311.location.FetchAddressIntentService;
 import com.example.majifix311.location.LocationTracker;
 import com.example.majifix311.models.Attachment;
+import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
 import com.example.majifix311.db.DatabaseHelper;
+import com.example.majifix311.utils.AttachmentUtils;
 import com.example.majifix311.ui.views.AttachmentButton;
 import com.example.majifix311.utils.AttachmentUtils;
 import com.example.majifix311.utils.EmptyErrorTrigger;
@@ -45,6 +50,8 @@ import com.example.majifix311.utils.MapUtils;
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
+
+import static android.view.View.GONE;
 
 /**
  * This activity is for submitting problems to a municipal company that uses the majifix system.
