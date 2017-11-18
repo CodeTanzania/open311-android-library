@@ -123,6 +123,7 @@
                 android:orientation="vertical">
 
                 <ImageView
+                    android:id="@+id/iv_add_photo"
                     android:layout_width="@dimen/form_icon"
                     android:layout_height="@dimen/form_icon"
                     android:contentDescription="@string/content_desc_photo"

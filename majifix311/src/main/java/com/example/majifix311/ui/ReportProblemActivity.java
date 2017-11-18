@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
@@ -28,11 +31,13 @@ import android.widget.Toast;
 import com.example.majifix311.EventHandler;
 import com.example.majifix311.location.FetchAddressIntentService;
 import com.example.majifix311.location.LocationTracker;
+import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
 import com.example.majifix311.db.DatabaseHelper;
+import com.example.majifix311.utils.AttachmentUtils;
 import com.example.majifix311.utils.EmptyErrorTrigger;
 import com.example.majifix311.utils.KeyboardUtils;
 import com.example.majifix311.utils.MapUtils;
@@ -40,6 +45,8 @@ import com.example.majifix311.utils.MapUtils;
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
+
+import static android.view.View.GONE;
 
 /**
  * This activity is for submitting problems to a municipal company that uses the majifix system.
@@ -74,6 +81,8 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
     private LocationTracker mLocationTracker;
 
     private LinearLayout mLlPhoto;
+    private ImageView mIvPhoto;
+    private String mAttachmentUrl;
 
     private Button mSubmitButton;
 
@@ -113,6 +122,7 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         mIvLocation = (ImageView) findViewById(R.id.iv_location);
         mTvLocationError = (TextView) findViewById(R.id.tv_location_error);
         mLlPhoto = (LinearLayout) findViewById(R.id.ll_add_photo);
+        mIvPhoto = (ImageView) findViewById(R.id.iv_add_photo);
 
         // for required fields: watch for text changes, and if empty, display error
         mEtName.addTextChangedListener(new EmptyErrorTrigger(mTilName));
@@ -122,10 +132,10 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         mEtDescription.addTextChangedListener(new EmptyErrorTrigger(mTilDescription));
 
         // add click listeners
-        setupCategoryPicker();
-        setupLocationPicker();
         mSubmitButton = (Button) findViewById(R.id.btn_submit);
         mSubmitButton.setOnClickListener(this);
+        setupCategoryPicker();
+        setupPhotoListener();
 
         // start location tracker to get current GPS location
         mLocationTracker = new LocationTracker(this);
@@ -143,6 +153,16 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         if (mLocationTracker != null) {
             mLocationTracker.respondToActivityResult(requestCode, resultCode);
         }
+
+        // Was intent was fired to capture photo? Then display thumbnail in given imageview.
+        boolean photoCaptureSuccess = AttachmentUtils.setThumbnailFromActivityResult(
+                mIvPhoto, mAttachmentUrl, requestCode, resultCode, data);
+        if (!photoCaptureSuccess) {
+            // If photo cannot be found, reset state
+            mAttachmentUrl = null;
+        } else {
+            //TODO mBuilder.addAttachment()
+        }
     }
 
     @Override
@@ -151,6 +171,9 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         if (mLocationTracker != null) {
             mLocationTracker.respondToPermissions(requestCode, grantResults);
         }
+        // Check if this is a storage permission. If so, attempt to start camera.
+        mAttachmentUrl = AttachmentUtils.onRequestPermissionResult(
+                this, requestCode, permissions, grantResults);
     }
 
     @Override
@@ -186,6 +209,22 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
                 }
             }
         });
+    }
+
+    private void setupPhotoListener() {
+        // Check if phone is equipped with camera
+        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+            // If so, trigger camera on click. Picture will be returned in onActivityResult
+            mLlPhoto.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mAttachmentUrl = AttachmentUtils.dipatchTakePictureIntent(ReportProblemActivity.this);
+                }
+            });
+        } else {
+            // If not, hide camera icon and label
+            mLlPhoto.setVisibility(GONE);
+        }
     }
 
     private void setupLocationPicker() {
