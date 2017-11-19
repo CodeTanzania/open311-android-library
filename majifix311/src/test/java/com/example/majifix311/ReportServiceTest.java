@@ -100,7 +100,7 @@ public class ReportServiceTest {
 
     private Intent getServiceIntent() {
         Intent startIntent = new Intent();
-        startIntent.setAction(ReportService.STARTFOREGROUND_ACTION);
+        startIntent.setAction(ReportService.START_POST_PROBLEM_ACTION);
         startIntent.putExtra(ReportService.NEW_PROBLEM_INTENT, ProblemTest.buildMockProblem(null));
         return startIntent;
     }

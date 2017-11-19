@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SimpleMajifixApp.iml" filepath="$PROJECT_DIR$/SimpleMajifixApp.iml" />
+      <module fileurl="file://C:\Dev\open311-android-library\SimpleMajifixApp.iml" filepath="C:\Dev\open311-android-library\SimpleMajifixApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/majifix311/majifix311.iml" filepath="$PROJECT_DIR$/majifix311/majifix311.iml" />
+      <module fileurl="file://$PROJECT_DIR$/open311-android-library.iml" filepath="$PROJECT_DIR$/open311-android-library.iml" />
     </modules>
   </component>
 </project>
