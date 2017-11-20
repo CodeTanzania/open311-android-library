@@ -70,30 +70,14 @@ public class ReportService extends Service {
                         @Override
                         public void onSubscribe(Disposable d) {}
 
-                        //@Override
-                        //public void onSuccess(ApiServiceRequestGetMany problemsObj) {
-                        //    int size = problemsObj.getServicerequests().size();
-                        //    ArrayList<Problem> problems = new ArrayList<>(size);
-                        //    for (int i = 0; i < size; i++) {
-                        //        Problem problem = ApiModelConverter.convert(
-                        //                problemsObj.getServicerequests().get(i)
-                        //        );
-                        //        problems.add(problem);
-                        //    }
-                        //    EventHandler.retrievedMyRequests(getApplicationContext(),problems);
-                        //}
-
                         @Override
                         public void onSuccess(ArrayList<Problem> problems) {
-                            //String groupJSONed = (new GsonBuilder().setPrettyPrinting().create())
-                            //        .toJson(apiServiceRequestGetMany);
-                            //Log.d(TAG, "onSuccess: " + groupJSONed);
                             EventHandler.retrievedMyRequests(getApplicationContext(),problems);
                         }
 
                         @Override
                         public void onError(Throwable e) {
-                            Log.d(TAG, "onError: " + e.toString());
+                            EventHandler.errorRetrievingRequests(getApplicationContext(),e);
                         }
                     }, number);
                     break;

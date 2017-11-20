@@ -150,8 +150,8 @@ class MajiFixAPI {
                 @Header("Authorization") String authHeader,
                 @Query("query") String query);
 
-
-        //TODO this is probably an invalid return generic type
+        //TODO get GSON to directly spit out ApiServiceRequestGet objects.
+        // Use CustomTypeFactory? https://stackoverflow.com/a/43459059
         @GET("/servicerequests")
         @Headers({"Accept: application/json", "Content-Type: application/json"})
         Single<ApiServiceRequestGetMany> getReportsWPhoneNo(

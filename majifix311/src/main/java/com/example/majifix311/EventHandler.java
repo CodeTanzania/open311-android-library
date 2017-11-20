@@ -60,7 +60,7 @@ public class EventHandler {
         LocalBroadcastManager.getInstance(context).sendBroadcast(resultIntent);
     }
 
-    public static void retrievedMyRequests(Context context, Throwable error){
+    public static void errorRetrievingRequests(Context context, Throwable error){
         System.out.println("Erred on request from server");
 
         Intent resultIntent = new Intent();

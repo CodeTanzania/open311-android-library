@@ -77,31 +77,7 @@ public class ProblemListFragment extends Fragment implements ProblemListAdapter.
                 new IntentFilter(EventHandler.BROADCAST_MY_PROBLEMS_FETCHED));
 
         ReportService.fetchProblems(getContext(),"255714095061");
-
-        //sendMocks();
-
-        // mProblems = getArguments().getParcelableArrayList(PROBLEMS_INTENT);
-        // setupRecyclerView();
     }
-
-    //private void sendMocks() {
-    //    Problem.Builder builder = new Problem.Builder(null);
-    //    Problem problem1 = builder.buildWithoutValidation(null, null, null,
-    //            null, new Category("Puddle", "123", 3, "PU"),
-    //            null, null, "Magnificent!", "TIC123",
-    //            new Status(true, "In Progress", "#3498DB"), Calendar.getInstance(), null, null, null);
-    //    Problem problem2 = builder.buildWithoutValidation(null, null, null,
-    //            null, new Category("Shite Heap", "456", 3, "SH"),
-    //            null, null, "Eew!", "TIC456",
-    //            new Status(false, "Resolved", "#28B463"), Calendar.getInstance(), null, null, null);
-    //
-    //
-    //    //ArrayList<Problem> problems = new ArrayList<>(2);
-    //    //problems.add(problem1);
-    //    //problems.add(problem2);
-    //
-    //    //EventHandler.sendMyReportedProblemsList(getContext(), problems);
-    //}
 
     private void setupRecyclerView() {
         mAdapter = new ProblemListAdapter(mProblems, this);
