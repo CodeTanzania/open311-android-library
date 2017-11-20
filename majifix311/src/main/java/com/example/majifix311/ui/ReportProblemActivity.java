@@ -144,7 +144,8 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
             // If photo cannot be found, reset state
             mAttachmentUrl = null;
         } else {
-            //TODO mBuilder.addAttachment()
+            Attachment attachment = AttachmentUtils.getPicAsAttachment(mAttachmentUrl);
+            mBuilder.addAttachment(attachment);
         }
     }
 
@@ -188,10 +189,11 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     private void setupPhotoListener() {
         // Check if phone is equipped with camera
         if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            // If so, trigger camera on click. Picture will be returned in onActivityResult
+            // If so, trigger camera on click
             mLlPhoto.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    // mAttachmentUrl will be used to retrieve the file in onActivityResult
                     mAttachmentUrl = AttachmentUtils.dipatchTakePictureIntent(ReportProblemActivity.this);
                 }
             });
