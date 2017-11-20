@@ -16,9 +16,17 @@ import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.util.Base64;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 
+import com.example.majifix311.models.Attachment;
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,17 +37,26 @@ import static android.app.Activity.RESULT_OK;
  * This works to contain the logic involved in taking pictures using the phones camera
  * as well as retrieving files from the phone file system.
  *
+ * To take a picture in an Activity, call 'dipatchTakePictureIntent' and be sure to override
+ * 'onActivityResult' and 'onRequestPermissionResult'.
+ *
  * For more information, take a look at:
+ *  https://developer.android.com/guide/topics/media/camera.html#intent-image
  *  https://developer.android.com/training/camera/photobasics.html#TaskCaptureIntent
  *
  * For information on EXIF (used to fix Samsung photo rotation bug), look here:
  *  http://android-coding.blogspot.com/2011/10/read-exif-of-jpg-file-using.html
  *  https://stackoverflow.com/questions/40864566/how-to-rotate-image-to-its-default-orientation-selected-from-gallery-in-android
+ *
+ *  TODO: Add tests for methods in this class
  */
 
 public class AttachmentUtils {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_EXTERNAL_STORAGE_PERMISSION = 2;
+
+    private static final int MAX_SIZE = 1024;
+    public static final int DEFAULT_JPEG_COMPRESSION_QUALITY = 70;
 
     /** TAKE PICTURE: Step 1 -> Send Intent. This method only returns a thumbnail */
     public static void dipatchTakePictureIntentForThumbnailOnly(Activity activity) {
@@ -64,14 +81,17 @@ public class AttachmentUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            // If file was created, start intent with uri. Intent will return in
-            // on ActivityResult. No Thumbnail will be sent, and file will need to be parsed.
             if (photoFile != null) {
+                // If file was created, start intent with uri.
                 Uri photoUri = FileProvider.getUriForFile(activity,
                         "com.example.majifix311.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                // Limit photo size to around 1MB TODO Does this work? I think not...
+                takePictureIntent.putExtra(MediaStore.EXTRA_SIZE_LIMIT, MAX_SIZE*MAX_SIZE);
+                // Intent will return in on ActivityResult. File will need to be parsed.
                 activity.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                // Return uri that can be used to parse the photo.
                 return photoFile.getAbsolutePath();
             }
         }
@@ -94,13 +114,12 @@ public class AttachmentUtils {
     public static boolean setThumbnailFromActivityResult(ImageView imageView, String url,
                                                         int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            if (data == null) {
+            if (data == null || data.getExtras() == null) {
                 // assume image is saved in file
                 return setPicFromFile(imageView, url);
             } else {
                 // use bitmap sent in intent
-                Bundle extras = data.getExtras();
-                Bitmap bitmap = (Bitmap) extras.get("data");
+                Bitmap bitmap = (Bitmap) data.getExtras().get("data");
                 if (bitmap != null) {
                     imageView.setImageBitmap(bitmap);
                     return true;
@@ -124,8 +143,19 @@ public class AttachmentUtils {
     }
 
     /** The majiFix api expects a Base64 string as the content for it's attachments */
-    public static String getPicAsBase64String(String url) {
+    public static Attachment getPicAsAttachment(String url) {
+        String mime = getMimeType(url);
+        String content = getContentAsBase64String(url);
+        System.out.println(content);
+        if (mime != null && content != null) {
+            return new Attachment(null,null, mime, content);
+        }
         return null;
+    }
+
+    public static Bitmap decodeFromBase64String(String content) {
+        byte[] decodedBytes = Base64.decode(content, 0);
+        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
     }
 
     /** This extracts a photo from a file to sets it to a given imageview */
@@ -138,21 +168,8 @@ public class AttachmentUtils {
         int targetW = view.getWidth();
         int targetH = view.getHeight();
 
-        // Get dimens of bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(uri, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-        // Decode the image file into a Bitmap sized to fit the view
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-        Bitmap bitmap = BitmapFactory.decodeFile(uri, bmOptions);
+        // Get scaled bitmap
+        Bitmap bitmap = getScaledBitmap(uri, targetW, targetH);
 
         // Some devices (Samsung) save important rotation info into exif
         // This information must be read, and image manually rotated
@@ -169,6 +186,44 @@ public class AttachmentUtils {
         return true;
     }
 
+    private static String getContentAsBase64String(String url) {
+        // Get scaled bitmap
+        Bitmap bitmap = getScaledBitmap(url, MAX_SIZE, MAX_SIZE);
+        // Compress and encode
+        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, DEFAULT_JPEG_COMPRESSION_QUALITY, byteArrayOS);
+        return Base64.encodeToString(byteArrayOS.toByteArray(), Base64.DEFAULT);
+    }
+
+    private static String getMimeType(String url) {
+        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+        String type = null;
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        System.out.println("Extension: "+extension+", type: "+type);
+        return type;
+    }
+
+    private static Bitmap getScaledBitmap(String uri, int maxW, int maxH) {
+        // Get dimens of saved bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(uri, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+        System.out.println("Photo w/h: "+photoW+"/"+photoH);
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW/maxW, photoH/maxH);
+
+        // Decode the image file into a Bitmap sized to fit the view
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+        return BitmapFactory.decodeFile(uri, bmOptions);
+    }
+
     /** Creates an empty file where we want to store photo data */
     private static File createEmptyImageFile(Activity activity) throws IOException {
         // In API 21+, external storage is considered a dangeorus permission that must be checked at runtime
@@ -178,9 +233,7 @@ public class AttachmentUtils {
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             String imageFileName = "JPEG_" + timeStamp + "_";
             File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-            System.out.println("File is at: "+storageDirectory.getAbsolutePath());
             File image = File.createTempFile(imageFileName, ".jpg", storageDirectory);
-            System.out.println("File is at: "+image.getAbsolutePath());
 
             // Ensure this file will be accessible to other apps
             addPicToGalleryForExternalUse(activity, image.getAbsolutePath());
@@ -269,4 +322,40 @@ public class AttachmentUtils {
             e.printStackTrace();
         }
     }
+
+
+//    private static byte[] readFileAsBytes(String url) {
+//        File file = new File(url);
+//        int size = (int) file.length();
+//        byte bytes[] = new byte[size];
+//        byte tempBuff[] = new byte[size];
+//        FileInputStream fis = null;
+//        try {
+//            fis = new FileInputStream(file);
+//            try {
+//                int read = fis.read(bytes, 0, size);
+//                if (read < size) {
+//                    int remain = size - read;
+//                    while (remain > 0) {
+//                        read = fis.read(tempBuff, 0, remain);
+//                        System.arraycopy(tempBuff, 0, bytes, size - remain, read);
+//                        remain -= read;
+//                    }
+//                }
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } finally {
+//                try {
+//                    fis.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        return bytes;
+//    }
 }

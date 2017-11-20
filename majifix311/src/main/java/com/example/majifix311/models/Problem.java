@@ -39,7 +39,8 @@ public class Problem implements Parcelable {
 //    private List<Comment> mComments; //TODO Implement
 
     private Problem(String username, String phone, String email, String account,
-                    Category category, Location location, String address, String description) {
+                    Category category, Location location, String address, String description,
+                    List<Attachment> attachments) {
         mReporter = new Reporter();
         mReporter.setName(username);
         mReporter.setPhone(phone);
@@ -50,20 +51,21 @@ public class Problem implements Parcelable {
         mLocation = location;
         mAddress = address;
         mDescription = description;
+
+        mAttachments = attachments;
     }
 
     private Problem(String username, String phone, String email, String account,
                     Category category, Location location, String address, String description,
                     String ticketNumber, Status status, Calendar createdAt, Calendar updatedAt,
                     Calendar resolvedAt, List<Attachment> attachments) {
-        this(username, phone, email, account, category, location, address, description);
+        this(username, phone, email, account, category, location, address, description, attachments);
 
         mTicketNumber = ticketNumber;
         mStatus = status;
         mCreatedAt = createdAt;
         mUpdatedAt = updatedAt;
         mResolvedAt = resolvedAt;
-        mAttachments = attachments;
     }
 
     private Problem(Parcel in) {
@@ -210,6 +212,7 @@ public class Problem implements Parcelable {
         Location tempLocation;
         String tempAddress;
         String tempDescription;
+        List<Attachment> tempAttachments;
 
         public Builder(InvalidCallbacks listener) {
             mListener = listener;
@@ -276,12 +279,19 @@ public class Problem implements Parcelable {
             tempDescription = description.trim();
         }
 
+        public void addAttachment(Attachment attachment) {
+            if (tempAttachments == null) {
+                tempAttachments = new ArrayList<>();
+            }
+            tempAttachments.add(attachment);
+        }
+
         public Problem build() {
             //TODO add back the validation when location is added
 //            return new Problem(tempUsername, tempPhone, tempCategory,
 //                    tempLocation, tempAddress, tempDescription);
             return validate() ? new Problem(tempUsername, tempPhone, tempEmail, tempAccount,
-                    tempCategory, tempLocation, tempAddress, tempDescription) : null;
+                    tempCategory, tempLocation, tempAddress, tempDescription, tempAttachments) : null;
         }
 
         public Problem buildWithoutValidation(String username, String phone, String email,
