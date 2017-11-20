@@ -1,14 +1,26 @@
 package com.example.majifix311.api;
 
+import android.util.Log;
+
 import com.example.majifix311.BuildConfig;
 import com.example.majifix311.MajiFix;
+import com.example.majifix311.api.models.ApiServiceRequestGetMany;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.api.models.ApiServiceGroup;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
 
+import org.reactivestreams.Subscriber;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.Single;
+import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
@@ -33,8 +45,10 @@ import retrofit2.http.Query;
 class MajiFixAPI {
     private static MajiFixAPI mSingleton;
 
+    private static final String TAG = "MajiFixAPI";
     private Retrofit mRetrofit;
     private MajiFixRetrofitApi mApi;
+    private Observable<ApiServiceGroup> mRequestCache;
 
     private MajiFixAPI() {
         initRetrofit();
@@ -88,6 +102,40 @@ class MajiFixAPI {
                 .subscribe(onNext, onError);
     }
 
+    void getProblemsByPhoneNumber(SingleObserver<ArrayList<Problem>> observer, String phoneNumber){
+
+        String test = "{\"reporter.phone\":\"" + phoneNumber + "\"}";
+        Log.d(TAG, "getProblemsByPhoneNumber: " + test);
+        Single<ApiServiceRequestGetMany> call = mApi.getReportsWPhoneNo(getAuthToken(),test
+                );
+
+        ArrayList<Problem> problems = new ArrayList<>();
+
+        call.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMapObservable(new Function<ApiServiceRequestGetMany,Observable<ApiServiceRequestGet>>(){
+                    @Override
+                    public Observable<ApiServiceRequestGet> apply(ApiServiceRequestGetMany getMany) throws Exception {
+                        return Observable.fromIterable(getMany.getServicerequests());
+                    }
+                })
+                .map(new Function<ApiServiceRequestGet, Problem>() {
+                    @Override
+                    public Problem apply(ApiServiceRequestGet apiServiceRequest) throws Exception {
+                        // convert the server object into something the app can use
+                        System.out.println("Conversion taking place! "+apiServiceRequest);
+                        return ApiModelConverter.convert(apiServiceRequest);
+                    }
+                })
+                .collectInto(problems, new BiConsumer<List<Problem>, Problem>() {
+                    @Override
+                    public void accept(List<Problem> list, Problem problem) throws Exception {
+                        list.add(problem);
+                    }
+                })
+                .subscribe(observer);
+    }
+
     private String getAuthToken() {
         //TODO obfuscate token
         String authToken = "Bearer "+ BuildConfig.APP_TOKEN;
@@ -102,11 +150,22 @@ class MajiFixAPI {
                 @Header("Authorization") String authHeader,
                 @Query("query") String query);
 
+        //TODO get GSON to directly spit out ApiServiceRequestGet objects.
+        // Use CustomTypeFactory? https://stackoverflow.com/a/43459059
+        @GET("/servicerequests")
+        @Headers({"Accept: application/json", "Content-Type: application/json"})
+        Single<ApiServiceRequestGetMany> getReportsWPhoneNo(
+            @Header("Authorization") String authorization,
+            @Query("query") String query
+        );
+
         @POST("/servicerequests")
         @Headers({"Content-Type: application/json"})
         Observable<ApiServiceRequestGet> postProblem(
                 @Header("Authorization") String authorization,
                 @Body ApiServiceRequestPost newProblem);
+
+
 
     }
 }
