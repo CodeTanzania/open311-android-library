@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,7 +17,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,14 +27,13 @@ import com.example.majifix311.models.Problem;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
 import com.example.majifix311.db.DatabaseHelper;
+import com.example.majifix311.ui.views.AttachmentButton;
 import com.example.majifix311.utils.AttachmentUtils;
 import com.example.majifix311.utils.EmptyErrorTrigger;
 
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
-
-import static android.view.View.GONE;
 
 /**
  * This activity is for submitting problems to a municipal company that uses the majifix system.
@@ -66,9 +62,10 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
 
     private ImageView mIvLocation;
     private TextView mTvLocationError;
-    private LinearLayout mLlPhoto;
-    private ImageView mIvPhoto;
-    private String mAttachmentUrl;
+    private AttachmentButton mAbPhoto;
+    //private LinearLayout mLlPhoto;
+    //private ImageView mIvPhoto;
+    //private String mAttachmentUrl;
 
     private Button mSubmitButton;
 
@@ -106,8 +103,9 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         mEtDescription = (EditText) findViewById(R.id.et_description);
         mIvLocation = (ImageView) findViewById(R.id.iv_location);
         mTvLocationError = (TextView) findViewById(R.id.tv_location_error);
-        mLlPhoto = (LinearLayout) findViewById(R.id.ll_add_photo);
-        mIvPhoto = (ImageView) findViewById(R.id.iv_add_photo);
+        mAbPhoto = (AttachmentButton) findViewById(R.id.ab_add_photo);
+        //mLlPhoto = (LinearLayout) findViewById(R.id.ll_add_photo);
+        //mIvPhoto = (ImageView) findViewById(R.id.iv_add_photo);
 
         // for required fields: watch for text changes, and if empty, display error
         mEtName.addTextChangedListener(new EmptyErrorTrigger(mTilName));
@@ -137,14 +135,12 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Intent was fired to capture photo. Display thumbnail in given imageview.
-        boolean photoCaptureSuccess = AttachmentUtils.setThumbnailFromActivityResult(
-                mIvPhoto, mAttachmentUrl, requestCode, resultCode, data);
-        if (!photoCaptureSuccess) {
-            // If photo cannot be found, reset state
-            mAttachmentUrl = null;
-        } else {
-            Attachment attachment = AttachmentUtils.getPicAsAttachment(mAttachmentUrl);
+        // Attachment button will handle result of camera or file intents, and display image
+        boolean photoCapturedSuccess = mAbPhoto.displayOnActivityResult(requestCode, resultCode, data);
+
+        // If sucess, add attachment to problem.
+       if (photoCapturedSuccess) {
+            Attachment attachment = AttachmentUtils.getPicAsAttachment(mAbPhoto.getAttachmentUrl());
             mBuilder.addAttachment(attachment);
         }
     }
@@ -153,9 +149,11 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+        // Attachment button will handle photo permissions requests
+        mAbPhoto.onRequestPermissionResult(requestCode, permissions, grantResults);
         // Check if this is a storage permission. If so, attempt to start camera.
-        mAttachmentUrl = AttachmentUtils.onRequestPermissionResult(
-                this, requestCode, permissions, grantResults);
+//        mAttachmentUrl = AttachmentUtils.onRequestPermissionResult(
+//                this, requestCode, permissions, grantResults);
     }
 
     private void setupCategoryPicker() {
@@ -187,20 +185,22 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     }
 
     private void setupPhotoListener() {
+       // AttachmentUtils.setupAddAttachmentButton(this, mLlPhoto);
+
         // Check if phone is equipped with camera
-        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            // If so, trigger camera on click
-            mLlPhoto.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // mAttachmentUrl will be used to retrieve the file in onActivityResult
-                    mAttachmentUrl = AttachmentUtils.dipatchTakePictureIntent(ReportProblemActivity.this);
-                }
-            });
-        } else {
-            // If not, hide camera icon and label
-            mLlPhoto.setVisibility(GONE);
-        }
+//        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+//            // If so, trigger camera on click
+//            mLlPhoto.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    // mAttachmentUrl will be used to retrieve the file in displayOnActivityResult
+//                    mAttachmentUrl = AttachmentUtils.dipatchTakePictureIntent(ReportProblemActivity.this);
+//                }
+//            });
+//        } else {
+//            // If not, hide camera icon and label
+//            mLlPhoto.setVisibility(GONE);
+//        }
     }
 
     private void createCategoryPickerDialog(Category[] categories) {
