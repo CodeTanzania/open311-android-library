@@ -21,7 +21,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -33,7 +32,6 @@ import com.example.majifix311.EventHandler;
 import com.example.majifix311.location.FetchAddressIntentService;
 import com.example.majifix311.location.LocationTracker;
 import com.example.majifix311.models.Attachment;
-import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.R;
@@ -41,17 +39,14 @@ import com.example.majifix311.api.ReportService;
 import com.example.majifix311.db.DatabaseHelper;
 import com.example.majifix311.utils.AttachmentUtils;
 import com.example.majifix311.ui.views.AttachmentButton;
-import com.example.majifix311.utils.AttachmentUtils;
 import com.example.majifix311.utils.EmptyErrorTrigger;
 import com.example.majifix311.utils.MapUtils;
 import com.example.majifix311.utils.KeyboardUtils;
-import com.example.majifix311.utils.MapUtils;
 
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
 
-import static android.view.View.GONE;
 
 /**
  * This activity is for submitting problems to a municipal company that uses the majifix system.
