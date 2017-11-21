@@ -2,9 +2,11 @@ package com.example.majifix311.utils;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -17,10 +19,18 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Base64;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
+import android.widget.ListPopupWindow;
+import android.widget.PopupMenu;
+import android.widget.SimpleAdapter;
 
+import com.example.majifix311.R;
 import com.example.majifix311.models.Attachment;
+import com.example.majifix311.ui.views.AttachmentButton;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,6 +38,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -38,11 +49,14 @@ import static android.app.Activity.RESULT_OK;
  * as well as retrieving files from the phone file system.
  *
  * To take a picture in an Activity, call 'dipatchTakePictureIntent' and be sure to override
- * 'onActivityResult' and 'onRequestPermissionResult'.
+ * 'displayOnActivityResult' and 'onRequestPermissionResult'.
+ *
+ * If a UI component is needed, the AttachmentButton can be used.
  *
  * For more information, take a look at:
  *  https://developer.android.com/guide/topics/media/camera.html#intent-image
  *  https://developer.android.com/training/camera/photobasics.html#TaskCaptureIntent
+ *  http://codetheory.in/android-pick-select-image-from-gallery-with-intents/
  *
  * For information on EXIF (used to fix Samsung photo rotation bug), look here:
  *  http://android-coding.blogspot.com/2011/10/read-exif-of-jpg-file-using.html
@@ -53,66 +67,90 @@ import static android.app.Activity.RESULT_OK;
 
 public class AttachmentUtils {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int REQUEST_EXTERNAL_STORAGE_PERMISSION = 2;
+    private static final int REQUEST_BROWSE_MEDIA_STORE = 2;
+    private static final int REQUEST_EXTERNAL_STORAGE_PERMISSION = 3;
 
     private static final int MAX_SIZE = 1024;
     public static final int DEFAULT_JPEG_COMPRESSION_QUALITY = 70;
 
-    /** TAKE PICTURE: Step 1 -> Send Intent. This method only returns a thumbnail */
+    public static boolean phoneHasCamera(PackageManager packageManager) {
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+    }
+
+    /**
+     * TAKE PICTURE: Step 1 -> Send Intent. This method only returns a thumbnail
+     */
     public static void dipatchTakePictureIntentForThumbnailOnly(Activity activity) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // check to ensure that the activity component can handle the intent
         if (takePictureIntent.resolveActivity(activity.getPackageManager()) != null) {
-            // This intent will return a bitmap in onActivityResult
+            // This intent will return a bitmap in displayOnActivityResult
             activity.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
     }
 
-    /** TAKE PICTURE: Step 1 (OPTION B) -> Send Intent to take picture and save file.
-     * Returns a uri that can be used to retrieve the full size image */
+    public static void dispatchAddFromGalleryIntent(Activity activity) {
+        Intent mediaStoreIntent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        activity.startActivityForResult(mediaStoreIntent, REQUEST_BROWSE_MEDIA_STORE);
+    }
+
+    /**
+     * TAKE PICTURE: Step 1 (OPTION B) -> Send Intent to take picture and save file.
+     * Returns a uri that can be used to retrieve the full size image
+     */
     public static String dipatchTakePictureIntent(Activity activity) {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // check to ensure that the activity component can handle the intent
-        if (takePictureIntent.resolveActivity(activity.getPackageManager()) != null) {
-            // Create the File where the image should go
-            File photoFile = null;
-            try {
-                photoFile = createEmptyImageFile(activity);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (photoFile != null) {
-                // If file was created, start intent with uri.
-                Uri photoUri = FileProvider.getUriForFile(activity,
-                        "com.example.majifix311.fileprovider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                // Limit photo size to around 1MB TODO Does this work? I think not...
-                takePictureIntent.putExtra(MediaStore.EXTRA_SIZE_LIMIT, MAX_SIZE*MAX_SIZE);
-                // Intent will return in on ActivityResult. File will need to be parsed.
-                activity.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                // Return uri that can be used to parse the photo.
-                return photoFile.getAbsolutePath();
+        // check if phone is equipped with camera
+        PackageManager packageManager = activity.getPackageManager();
+        if (phoneHasCamera(packageManager)) {
+            // check to ensure that the activity component can handle the intent
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (takePictureIntent.resolveActivity(packageManager) != null) {
+                // Create the File where the image should go
+                File photoFile = null;
+                try {
+                    photoFile = createEmptyImageFile(activity);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (photoFile != null) {
+                    // If file was created, start intent with uri.
+                    Uri photoUri = FileProvider.getUriForFile(activity,
+                            "com.example.majifix311.fileprovider",
+                            photoFile);
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                    // Limit photo size to around 1MB TODO Does this work? I think not...
+                    takePictureIntent.putExtra(MediaStore.EXTRA_SIZE_LIMIT, MAX_SIZE * MAX_SIZE);
+                    // Intent will return in on ActivityResult. File will need to be parsed.
+                    activity.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                    // Return uri that can be used to parse the photo.
+                    return photoFile.getAbsolutePath();
+                }
             }
         }
         return null;
     }
 
-    /** TAKE PICTURE: Step 2 -> get thumbnail. This should be called in onActivityResult.
-     * Note: This will only work with dipatchTakePictureIntentForThumbnailOnly */
+    /**
+     * TAKE PICTURE: Step 2 -> get thumbnail. This should be called in displayOnActivityResult.
+     * Note: This will only work with dipatchTakePictureIntentForThumbnailOnly
+     */
     public static Bitmap setThumbnailFromActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             if (data != null && data.getExtras() != null) {
                 return (Bitmap) data.getExtras().get("data");
             }
         }
-        return null;    }
+        return null;
+    }
 
-    /** TAKE PICTURE: Step 2 (OPTION B) -> This should be called in onActivityResult.
+    /**
+     * TAKE PICTURE: Step 2 (OPTION B) -> This should be called in displayOnActivityResult.
      * This method will handle both the case where the image is saved in a file, and a simple
-     * thumbnail sent in the intent. It returns true when bitmap was found successfully. */
+     * thumbnail sent in the intent. It returns true when bitmap was found successfully.
+     */
     public static boolean setThumbnailFromActivityResult(ImageView imageView, String url,
-                                                        int requestCode, int resultCode, Intent data) {
+                                                         int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             if (data == null || data.getExtras() == null) {
                 // assume image is saved in file
@@ -126,7 +164,11 @@ public class AttachmentUtils {
                 }
             }
         }
-        return false;
+        return requestCode == REQUEST_BROWSE_MEDIA_STORE
+                && resultCode == RESULT_OK && data != null
+                && setPicFromFile(imageView, getRealPathFromMediaUri(
+                    imageView.getContext(), data.getData()));
+
     }
 
     /** Newer devices may require a permission check. Please call this onRequestPermissionResult in the Activity */
@@ -189,10 +231,13 @@ public class AttachmentUtils {
     private static String getContentAsBase64String(String url) {
         // Get scaled bitmap
         Bitmap bitmap = getScaledBitmap(url, MAX_SIZE, MAX_SIZE);
-        // Compress and encode
-        ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, DEFAULT_JPEG_COMPRESSION_QUALITY, byteArrayOS);
-        return Base64.encodeToString(byteArrayOS.toByteArray(), Base64.DEFAULT);
+        if (bitmap != null) {
+            // Compress and encode
+            ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, DEFAULT_JPEG_COMPRESSION_QUALITY, byteArrayOS);
+            return Base64.encodeToString(byteArrayOS.toByteArray(), Base64.DEFAULT);
+        }
+        return null;
     }
 
     private static String getMimeType(String url) {
@@ -263,6 +308,32 @@ public class AttachmentUtils {
         context.sendBroadcast(mediaScanIntent);
     }
 
+    /** This gets the absolute path from the content provider, for a media asset */
+    private static String getRealPathFromMediaUri(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+            if (cursor == null) {
+                return null;
+            }
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
+    private static Bitmap rotateImage(Bitmap bitmap, float degrees) {
+        System.out.println("Rotating image: "+degrees);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degrees);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
+
     /** Samsung devices store the rotation data in EXIF file, and image must be manually rotated */
     private static Bitmap rotateImageBasedOnExifData(Bitmap bitmap, String photoPath) throws IOException {
         ExifInterface exifInterface = new ExifInterface(photoPath);
@@ -284,13 +355,6 @@ public class AttachmentUtils {
                 break;
         }
         return bitmap;
-    }
-
-    private static Bitmap rotateImage(Bitmap bitmap, float degrees) {
-        System.out.println("Rotating image: "+degrees);
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degrees);
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
     private static void logExif(String file){
