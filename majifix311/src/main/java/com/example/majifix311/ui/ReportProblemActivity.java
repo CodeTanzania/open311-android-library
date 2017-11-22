@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.FragmentActivity;
@@ -16,16 +17,18 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.majifix311.EventHandler;
+import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
 import com.example.majifix311.db.DatabaseHelper;
+import com.example.majifix311.ui.views.AttachmentButton;
+import com.example.majifix311.utils.AttachmentUtils;
 import com.example.majifix311.utils.EmptyErrorTrigger;
 
 import java.util.List;
@@ -57,10 +60,12 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     private EditText mEtAddress;
     private EditText mEtDescription;
 
-    private LinearLayout mLlLocation;
     private ImageView mIvLocation;
     private TextView mTvLocationError;
-    private LinearLayout mLlPhoto;
+    private AttachmentButton mAbPhoto;
+    //private LinearLayout mLlPhoto;
+    //private ImageView mIvPhoto;
+    //private String mAttachmentUrl;
 
     private Button mSubmitButton;
 
@@ -96,10 +101,11 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         mEtCategory = (EditText) findViewById(R.id.et_category);
         mEtAddress = (EditText) findViewById(R.id.et_address);
         mEtDescription = (EditText) findViewById(R.id.et_description);
-        mLlLocation = (LinearLayout) findViewById(R.id.ll_add_location);
         mIvLocation = (ImageView) findViewById(R.id.iv_location);
         mTvLocationError = (TextView) findViewById(R.id.tv_location_error);
-        mLlPhoto = (LinearLayout) findViewById(R.id.ll_add_photo);
+        mAbPhoto = (AttachmentButton) findViewById(R.id.ab_add_photo);
+        //mLlPhoto = (LinearLayout) findViewById(R.id.ll_add_photo);
+        //mIvPhoto = (ImageView) findViewById(R.id.iv_add_photo);
 
         // for required fields: watch for text changes, and if empty, display error
         mEtName.addTextChangedListener(new EmptyErrorTrigger(mTilName));
@@ -112,6 +118,7 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         mSubmitButton = (Button) findViewById(R.id.btn_submit);
         mSubmitButton.setOnClickListener(this);
         setupCategoryPicker();
+        setupPhotoListener();
 
         // initialize problem builder
         mBuilder = new Problem.Builder(this);
@@ -122,6 +129,31 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mPostResponse);
         super.onDestroy();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Attachment button will handle result of camera or file intents, and display image
+        boolean photoCapturedSuccess = mAbPhoto.displayOnActivityResult(requestCode, resultCode, data);
+
+        // If sucess, add attachment to problem.
+       if (photoCapturedSuccess) {
+            Attachment attachment = AttachmentUtils.getPicAsAttachment(mAbPhoto.getAttachmentUrl());
+            mBuilder.addAttachment(attachment);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Attachment button will handle photo permissions requests
+        mAbPhoto.onRequestPermissionResult(requestCode, permissions, grantResults);
+        // Check if this is a storage permission. If so, attempt to start camera.
+//        mAttachmentUrl = AttachmentUtils.onRequestPermissionResult(
+//                this, requestCode, permissions, grantResults);
     }
 
     private void setupCategoryPicker() {
@@ -150,6 +182,25 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
                 }
             }
         });
+    }
+
+    private void setupPhotoListener() {
+       // AttachmentUtils.setupAddAttachmentButton(this, mLlPhoto);
+
+        // Check if phone is equipped with camera
+//        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+//            // If so, trigger camera on click
+//            mLlPhoto.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    // mAttachmentUrl will be used to retrieve the file in displayOnActivityResult
+//                    mAttachmentUrl = AttachmentUtils.dipatchTakePictureIntent(ReportProblemActivity.this);
+//                }
+//            });
+//        } else {
+//            // If not, hide camera icon and label
+//            mLlPhoto.setVisibility(GONE);
+//        }
     }
 
     private void createCategoryPickerDialog(Category[] categories) {
