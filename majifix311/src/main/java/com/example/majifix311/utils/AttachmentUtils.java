@@ -48,10 +48,14 @@ import static android.app.Activity.RESULT_OK;
  * This works to contain the logic involved in taking pictures using the phones camera
  * as well as retrieving files from the phone file system.
  *
- * To take a picture in an Activity, call 'dipatchTakePictureIntent' and be sure to override
- * 'displayOnActivityResult' and 'onRequestPermissionResult'.
+ *      To take a picture in an Activity, call 'dipatchTakePictureIntent' and be sure to override
+ *      'displayOnActivityResult' and 'onRequestPermissionResult'.
  *
- * If a UI component is needed, the AttachmentButton can be used.
+ *      To open the media store, call `dispatchAddFromGalleryIntent` and be sure to override
+ *      'displayOnActivityResult' and 'onRequestPermissionResult'.
+ *
+ * If a UI component is needed that allows user to choose, the AttachmentButton can be used.
+ *
  *
  * For more information, take a look at:
  *  https://developer.android.com/guide/topics/media/camera.html#intent-image
@@ -71,10 +75,19 @@ public class AttachmentUtils {
     private static final int REQUEST_EXTERNAL_STORAGE_PERMISSION = 3;
 
     private static final int MAX_SIZE = 1024;
-    public static final int DEFAULT_JPEG_COMPRESSION_QUALITY = 70;
+    private static final int DEFAULT_JPEG_COMPRESSION_QUALITY = 70;
 
-    public static boolean phoneHasCamera(PackageManager packageManager) {
+    private static boolean phoneHasCamera(PackageManager packageManager) {
         return packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+    }
+
+    /**
+     * CHOOSE FROM GALLERY: Step 1 -> Send Intent. Url will be in activity result.
+     */
+    public static void dispatchAddFromGalleryIntent(Activity activity) {
+        Intent mediaStoreIntent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        activity.startActivityForResult(mediaStoreIntent, REQUEST_BROWSE_MEDIA_STORE);
     }
 
     /**
@@ -87,12 +100,6 @@ public class AttachmentUtils {
             // This intent will return a bitmap in displayOnActivityResult
             activity.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
-    }
-
-    public static void dispatchAddFromGalleryIntent(Activity activity) {
-        Intent mediaStoreIntent = new Intent(Intent.ACTION_PICK,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        activity.startActivityForResult(mediaStoreIntent, REQUEST_BROWSE_MEDIA_STORE);
     }
 
     /**
@@ -145,9 +152,10 @@ public class AttachmentUtils {
     }
 
     /**
-     * TAKE PICTURE: Step 2 (OPTION B) -> This should be called in displayOnActivityResult.
-     * This method will handle both the case where the image is saved in a file, and a simple
-     * thumbnail sent in the intent. It returns true when bitmap was found successfully.
+     * TAKE PICTURE | CHOOSE FROM GALLERY: Step 2 (OPTION B) -> This should be called in
+     * displayOnActivityResult. This method will handle both the case where the image is saved in
+     * a file, and a simple thumbnail sent in the intent. It returns true when bitmap was found
+     * successfully.
      */
     public static boolean setThumbnailFromActivityResult(ImageView imageView, String url,
                                                          int requestCode, int resultCode, Intent data) {
@@ -228,6 +236,7 @@ public class AttachmentUtils {
         return true;
     }
 
+    /** This is the format stored in the server */
     private static String getContentAsBase64String(String url) {
         // Get scaled bitmap
         Bitmap bitmap = getScaledBitmap(url, MAX_SIZE, MAX_SIZE);
@@ -250,6 +259,7 @@ public class AttachmentUtils {
         return type;
     }
 
+    /** This helps avoid OOM errors, by loading a bitmap already sized for the imageview */
     private static Bitmap getScaledBitmap(String uri, int maxW, int maxH) {
         // Get dimens of saved bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();

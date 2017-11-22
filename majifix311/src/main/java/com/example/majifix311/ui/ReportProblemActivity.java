@@ -122,8 +122,6 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         mIvLocation = (ImageView) findViewById(R.id.iv_location);
         mTvLocationError = (TextView) findViewById(R.id.tv_location_error);
         mAbPhoto = (AttachmentButton) findViewById(R.id.ab_add_photo);
-        //mLlPhoto = (LinearLayout) findViewById(R.id.ll_add_photo);
-        //mIvPhoto = (ImageView) findViewById(R.id.iv_add_photo);
 
         // for required fields: watch for text changes, and if empty, display error
         mEtName.addTextChangedListener(new EmptyErrorTrigger(mTilName));
@@ -136,7 +134,6 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         mSubmitButton = (Button) findViewById(R.id.btn_submit);
         mSubmitButton.setOnClickListener(this);
         setupCategoryPicker();
-        setupPhotoListener();
 
         // start location tracker to get current GPS location
         mLocationTracker = new LocationTracker(this);
@@ -173,9 +170,6 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         }
         // Attachment button will handle photo permissions requests
         mAbPhoto.onRequestPermissionResult(requestCode, permissions, grantResults);
-        // Check if this is a storage permission. If so, attempt to start camera.
-//        mAttachmentUrl = AttachmentUtils.onRequestPermissionResult(
-//                this, requestCode, permissions, grantResults);
     }
 
     @Override
@@ -211,25 +205,6 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
                 }
             }
         });
-    }
-
-    private void setupPhotoListener() {
-       // AttachmentUtils.setupAddAttachmentButton(this, mLlPhoto);
-
-        // Check if phone is equipped with camera
-//        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-//            // If so, trigger camera on click
-//            mLlPhoto.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    // mAttachmentUrl will be used to retrieve the file in displayOnActivityResult
-//                    mAttachmentUrl = AttachmentUtils.dipatchTakePictureIntent(ReportProblemActivity.this);
-//                }
-//            });
-//        } else {
-//            // If not, hide camera icon and label
-//            mLlPhoto.setVisibility(GONE);
-//        }
     }
 
     private void setupLocationPicker() {
