@@ -111,31 +111,7 @@
             android:id="@+id/ab_add_photo"
             android:layout_height="wrap_content"
             android:layout_width="0dp"
-            android:layout_weight="1"
-            app:layout="@layout/view_add_attachment"/>
-
-        <!--<LinearLayout-->
-            <!--android:id="@+id/ll_add_photo"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_weight="1"-->
-            <!--android:orientation="vertical"-->
-            <!--android:layout_gravity="center"-->
-            <!--android:gravity="center">-->
-
-            <!--<ImageView-->
-                <!--android:id="@+id/iv_add_photo"-->
-                <!--android:src="@drawable/ic_add_photo_black"-->
-                <!--android:contentDescription="@string/content_desc_photo"-->
-                <!--android:layout_width="@dimen/form_icon"-->
-                <!--android:layout_height="@dimen/form_icon" />-->
-
-            <!--<TextView-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="@string/hint_photo"/>-->
-
-        <!--</LinearLayout>-->
+            android:layout_weight="1" />
 
     </LinearLayout>
 
