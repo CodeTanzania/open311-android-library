@@ -28,7 +28,7 @@ public class Party implements Serializable {
      */
     @Expose
     @SerializedName("_id")
-    private String _id;
+    private String objectId;
 
 
     /**
@@ -152,11 +152,11 @@ public class Party implements Serializable {
     }
 
     public String getObjectId() {
-        return _id;
+        return objectId;
     }
 
     public void setObjectId(String _id) {
-        this._id = _id;
+        this.objectId = _id;
     }
 
     public String getJurisdiction() {
@@ -246,7 +246,8 @@ public class Party implements Serializable {
 
         Party party = (Party) o;
 
-        if (_id != null ? !_id.equals(party._id) : party._id != null) return false;
+        if (objectId != null ? !objectId.equals(party.objectId) : party.objectId != null)
+            return false;
         if (name != null ? !name.equals(party.name) : party.name != null) return false;
         if (email != null ? !email.equals(party.email) : party.email != null) return false;
         return phone != null ? phone.equals(party.phone) : party.phone == null;
@@ -254,7 +255,7 @@ public class Party implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = _id != null ? _id.hashCode() : 0;
+        int result = objectId != null ? objectId.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (email != null ? email.hashCode() : 0);
         result = 31 * result + (phone != null ? phone.hashCode() : 0);
