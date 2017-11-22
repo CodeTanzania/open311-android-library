@@ -287,7 +287,6 @@ public class Problem implements Parcelable {
         }
 
         public Problem build() {
-            //TODO add back the validation when location is added
 //            return new Problem(tempUsername, tempPhone, tempCategory,
 //                    tempLocation, tempAddress, tempDescription);
             return validate() ? new Problem(tempUsername, tempPhone, tempEmail, tempAccount,

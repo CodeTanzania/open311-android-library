@@ -24,15 +24,18 @@ import com.example.majifix311.utils.AttachmentUtils;
  * This is a drag and drop element that will, when clicked, show a dialog with options to either
  * start a camera or select from gallery.
  *
- * To have the view automatically display the user chosen picture, call the attachment button
- * in `displayOnActivityResult` and in `onRequestPermissionResult`.
+ * To have the view handle the intent correctly, please call `button.displayOnActivityResult()`
+ * and `button.onRequestPermissionResult()` in the Activity lifecycle methods. This will ensure
+ * that the AttachmentUrl is properly set, and the thumbnail is properly displayed in the
+ * 'mPreview' ImageView.
+ *
+ * Currently, it is possible to customize the layout used, via xml with `app:ab_layout`.
+ * To ensure the preview works as expected, also be sure to also provide `app:ab_preview_id`,
+ * or use the same id as used by the default layout (`R.id.iv_add_photo`).
+ *
  */
 
 public class AttachmentButton extends LinearLayout {
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int REQUEST_BROWSE_MEDIA_STORE = 2;
-    private static final int REQUEST_EXTERNAL_STORAGE_PERMISSION = 3;
-
     private int mLayoutRes;
     private int mPreviewImageViewId;
 
@@ -66,6 +69,24 @@ public class AttachmentButton extends LinearLayout {
         } finally {
             a.recycle();
         }
+    }
+
+    public String getAttachmentUrl() {
+        return mPendingImageUrl;
+    }
+
+    public void setAttachmentUrl(String attachmentUrl) {
+        mPendingImageUrl = attachmentUrl;
+    }
+
+    public boolean displayOnActivityResult(int requestCode, int resultCode, Intent data) {
+        return AttachmentUtils.setThumbnailFromActivityResult(mPreview, mPendingImageUrl,
+                                                       requestCode, resultCode, data);
+    }
+
+    public void onRequestPermissionResult(int requestCode, String permissions[], int[] grantResults) {
+        mPendingImageUrl = AttachmentUtils.onRequestPermissionResult(
+                                    getActivity(), requestCode, permissions, grantResults);
     }
 
     private void init() {
@@ -107,32 +128,6 @@ public class AttachmentButton extends LinearLayout {
                 popup.show();
             }
         });
-    }
-
-    public String getAttachmentUrl() {
-        return mPendingImageUrl;
-    }
-
-    public void setAttachmentUrl(String attachmentUrl) {
-        mPendingImageUrl = attachmentUrl;
-    }
-
-    public ImageView getPreviewImageView() {
-        return mPreview;
-    }
-
-    public void setPreviewImageView(ImageView imageView) {
-        mPreview = imageView;
-    }
-
-    public boolean displayOnActivityResult(int requestCode, int resultCode, Intent data) {
-        return AttachmentUtils.setThumbnailFromActivityResult(mPreview, mPendingImageUrl,
-                                                       requestCode, resultCode, data);
-    }
-
-    public void onRequestPermissionResult(int requestCode, String permissions[], int[] grantResults) {
-        mPendingImageUrl = AttachmentUtils.onRequestPermissionResult(
-                                    getActivity(), requestCode, permissions, grantResults);
     }
 
     private Activity getActivity() {
