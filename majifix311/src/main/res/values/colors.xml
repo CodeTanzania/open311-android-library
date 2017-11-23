@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="accent">#3A8BCA</color>
+    <color name="secondary">#D5EFD4</color>
 
     <color name="error">#cc0000</color>
     <color name="separator">#999999</color>
 
     <color name="open">@color/accent</color>
     <color name="resolved">#3CCA68</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
 
 </resources>

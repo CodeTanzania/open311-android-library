@@ -138,9 +138,9 @@ class MajiFixAPI {
 
     private String getAuthToken() {
         //TODO obfuscate token
-        String authToken = "Bearer "+ BuildConfig.APP_TOKEN;
+        String authToken = "Bearer "+ BuildConfig.MAJIFIX_API_TOKEN;
         System.out.println("Auth token: "+authToken);
-        return "Bearer "+ BuildConfig.APP_TOKEN;
+        return "Bearer "+ BuildConfig.MAJIFIX_API_TOKEN;
     }
 
     private interface MajiFixRetrofitApi {
