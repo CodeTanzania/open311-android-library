@@ -2,7 +2,10 @@ package com.example.majifix311.utils;
 
 import android.content.res.Resources;
 import android.location.Location;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.example.majifix311.BuildConfig;
 import com.example.majifix311.R;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
@@ -32,7 +35,14 @@ public class MapUtils {
                     coordinateFormat.format(location.getLongitude()));
     }
 
-//    public static void getStaticMap(Location location) {
-//        String url = "https://api.mapbox.com/v4/mapbox.streets/pin-s-marker+285A98(39.2775, -6.8194)/39.2775,-6.8194,19/600x300@2x.png?access_token=pk.eyJ1Ijoia3J0b25nYSIsImEiOiJjajV2ZzAzcDMwMXhlMnFwNGNvZXBucDFsIn0.BxafRKx6aBYMFC-R8x_xkw"
-//    }
+    public static void setStaticMap(ImageView imageView, Location location) {
+        String url = "https://api.mapbox.com/v4/mapbox.streets/" +
+                "pin-m-circle+285A98("+location.getLongitude()+","+location.getLatitude()+")/" +
+                "auto/" +
+                imageView.getWidth() +"x"+ imageView.getHeight() +
+                "@2x.png?" +
+                "access_token="+ BuildConfig.MAPBOX_TOKEN;
+
+        Glide.with(imageView.getContext()).load(url).into(imageView);
+    }
 }

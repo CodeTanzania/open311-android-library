@@ -2,6 +2,9 @@
     <string name="app_name" tools:override="true">majifix311</string>
     <string name="mapbox_style" translatable="false">mapbox://styles/mapbox/streets-v10</string>
 
+    <!--errors-->
+    <string name="network_error">Please check your internet connection and try again</string>
+
     <!--report issue form-->
     <string name="title_report">Report</string>
     <string name="hint_name">Full name</string>
@@ -30,9 +33,9 @@
     <string name="label_location_selector">Location of Problem:</string>
     <string name="use_location">Use Location</string>
     <string name="change_address">Change Address</string>
-    <string name="location_permission_dialog_title">Location Permission Needed</string>
-    <string name="location_permission_dialog_description">Without location, DAWASCO will be unable to help you. Please share your location to submit an issue.</string>
-    <string name="location_permission_denied">DAWASCO needs a location to find the problem. GPS is required. Enable location and try again.</string>
+    <string name="location_permission_dialog_title">GPS Point is necessary to help DAWASCO find the problem.</string>
+    <string name="location_permission_dialog_description">Please allow the app to enable GPS.</string>
+    <string name="location_permission_denied">You must enable GPS to submit location.</string>
     <string name="location_not_available">Location Not Available</string>
     <string name="invalid_lat_long_used">Invalid longitude or latitude</string>
     <string name="no_address_found">No address found</string>

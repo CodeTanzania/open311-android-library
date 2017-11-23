@@ -14,7 +14,9 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        vectorDrawables.useSupportLibrary = true
+        vectorDrawables {
+            useSupportLibrary = true
+        }
 
         buildConfigField("String", "END_POINT", "\"http://dawasco.herokuapp.com\"")
         buildConfigField("String", "MAJIFIX_API_TOKEN", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU5ZTQ0OWQzODI0NjEwMDAwNGYzNDgzMSIsImlhdCI6MTUwODEzMzMzMSwiZXhwIjozMzA2NTczMzMzMSwiYXVkIjoib3BlbjMxMSJ9.3-a02oah-lmHFdqw1wMkbxIVa2qdA_D7ZTo0bGQQ_zE\"")
@@ -54,11 +56,13 @@ dependencies {
     compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
 
     // location
-//    compile 'com.google.android.gms:play-services:11.2.2'
-//    compile 'com.google.android.gms:play-services:10.0.0' // 10.2 removed map and location support for api 11
     compile 'com.google.android.gms:play-services-location:11.6.0'
     compile 'com.google.android.gms:play-services-maps:11.6.0'
     compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.1.2@aar') { transitive=true }
     compile('com.mapbox.mapboxsdk:mapbox-android-services:2.2.0@aar') { transitive=true }
     compile 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.1.0'
+
+    // images
+    compile 'com.github.bumptech.glide:glide:4.3.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
 }

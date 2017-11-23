@@ -125,6 +125,9 @@ public abstract class MapboxBaseFragment extends DialogFragment implements OnMap
     }
 
     protected void updateCamera() {
+        if (mMapboxMap == null) {
+            return;
+        }
         mMapView.setCameraDistance(10);
         CameraPosition position;
         if (mLocationFoundPreviously) {
@@ -147,12 +150,18 @@ public abstract class MapboxBaseFragment extends DialogFragment implements OnMap
     }
 
     protected void addMarker(LatLng location) {
+        if (location == null) {
+            return;
+        }
         mMarker = new MarkerOptions()
                 .position(location);
         mMapboxMap.addMarker(mMarker);
     }
 
     protected void addMarker(LatLng location, Integer titleResId, Integer snippetResId) {
+        if (location == null) {
+            return;
+        }
         mMarker = new MarkerOptions()
                 .position(location)
                 .title(getString(titleResId))
