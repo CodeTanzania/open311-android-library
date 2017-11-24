@@ -79,15 +79,24 @@ public class ProblemListFragment extends Fragment implements ProblemListAdapter.
         ReportService.fetchProblems(getContext(),"255714095061");
     }
 
+    @Override
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(getContext())
+                .unregisterReceiver(mMyReportedProblemsReceived);
+        super.onDestroy();
+    }
+
     private void setupRecyclerView() {
-        mAdapter = new ProblemListAdapter(mProblems, this);
-        rvProblems.setAdapter(mAdapter);
-        rvProblems.setLayoutManager(
-                new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-        rvProblems.addItemDecoration(
-                new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
-        rvProblems.setHasFixedSize(true); // layout dimens of each item will always be consistent
-        rvProblems.setNestedScrollingEnabled(true);
+        if (getActivity() != null && isAdded()) {
+            mAdapter = new ProblemListAdapter(mProblems, this);
+            rvProblems.setAdapter(mAdapter);
+            rvProblems.setLayoutManager(
+                    new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+            rvProblems.addItemDecoration(
+                    new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
+            rvProblems.setHasFixedSize(true); // layout dimens of each item will always be consistent
+            rvProblems.setNestedScrollingEnabled(true);
+        }
     }
 
     @Override
