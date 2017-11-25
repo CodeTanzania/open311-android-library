@@ -3,6 +3,7 @@ package com.example.majifix311.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.example.majifix311.api.models.ApiServiceGroup;
 import com.example.majifix311.models.Category;
@@ -31,6 +32,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "MajiFix.db";
     //private BriteDatabase mDatabase;
+    private static final String TAG = "DatabaseHelper";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -90,6 +92,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             @Override
             public ArrayList<Problem> call() throws Exception {
                 ProblemContract.writeProblems(DatabaseHelper.this, problems);
+                Log.d(TAG, "Database written on thread" + Thread.currentThread());
                 return ProblemContract.readProblems(DatabaseHelper.this);
             }
         });
@@ -113,16 +116,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    private void readProblemsAndTrigger(SingleEmitter<ArrayList<Problem>> e) throws Exception {
-        ArrayList<Problem> proof = ProblemContract.readProblems(DatabaseHelper.this);
-        e.onSuccess(proof);
-    }
-
     public Single<ArrayList<Problem>> retrieveMyReportedProblems() {
-        return Single.create(new SingleOnSubscribe<ArrayList<Problem>>(){
+        return Single.fromCallable(new Callable<ArrayList<Problem>>() {
             @Override
-            public void subscribe(SingleEmitter<ArrayList<Problem>> e) throws Exception {
-                readProblemsAndTrigger(e);
+            public ArrayList<Problem> call() throws Exception {
+                Log.d(TAG, "Database pure read on thread" + Thread.currentThread());
+                return ProblemContract.readProblems(DatabaseHelper.this);
             }
         });
     }
