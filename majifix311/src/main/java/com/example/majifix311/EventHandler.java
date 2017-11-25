@@ -51,7 +51,7 @@ public class EventHandler {
     }
 
     public static void retrievedMyRequests(Context context, ArrayList<Problem> problems){
-        System.out.println("Received requests from server");
+        System.out.println("Received requests from indeterminate source");
 
         Intent resultIntent = new Intent();
         resultIntent.setAction(BROADCAST_MY_PROBLEMS_FETCHED);
@@ -66,7 +66,7 @@ public class EventHandler {
         Intent resultIntent = new Intent();
         resultIntent.setAction(BROADCAST_MY_PROBLEMS_FETCHED);
         resultIntent.putExtra(IS_SUCCESS, false);
-        resultIntent.putExtra(REQUEST_LIST, error);
+        resultIntent.putExtra(ERROR_INTENT, error);
         LocalBroadcastManager.getInstance(context).sendBroadcast(resultIntent);
     }
 
