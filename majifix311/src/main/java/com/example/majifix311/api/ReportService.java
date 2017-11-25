@@ -7,30 +7,20 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.Pair;
 
 import com.example.majifix311.EventHandler;
-import com.example.majifix311.api.models.ApiServiceGroup;
-import com.example.majifix311.api.models.ApiServiceRequestGet;
-import com.example.majifix311.api.models.ApiServiceRequestGetMany;
 import com.example.majifix311.db.DatabaseHelper;
 import com.example.majifix311.models.Problem;
-import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
-import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleObserver;
-import io.reactivex.SingleOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
@@ -112,91 +102,61 @@ public class ReportService extends Service {
                 .subscribeOn(Schedulers.io())
                 .delay(10, TimeUnit.SECONDS);
 
-        final Observable<ArrayList<Problem>> realDB = db.retrieveMyReportedProblems().toObservable();
+        final Observable<ArrayList<Problem>> realDB =
+                db.retrieveMyReportedProblems().subscribeOn(Schedulers.io()).toObservable();
 
-        Function<Observable<ArrayList<Problem>>, ObservableSource<ArrayList<Problem>>> merger =
-                new Function<Observable<ArrayList<Problem>>, ObservableSource<ArrayList<Problem>>>() {
+
+        Function<
+                Observable<Pair<ArrayList<Problem>, Boolean>>,
+                ObservableSource<Pair<ArrayList<Problem>, Boolean>>
+                > merger =
+                new Function<
+                        Observable<Pair<ArrayList<Problem>, Boolean>>,
+                        ObservableSource<Pair<ArrayList<Problem>, Boolean>>
+                        >() {
                     @Override
-                    public ObservableSource<ArrayList<Problem>> apply(Observable<ArrayList<Problem>> observable) throws Exception {
-                        return Observable.mergeDelayError(observable, realDB.takeUntil(observable));
+                    public ObservableSource<Pair<ArrayList<Problem>, Boolean>> apply(
+                            Observable<Pair<ArrayList<Problem>, Boolean>> network) throws Exception {
+                        return Observable.mergeDelayError(
+                                network,
+                                realDB.takeUntil(network).map(preliminizer(true))
+                        );
                     }
                 };
 
         majiFixAPI.getProblemsByPhoneNumber(number)
                 .subscribeOn(Schedulers.io())
-                //.flatMapObservable(new Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>>() {
-                //    @Override
-                //    public ObservableSource<ArrayList<Problem>> apply(ArrayList<Problem> problems) throws Exception {
-                //        return db.saveMyReportedProblems(problems).toObservable();
-                //    }
-                //})
-                .toObservable()
+                .flatMapObservable(new Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>>() {
+                    @Override
+                    public ObservableSource<ArrayList<Problem>> apply(ArrayList<Problem> problems) throws Exception {
+                        return db.saveMyReportedProblems(problems).toObservable();
+                    }
+                })
+                .map(preliminizer(false))
                 .publish(merger)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        new Consumer<ArrayList<Problem>>() {
+                        new Consumer<Pair<ArrayList<Problem>,Boolean>>() {
                             @Override
-                            public void accept(ArrayList<Problem> problems) throws Exception {
-                                EventHandler.retrievedMyRequests(getApplicationContext(), problems);
+                            public void accept(Pair<ArrayList<Problem>,Boolean> problems) throws Exception {
+                                EventHandler.retrievedMyRequests(
+                                        getApplicationContext(),
+                                        problems.first,
+                                        problems.second
+                                );
                             }
                         },
                         errorConsumer
                 );
+    }
 
-
-/*        final SingleObserver<ArrayList<Problem>> observer = new SingleObserver<ArrayList<Problem>>() {
+    private Function<ArrayList<Problem>, Pair<ArrayList<Problem>, Boolean>> preliminizer(final boolean isPreliminary) {
+        return new Function<ArrayList<Problem>, Pair<ArrayList<Problem>, Boolean>>() {
             @Override
-            public void onSubscribe(Disposable d) {
-            }
-
-            @Override
-            public void onSuccess(ArrayList<Problem> problems) {
-                //db.saveMyReportedProblems();
-                EventHandler.retrievedMyRequests(getApplicationContext(), problems);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                EventHandler.errorRetrievingRequests(getApplicationContext(), e);
+            public Pair<ArrayList<Problem>, Boolean> apply(ArrayList<Problem> problems) throws Exception {
+                return new Pair<>(problems, isPreliminary);
             }
         };
-
-        db.retrieveMyReportedProblems()
-                .subscribeOn(Schedulers.io())
-
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<ArrayList<Problem>>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {}
-
-                    @Override
-                    public void onNext(ArrayList<Problem> problems) {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {}
-                })
-                new Consumer<ArrayList<Problem>>() {
-                    @Override
-                    public void accept(ArrayList<Problem> problems) throws Exception {
-                        EventHandler.retrievedMyRequests(getApplicationContext(), problems);
-                    }
-                },
-                new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        observer.onError(throwable);
-                    }
-                },
-        true);
-
-        majiFixAPI.getProblemsByPhoneNumber(observer, number);*/
     }
 
     protected Consumer<Problem> onNext() {

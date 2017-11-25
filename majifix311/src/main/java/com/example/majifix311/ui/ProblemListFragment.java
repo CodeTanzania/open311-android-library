@@ -14,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.majifix311.EventHandler;
@@ -33,6 +34,7 @@ public class ProblemListFragment extends Fragment implements ProblemListAdapter.
     private final static String PROBLEMS_INTENT = "problems";
 
     private RecyclerView rvProblems;
+    private ProgressBar mProgress;
     private List<Problem> mProblems;
     private ProblemListAdapter mAdapter;
 
@@ -51,7 +53,13 @@ public class ProblemListFragment extends Fragment implements ProblemListAdapter.
         public void onReceive(Context context, Intent intent) {
             if (intent.getBooleanExtra(EventHandler.IS_SUCCESS, false)) {
                 mProblems = intent.getParcelableArrayListExtra(EventHandler.REQUEST_LIST);
-                System.out.println("Problems Received! "+mProblems.size());
+
+                boolean isPreliminary = intent.getBooleanExtra(EventHandler.IS_PRELIMINARY_DATA,false);
+                if(!isPreliminary){
+                    mProgress.setVisibility(View.GONE);
+                }
+                System.out.println("Problems Received! "+mProblems.size() +
+                        (isPreliminary ? " cached" : " fetched") + " entries");
                 setupRecyclerView();
             } else {
                 // TODO Implement error logic
@@ -70,13 +78,14 @@ public class ProblemListFragment extends Fragment implements ProblemListAdapter.
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         rvProblems = (RecyclerView) view.findViewById(R.id.rv_problem_list);
-
+        mProgress = (ProgressBar) view.findViewById(R.id.progress_problem_list);
 
         // TODO Broadcast management should be handled by activity
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mMyReportedProblemsReceived,
                 new IntentFilter(EventHandler.BROADCAST_MY_PROBLEMS_FETCHED));
 
         ReportService.fetchProblems(getContext(),"255714095061");
+        mProgress.setVisibility(View.VISIBLE);
     }
 
     private void setupRecyclerView() {
