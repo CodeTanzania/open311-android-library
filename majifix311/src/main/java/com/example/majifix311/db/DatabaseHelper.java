@@ -5,30 +5,37 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.majifix311.api.models.ApiServiceGroup;
-import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
 import io.reactivex.functions.Consumer;
 
 /**
  * This is used to manage database tables.
- *
+ * <p>
  * Thanks to: http://beust.com/weblog/2015/06/01/easy-sqlite-on-android-with-rxjava/
  */
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "MajiFix.db";
+    //private BriteDatabase mDatabase;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        //SqlBrite sqlBrite = new SqlBrite.Builder().build();
+        // mDatabase = sqlBrite.wrapDatabaseHelper(this, Schedulers.io());
     }
 
     @Override
@@ -78,18 +85,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         triggerTask(categoriesTask, onNext, onError, async);
     }
 
-    public void saveMyReportedProblems(final List<ApiServiceRequestGet> serverResponse, Consumer<List<Problem>> onNext, Consumer<Throwable> onError, boolean async) {
-        Observable<List<Problem>> problemTask = Observable.create(new ObservableOnSubscribe<List<Problem>>() {
+    public Single<ArrayList<Problem>> saveMyReportedProblems(final List<Problem> problems) {
+        return Single.fromCallable(new Callable<ArrayList<Problem>>() {
             @Override
-            public void subscribe(ObservableEmitter<List<Problem>> e) throws Exception {
-                ProblemContract.writeProblems(DatabaseHelper.this, serverResponse);
-                List<Problem> proof = ProblemContract.readProblems(DatabaseHelper.this);
-                e.onNext(proof);
-                e.onComplete();
+            public ArrayList<Problem> call() throws Exception {
+                ProblemContract.writeProblems(DatabaseHelper.this, problems);
+                return ProblemContract.readProblems(DatabaseHelper.this);
             }
         });
 
-        triggerTask(problemTask, onNext, onError, async);
+                /*new SingleOnSubscribe<ArrayList<Problem>>(){
+            @Override
+            public void subscribe(SingleEmitter<ArrayList<Problem>> e) throws Exception {
+                ProblemContract.writeProblems(DatabaseHelper.this, problems);
+                //readProblemsAndTrigger(e);
+                ArrayList<Problem> proof = ProblemContract.readProblems(DatabaseHelper.this);
+                e.onSuccess(proof);
+            }
+        }*/
     }
 
     private void triggerTask(Observable<?> task, Consumer onNext, Consumer<Throwable> onError, boolean async) {
@@ -100,4 +113,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    private void readProblemsAndTrigger(SingleEmitter<ArrayList<Problem>> e) throws Exception {
+        ArrayList<Problem> proof = ProblemContract.readProblems(DatabaseHelper.this);
+        e.onSuccess(proof);
+    }
+
+    public Single<ArrayList<Problem>> retrieveMyReportedProblems() {
+        return Single.create(new SingleOnSubscribe<ArrayList<Problem>>(){
+            @Override
+            public void subscribe(SingleEmitter<ArrayList<Problem>> e) throws Exception {
+                readProblemsAndTrigger(e);
+            }
+        });
+    }
+
+    //@Override
+    //public void onConfigure(SQLiteDatabase db) {
+    //    super.onConfigure(db);
+    //    db.enableWriteAheadLogging();
+    //}
 }

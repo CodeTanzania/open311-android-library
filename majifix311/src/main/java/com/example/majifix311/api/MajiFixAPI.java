@@ -102,20 +102,15 @@ class MajiFixAPI {
                 .subscribe(onNext, onError);
     }
 
-    void getProblemsByPhoneNumber(SingleObserver<ArrayList<Problem>> observer, String phoneNumber){
+    Single<ArrayList<Problem>> getProblemsByPhoneNumber(String phoneNumber){
+        Single<ApiServiceRequestGetMany> call = mApi.getReportsWPhoneNo(getAuthToken(),
+                "{\"reporter.phone\":\"" + phoneNumber + "\"}");
 
-        String test = "{\"reporter.phone\":\"" + phoneNumber + "\"}";
-        Log.d(TAG, "getProblemsByPhoneNumber: " + test);
-        Single<ApiServiceRequestGetMany> call = mApi.getReportsWPhoneNo(getAuthToken(),test
-                );
-
-        ArrayList<Problem> problems = new ArrayList<>();
-
-        call.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        return call
                 .flatMapObservable(new Function<ApiServiceRequestGetMany,Observable<ApiServiceRequestGet>>(){
                     @Override
                     public Observable<ApiServiceRequestGet> apply(ApiServiceRequestGetMany getMany) throws Exception {
+                        Log.d(TAG, "flatMapping on " + Thread.currentThread());
                         return Observable.fromIterable(getMany.getServicerequests());
                     }
                 })
@@ -123,17 +118,16 @@ class MajiFixAPI {
                     @Override
                     public Problem apply(ApiServiceRequestGet apiServiceRequest) throws Exception {
                         // convert the server object into something the app can use
-                        System.out.println("Conversion taking place! "+apiServiceRequest);
+                        //System.out.println("Conversion taking place! "+apiServiceRequest);
                         return ApiModelConverter.convert(apiServiceRequest);
                     }
                 })
-                .collectInto(problems, new BiConsumer<List<Problem>, Problem>() {
+                .collectInto(new ArrayList<Problem>(), new BiConsumer<List<Problem>, Problem>() {
                     @Override
                     public void accept(List<Problem> list, Problem problem) throws Exception {
                         list.add(problem);
                     }
-                })
-                .subscribe(observer);
+                });
     }
 
     private String getAuthToken() {

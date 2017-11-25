@@ -17,7 +17,11 @@ import org.robolectric.annotation.Config;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observer;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Predicate;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.subscribers.TestSubscriber;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -67,12 +71,22 @@ public class DatabaseHelperTest {
 
     @Test
     public void canWriteProblemsToDatabase() {
-        List<ApiServiceRequestGet> serverResponses = new ArrayList<>(1);
-        ApiServiceRequestGet mockResponse = ProblemTest.buildMockServerResponse();
-        serverResponses.add(mockResponse);
+        final ArrayList<Problem> problems = new ArrayList<>(1);
+        Problem mockProblem = ProblemTest.buildMockProblem(new ProblemTest());
+        problems.add(mockProblem);
 
-        mHelper.saveMyReportedProblems(
-                serverResponses, onProblemsSavedInDatabase(), onError(), false);
+        //TestObserver<ArrayList<Problem>> tester = new TestObserver<>();
+
+        mHelper.saveMyReportedProblems(problems)
+                .subscribe(new Consumer<ArrayList<Problem>>() {
+                    @Override
+                    public void accept(ArrayList<Problem> problems) throws Exception {
+                        mProblemResult = problems;
+                    }
+                });
+
+        //mHelper.saveMyReportedProblems(
+        //        serverResponses, onProblemsSavedInDatabase(), onError(), false);
 
         assertNotNull(mProblemResult);
         ProblemTest.assertGetMatchesMock(mProblemResult.get(0));
