@@ -16,11 +16,12 @@
             android:name=".ui.ReportProblemActivity"
             android:label=""
             android:launchMode="singleTask" />
-
         <activity
             android:name=".ui.ProblemListActivity"
             android:label=""
             android:launchMode="singleTask" />
+        <activity android:name=".ui.auth.SecureActivity" />
+        <activity android:name=".ui.auth.AuthActivity"></activity>
     </application>
 
 </manifest>
