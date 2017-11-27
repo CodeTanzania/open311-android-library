@@ -32,7 +32,7 @@ public class SecureActivity extends AppCompatActivity {
         Boolean isTokenExpired = auth.isTokenExpired();
         if (isTokenExpired) {
             finish();
-            Intent intent = new Intent(SecureActivity.this, AuthActivity.class);
+            Intent intent = new Intent(SecureActivity.this, SigninActivity.class);
             startActivity(intent);
         }
 

@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.example.majifix311.R;
 
-public class AuthActivity extends AppCompatActivity {
+public class SigninActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

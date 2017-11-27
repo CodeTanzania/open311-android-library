@@ -21,7 +21,7 @@
             android:label=""
             android:launchMode="singleTask" />
         <activity android:name=".ui.auth.SecureActivity" />
-        <activity android:name=".ui.auth.AuthActivity"></activity>
+        <activity android:name=".ui.auth.SigninActivity"></activity>
     </application>
 
 </manifest>
