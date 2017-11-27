@@ -148,7 +148,32 @@ public class Party implements Serializable {
     @SerializedName("lockedAt")
     private Date lockedAt;
 
+
+    /**
+     * A JWT encode party authorization token.
+     *
+     * @version 0.1.0
+     * @author lally elias <a href="mailto:lallyelias87@gmail.com">lallyelias87@gmail.com</a>
+     * @since 0.1.0
+     */
+    @Expose
+    @SerializedName("token")
+    private String token;
+
     public Party() {
+    }
+
+    public Party(String name, String email, String phone) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+    }
+
+    public Party(String name, String email, String phone, String token) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.token = token;
     }
 
     public String getObjectId() {
@@ -237,6 +262,14 @@ public class Party implements Serializable {
 
     public void setLockedAt(Date lockedAt) {
         this.lockedAt = lockedAt;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     @Override
