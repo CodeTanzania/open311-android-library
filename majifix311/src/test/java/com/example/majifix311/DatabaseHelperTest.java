@@ -89,7 +89,7 @@ public class DatabaseHelperTest {
         //        serverResponses, onProblemsSavedInDatabase(), onError(), false);
 
         assertNotNull(mProblemResult);
-        ProblemTest.assertGetMatchesMock(mProblemResult.get(0));
+        ProblemTest.assertPostMatchesMock(mProblemResult.get(0));
     }
 
     private Consumer<List<Category>> onCategoriesSavedInDatabase() {

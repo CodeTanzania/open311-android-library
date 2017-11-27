@@ -41,16 +41,16 @@ public class EventHandler {
         LocalBroadcastManager.getInstance(context).sendBroadcast(resultIntent);
     }
 
-    public static void sendMyReportedProblemsList(
-            Context context, ArrayList<Problem> problemList) {
-        System.out.println("Sending list of problems: "+problemList.size());
-
-        Intent resultIntent = new Intent();
-        resultIntent.setAction(BROADCAST_MY_REPORTED_RECIEVED);
-        resultIntent.putExtra(IS_SUCCESS, true);
-        resultIntent.putExtra(PROBLEM_INTENT, problemList);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(resultIntent);
-    }
+    //public static void sendMyReportedProblemsList(
+    //        Context context, ArrayList<Problem> problemList) {
+    //    System.out.println("Sending list of problems: "+problemList.size());
+    //
+    //    Intent resultIntent = new Intent();
+    //    resultIntent.setAction(BROADCAST_MY_REPORTED_RECIEVED);
+    //    resultIntent.putExtra(IS_SUCCESS, true);
+    //    resultIntent.putExtra(PROBLEM_INTENT, problemList);
+    //    LocalBroadcastManager.getInstance(context).sendBroadcast(resultIntent);
+    //}
 
     public static void retrievedMyRequests(Context context, ArrayList<Problem> problems, boolean isPreliminary){
         Intent resultIntent = new Intent();

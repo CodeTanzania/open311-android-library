@@ -1,6 +1,7 @@
 package com.example.majifix311.db;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -38,6 +39,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         //SqlBrite sqlBrite = new SqlBrite.Builder().build();
         // mDatabase = sqlBrite.wrapDatabaseHelper(this, Schedulers.io());
+    }
+
+    static String dbGetString(Cursor cursor, String index){
+        return cursor.getString(cursor.getColumnIndexOrThrow(index));
     }
 
     @Override
@@ -96,16 +101,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 return ProblemContract.readProblems(DatabaseHelper.this);
             }
         });
-
-                /*new SingleOnSubscribe<ArrayList<Problem>>(){
-            @Override
-            public void subscribe(SingleEmitter<ArrayList<Problem>> e) throws Exception {
-                ProblemContract.writeProblems(DatabaseHelper.this, problems);
-                //readProblemsAndTrigger(e);
-                ArrayList<Problem> proof = ProblemContract.readProblems(DatabaseHelper.this);
-                e.onSuccess(proof);
-            }
-        }*/
     }
 
     private void triggerTask(Observable<?> task, Consumer onNext, Consumer<Throwable> onError, boolean async) {
@@ -126,9 +121,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         });
     }
 
-    //@Override
-    //public void onConfigure(SQLiteDatabase db) {
-    //    super.onConfigure(db);
-    //    db.enableWriteAheadLogging();
-    //}
+    @Override
+    public void onConfigure(SQLiteDatabase db) {
+        super.onConfigure(db);
+        db.enableWriteAheadLogging();
+    }
 }

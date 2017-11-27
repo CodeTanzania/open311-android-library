@@ -46,7 +46,8 @@ public class ProblemContract {
             Entry.COLUMN_CREATED_AT + " INTEGER," +
             Entry.COLUMN_UPDATED_AT + " INTEGER," +
             Entry.COLUMN_RESOLVED_AT + " INTEGER," +
-            Entry.COLUMN_COMMENT_JSON + " TEXT)";
+            Entry.COLUMN_COMMENT_JSON + " TEXT," +
+            Entry.COLUMN_POSTED + " INTEGER)";
 
     static final String DELETE_PROBLEM_TABLE = "DROP TABLE IF EXISTS " + Entry.TABLE_NAME;
 
@@ -144,7 +145,8 @@ public class ProblemContract {
                 Entry.COLUMN_CREATED_AT,
                 Entry.COLUMN_UPDATED_AT,
                 Entry.COLUMN_RESOLVED_AT,
-                Entry.COLUMN_COMMENT_JSON
+                Entry.COLUMN_COMMENT_JSON,
+                Entry.COLUMN_POSTED
         };
 
         Cursor cursor = db.query(Entry.TABLE_NAME, projection,null,null,null,null,null);
@@ -154,20 +156,20 @@ public class ProblemContract {
             Problem.Builder builder = new Problem.Builder(null);
 
             // ticket id
-            String ticketNumber = dbGetString(cursor, Entry.COLUMN_TICKET_ID);
+            String ticketNumber = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_TICKET_ID);
 
             // reporter info
-            String username = dbGetString(cursor, Entry.COLUMN_REPORTER_NAME);
-            String phone = dbGetString(cursor, Entry.COLUMN_REPORTER_PHONE);
-            String email = dbGetString(cursor, Entry.COLUMN_REPORTER_EMAIL);
-            String accountNumber = dbGetString(cursor, Entry.COLUMN_REPORTER_ACCOUNT);
+            String username = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_REPORTER_NAME);
+            String phone = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_REPORTER_PHONE);
+            String email = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_REPORTER_EMAIL);
+            String accountNumber = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_REPORTER_ACCOUNT);
 
             // category info
-            String categoryName = dbGetString(cursor, Entry.COLUMN_CATEGORY_NAME);
-            String categoryId = dbGetString(cursor, Entry.COLUMN_CATEGORY_ID);
+            String categoryName = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_CATEGORY_NAME);
+            String categoryId = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_CATEGORY_ID);
             int categoryPriority = cursor.getInt(
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_CATEGORY_PRIORITY));
-            String categoryCode = dbGetString(cursor, Entry.COLUMN_CATEGORY_CODE);
+            String categoryCode = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_CATEGORY_CODE);
 
             // location info
             Location location = new Location("");
@@ -176,13 +178,13 @@ public class ProblemContract {
             location.setLongitude(cursor.getDouble(
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_LONGITUDE)));
 
-            String address = dbGetString(cursor, Entry.COLUMN_ADDRESS);
+            String address = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_ADDRESS);
 
             // other
-            String description = dbGetString(cursor, Entry.COLUMN_DESCRIPTION);
+            String description = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_DESCRIPTION);
 
             //TODO Implement attachments
-            String attachmentJson = dbGetString(cursor, Entry.COLUMN_ATTACHMENT_JSON);
+            String attachmentJson = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_ATTACHMENT_JSON);
 
             Type listType = new TypeToken<ArrayList<Attachment>>(){}.getType();
             List<Attachment> attachments = new Gson().fromJson(attachmentJson, listType);
@@ -190,8 +192,8 @@ public class ProblemContract {
             // status
             boolean isOpen = cursor.getInt(
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_STATUS_IS_OPEN)) > 0;
-            String statusName = dbGetString(cursor, Entry.COLUMN_STATUS_NAME);
-            String statusColor = dbGetString(cursor, Entry.COLUMN_STATUS_COLOR);
+            String statusName = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_STATUS_NAME);
+            String statusColor = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_STATUS_COLOR);
 
             // dates
             Calendar createdAt = DateUtils.getCalendarFromDbMills(cursor.getLong(
@@ -219,10 +221,6 @@ public class ProblemContract {
 
         return problems;
     }
-    
-    private static String dbGetString(Cursor cursor, String index){
-        return cursor.getString(cursor.getColumnIndexOrThrow(index));
-    }
 
     static class Entry implements BaseColumns {
         static final String TABLE_NAME = "problems";
@@ -248,8 +246,6 @@ public class ProblemContract {
         static final String COLUMN_UPDATED_AT = "updated_at";
         static final String COLUMN_RESOLVED_AT = "resolved_at";
         static final String COLUMN_COMMENT_JSON = "comment_ids";
-
-        //TODO determine if this line/column is necessary
-        //static final String COLUMN_POSTED = "is_posted";
+        static final String COLUMN_POSTED = "is_posted";
     }
 }

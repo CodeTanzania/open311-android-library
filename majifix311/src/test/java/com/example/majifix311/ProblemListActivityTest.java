@@ -97,7 +97,7 @@ public class ProblemListActivityTest {
         mockProblems.add(partialProblem1);
         mockProblems.add(partialProblem2);
 
-        EventHandler.sendMyReportedProblemsList(RuntimeEnvironment.application, mockProblems);
+        EventHandler.retrievedMyRequests(RuntimeEnvironment.application, mockProblems, false);
     }
 
 }
