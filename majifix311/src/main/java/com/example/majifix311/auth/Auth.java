@@ -17,6 +17,7 @@ import com.google.gson.annotations.SerializedName;
 import java.lang.reflect.Modifier;
 
 import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -42,6 +43,24 @@ public final class Auth {
      * @since 0.1.0
      */
     public static final String AUTH_PARTY = "AUTH_PARTY";
+
+    /**
+     * Exception message thrown when credential for signin are not valid
+     *
+     * @version 0.1.0
+     * @author lally elias <a href="mailto:lallyelias87@gmail.com">lallyelias87@gmail.com</a>
+     * @since 0.1.0
+     */
+    public static final String EXCEPTION_INVALID_CREDENTIAL = "Invalid Credential";
+
+    /**
+     * Exception message thrown when no internet connection
+     *
+     * @version 0.1.0
+     * @author lally elias <a href="mailto:lallyelias87@gmail.com">lallyelias87@gmail.com</a>
+     * @since 0.1.0
+     */
+    public static final String EXCEPTION_NO_NETWORK_CONNECTION = "No Network Connection";
 
     /**
      * Valid application context reference. It only set once during initialization
@@ -164,6 +183,11 @@ public final class Auth {
         return retrofit;
     }
 
+    //use for test only to inject mock api client
+    public void setApi(API api) {
+        this.api = api;
+    }
+
     public Gson getGson() {
         return gson;
     }
@@ -243,22 +267,64 @@ public final class Auth {
         return this.party;
     }
 
-    //TODO provide Rx implementation
-    public synchronized Party signin(String email, String password) {
+
+    /**
+     * Signin party using provided credentials
+     *
+     * @param email
+     * @param password
+     * @version 0.1.0
+     * @author lally elias <a href="mailto:lallyelias87@gmail.com">lallyelias87@gmail.com</a>
+     * @since 0.1.0
+     */
+    public synchronized Observable<Party> signin(String email, String password) {
+
         //initialize credential
         Credential credential = new Credential(email, password);
 
-        //validate credential
-        Boolean isValidCredential = credential.isValid();
-        if (isValidCredential) {
-            //TODO ensure internet connectivity
-            //TODO call API signin
-            //TODO save party to preferences
-            //TODO return party
-            return null;
-        }
+        Observable<Party> party;
 
-        return null;
+        party = Observable
+                .just(credential)
+                .map(new Function<Credential, Credential>() { // validate credential
+                    @Override
+                    public Credential apply(Credential credential) throws Exception {
+
+                        //validate credential
+                        Boolean isValidCredential = credential.isValid();
+                        if (!isValidCredential) {
+                            throw new Exception(EXCEPTION_INVALID_CREDENTIAL);
+                        }
+
+                        return credential;
+                    }
+                })
+                .map(new Function<Credential, Observable<Response>>() {//api signin
+                    @Override
+                    public Observable<Response> apply(Credential credential) throws Exception {
+                        return api.signin(credential);
+                    }
+                })
+                .map(new Function<Observable<Response>, Party>() { //obtain party
+                    @Override
+                    public Party apply(Observable<Response> response) throws Exception {
+                        Response authResponse = response.blockingFirst();
+                        if (authResponse.isSuccess()) {
+                            //obtain signin party
+                            Party party = authResponse.getParty();
+                            party.setToken(authResponse.getToken());
+
+                            //set party
+                            setParty(party);
+
+                            return party;
+                        } else {
+                            throw new Exception(authResponse.getMessage());
+                        }
+                    }
+                });
+
+        return party;
     }
 
     /**
@@ -437,6 +503,10 @@ public final class Auth {
 
         public Boolean getSuccess() {
             return success;
+        }
+
+        public Boolean isSuccess() {
+            return getSuccess();
         }
 
         public void setSuccess(Boolean success) {

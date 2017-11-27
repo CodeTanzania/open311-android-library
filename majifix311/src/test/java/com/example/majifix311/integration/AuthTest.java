@@ -163,6 +163,29 @@ public class AuthTest {
     }
 
     @Test
+    public void testSuccessSignin() {
+
+        final String email = "a@a.test";
+        final String password = "a";
+
+        TestObserver<Party> signInObserver = new TestObserver<Party>();
+
+        Auth auth = Auth.getInstance();
+        auth.setApi(api);
+
+        auth.signin(email, password).subscribe(signInObserver);
+
+        signInObserver.assertNoErrors();
+        signInObserver.assertValueCount(1);
+
+        //assert party
+        Party party = signInObserver.values().get(0);
+        assertNotNull("Should be able to parse response", party);
+        assertNotNull("Should have token", party.getToken());
+
+    }
+
+    @Test
     public void testFailureResponse() throws Exception {
         Auth.Credential credential = new Auth.Credential("a@a.test", "a");
 
@@ -172,6 +195,7 @@ public class AuthTest {
 
         testObserver.assertNoValues();
         testObserver.assertError(IOException.class);
+
     }
 
     //TODO more api test error
