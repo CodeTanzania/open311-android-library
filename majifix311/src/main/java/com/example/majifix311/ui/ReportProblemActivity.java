@@ -134,6 +134,7 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         mSubmitButton = (Button) findViewById(R.id.btn_submit);
         mSubmitButton.setOnClickListener(this);
         setupCategoryPicker();
+        setupLocationPicker();
 
         // start location tracker to get current GPS location
         mLocationTracker = new LocationTracker(this);
