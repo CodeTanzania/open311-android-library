@@ -6,4 +6,3 @@
 /build
 /captures
 .externalNativeBuild
-!/gradle/wrapper/gradle-wrapper.jar
