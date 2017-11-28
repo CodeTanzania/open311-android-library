@@ -22,7 +22,12 @@ public class ShadowViewPager extends ShadowViewGroup {
         ShadowsAdapter shadowsAdapter = Robolectric.getShadowsAdapter();
         shadowsAdapter
                 .getMainLooper()
-                .runPaused(() -> directlyOn(realViewPager, ViewPager.class).setAdapter(adapter));
+                .runPaused(new Runnable() {
+                    @Override
+                    public void run() {
+                        directlyOn(realViewPager, ViewPager.class).setAdapter(adapter);
+                    }
+                });
     }
 
     @Implementation
@@ -30,7 +35,12 @@ public class ShadowViewPager extends ShadowViewGroup {
         ShadowsAdapter shadowsAdapter = Robolectric.getShadowsAdapter();
         shadowsAdapter
                 .getMainLooper()
-                .runPaused(() -> directlyOn(realViewPager, ViewPager.class).setOffscreenPageLimit(limit));
+                .runPaused(new Runnable() {
+                    @Override
+                    public void run() {
+                        directlyOn(realViewPager, ViewPager.class).setOffscreenPageLimit(limit);
+                    }
+                });
     }
 
     @Implementation
