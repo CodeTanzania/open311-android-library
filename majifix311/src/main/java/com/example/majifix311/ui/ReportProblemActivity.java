@@ -2,14 +2,19 @@ package com.example.majifix311.ui;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -21,12 +26,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.majifix311.EventHandler;
+import com.example.majifix311.location.FetchAddressIntentService;
+import com.example.majifix311.location.LocationTracker;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
 import com.example.majifix311.db.DatabaseHelper;
 import com.example.majifix311.utils.EmptyErrorTrigger;
+import com.example.majifix311.utils.KeyboardUtils;
+import com.example.majifix311.utils.MapUtils;
 
 import java.util.List;
 
@@ -36,10 +45,12 @@ import io.reactivex.functions.Consumer;
  * This activity is for submitting problems to a municipal company that uses the majifix system.
  */
 
-public class ReportProblemActivity extends FragmentActivity implements View.OnClickListener,
-        Problem.Builder.InvalidCallbacks, CategoryPickerDialog.OnItemSelected {
+public class ReportProblemActivity extends AppCompatActivity implements View.OnClickListener,
+        Problem.Builder.InvalidCallbacks, CategoryPickerDialog.OnItemSelected, SelectLocationFragment.OnSelectLocation {
+    private static final String SELECT_LOCATION_FRAGMENT_TAG = "select-location-fragment";
+    private static final String SELECT_CATEGORY_FRAGMENT_TAG = "category_dialog";
+
     private Problem.Builder mBuilder;
-    private boolean mIsLocation;
 
     private Category[] mCategories;
     private CategoryPickerDialog mCategoryDialog;
@@ -60,6 +71,8 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     private LinearLayout mLlLocation;
     private ImageView mIvLocation;
     private TextView mTvLocationError;
+    private LocationTracker mLocationTracker;
+
     private LinearLayout mLlPhoto;
 
     private Button mSubmitButton;
@@ -109,9 +122,14 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         mEtDescription.addTextChangedListener(new EmptyErrorTrigger(mTilDescription));
 
         // add click listeners
+        setupCategoryPicker();
+        setupLocationPicker();
         mSubmitButton = (Button) findViewById(R.id.btn_submit);
         mSubmitButton.setOnClickListener(this);
-        setupCategoryPicker();
+
+        // start location tracker to get current GPS location
+        mLocationTracker = new LocationTracker(this);
+        mLocationTracker.start(mAutoLocationListener);
 
         // initialize problem builder
         mBuilder = new Problem.Builder(this);
@@ -119,8 +137,29 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // This ensures that GPS is turned on correctly
+        if (mLocationTracker != null) {
+            mLocationTracker.respondToActivityResult(requestCode, resultCode);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        // This ensures that permission callbacks are handled correctly
+        if (mLocationTracker != null) {
+            mLocationTracker.respondToPermissions(requestCode, grantResults);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
+        // both broadcasts and locationTrackers can cause memory leaks if not properly destroyed
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mPostResponse);
+        if (mLocationTracker != null) {
+            mLocationTracker.onPause();
+        }
         super.onDestroy();
     }
 
@@ -140,10 +179,7 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     // close keyboard if open (for example, when pressing next)
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    if (imm != null) {
-                        imm.hideSoftInputFromWindow(mEtCategory.getWindowToken(), 0);
-                    }
+                    KeyboardUtils.hideSoftInputMethod(ReportProblemActivity.this);
 
                     // start dialog
                     createCategoryPickerDialog(mCategories);
@@ -152,17 +188,23 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         });
     }
 
+    private void setupLocationPicker() {
+        mLlLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // on click, open select location fragment and allow user to choose/alter location
+                SelectLocationFragment fragment = new SelectLocationFragment();
+                fragment.show(getFragmentManager(), SELECT_LOCATION_FRAGMENT_TAG);
+            }
+        });
+    }
+
     private void createCategoryPickerDialog(Category[] categories) {
         if (mCategoryDialog == null) {
-            System.out.println("...Category Dialog was null...");
-            // creates new dialog
             mCategoryDialog = CategoryPickerDialog.newInstance(categories);
-
-            // registers activity to receive input from dialog
             mCategoryDialog.setListener(this);
         }
-        // shows dialog
-        mCategoryDialog.show(getFragmentManager(), "dialog");
+        mCategoryDialog.show(getFragmentManager(), SELECT_CATEGORY_FRAGMENT_TAG);
     }
 
     private void registerForPostUpdates() {
@@ -176,8 +218,6 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         mBuilder.setPhoneNumber(mEtPhone.getText().toString());
         mBuilder.setCategory(mSelectedCategory);
         mBuilder.setAddress(mEtAddress.getText().toString());
-        //TODO: Don't hardcode location
-//        mBuilder.setLocation(new Location(""));
         mBuilder.setDescription(mEtDescription.getText().toString());
         Problem problem = mBuilder.build();
 
@@ -189,9 +229,11 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
     public void setGpsPoint(Location location) {
         if (location == null) {
             updateLocationIcon(true);
+        } else {
+            // show minimap
+            MapUtils.setStaticMap(mIvLocation, location);
         }
         mBuilder.setLocation(location);
-        updateLocationIcon(false);
     }
 
     public void updateLocationIcon(boolean isError) {
@@ -252,9 +294,8 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         return new Consumer<Throwable>() {
             @Override
             public void accept(Throwable error) throws Exception {
-                System.out.println("onError! "+error);
                 Toast.makeText(ReportProblemActivity.this,
-                        "Please check your internet connection and try again", Toast.LENGTH_LONG).show();
+                        R.string.network_error, Toast.LENGTH_LONG).show();
                 ReportProblemActivity.this.finish();
             }
         };
@@ -274,5 +315,68 @@ public class ReportProblemActivity extends FragmentActivity implements View.OnCl
         }
         mEtCategory.setText(item.getName());
         mSelectedCategory = item;
+    }
+
+    // callbacks for auto location via LocationTracker
+    private LocationTracker.LocationListener mAutoLocationListener = new LocationTracker.LocationListener() {
+
+        @Override
+        public String getPermissionAlertTitle() {
+            return getString(R.string.location_permission_dialog_title);
+        }
+
+        @Override
+        public String getPermissionAlertDescription() {
+            return getString(R.string.location_permission_dialog_description);
+        }
+
+
+        @Override
+        public void onLocationChanged(Location location) {
+            if (location == null) {
+                updateLocationIcon(false);
+                return;
+            }
+            // We have found the GPS location. Set it.
+            setGpsPoint(location);
+            // Now, fetch address using geolocation
+            FetchAddressIntentService.findAddressWithGoogle(getApplicationContext(), location,
+                    new ResultReceiver(new Handler()) {
+                        @Override
+                        protected void onReceiveResult(int resultCode, Bundle resultData) {
+                            // Set address
+                            String address = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
+                            mEtAddress.setText(address);
+                        }
+                    });
+        }
+
+        @Override
+        public void onPermissionDenied() {
+            Toast.makeText(getApplicationContext(), R.string.location_permission_denied, Toast.LENGTH_LONG).show();
+            updateLocationIcon(true);
+        }
+    };
+
+    // callback for SelectLocationFragment
+    @Override
+    public void selectLocation(double lats, double longs, String address) {
+        // user manually selected location. disable auto find
+        if (mLocationTracker != null) {
+            mLocationTracker.onPause();
+            mLocationTracker = null;
+        }
+
+        // now set address and location using fragment provided location
+        if (address != null) {
+            mEtAddress.setText(address);
+        }
+        Location location = new Location(SELECT_LOCATION_FRAGMENT_TAG);
+        location.setLatitude(lats);
+        location.setLongitude(longs);
+        mBuilder.setLocation(location);
+
+        // show mini-map
+        MapUtils.setStaticMap(mIvLocation, location);
     }
 }
