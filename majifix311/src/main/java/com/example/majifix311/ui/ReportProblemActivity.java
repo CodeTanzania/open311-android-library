@@ -235,6 +235,9 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
     }
 
     private void submit() {
+        // Clear location error so it can be reset as necessary
+        updateLocationIcon(false);
+
         // Creates a problem using a builder which will validate required inputs
         mBuilder.setUsername(mEtName.getText().toString());
         mBuilder.setPhoneNumber(mEtPhone.getText().toString());
