@@ -47,27 +47,6 @@ public class ProblemListFragment extends Fragment implements ProblemListAdapter.
         return instance;
     }
 
-    // TODO: Move this to activity
-    private BroadcastReceiver mMyReportedProblemsReceived = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getBooleanExtra(EventHandler.IS_SUCCESS, false)) {
-                mProblems = intent.getParcelableArrayListExtra(EventHandler.REQUEST_LIST);
-
-                boolean isPreliminary = intent.getBooleanExtra(EventHandler.IS_PRELIMINARY_DATA,false);
-                if(!isPreliminary){
-                    mProgress.setVisibility(View.GONE);
-                }
-                System.out.println("Problems Received! "+mProblems.size() +
-                        (isPreliminary ? " cached" : " fetched") + " entries");
-                setupRecyclerView();
-            } else {
-                // TODO Implement error logic
-                Toast.makeText(getContext(), "Failure!", Toast.LENGTH_LONG).show();
-            }
-        }
-    };
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -80,19 +59,12 @@ public class ProblemListFragment extends Fragment implements ProblemListAdapter.
         rvProblems = (RecyclerView) view.findViewById(R.id.rv_problem_list);
         mProgress = (ProgressBar) view.findViewById(R.id.progress_problem_list);
 
-        // TODO Broadcast management should be handled by activity
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mMyReportedProblemsReceived,
-                new IntentFilter(EventHandler.BROADCAST_MY_PROBLEMS_FETCHED));
-
-        ReportService.fetchProblems(getContext(),"255714095061");
-        mProgress.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void onDestroy() {
-        LocalBroadcastManager.getInstance(getContext())
-                .unregisterReceiver(mMyReportedProblemsReceived);
-        super.onDestroy();
+        if (getArguments() != null) {
+            mProblems = getArguments().getParcelableArrayList(PROBLEMS_INTENT);
+        }
+        if (mProblems != null) {
+            setupRecyclerView();
+        }
     }
 
     private void setupRecyclerView() {

@@ -21,7 +21,7 @@ class Mocks {
     static String mockAddress = "55 Marimbo St";
     static String mockDescription = "Horrible horrible horrible!!";
     static String mockTicketNumber = "M123";
-    static String mockStatusName = "Open";
+    static String mockStatusName = "Closed";
     static String mockStatusColor = "#0D47A1";
     static String mockCreatedAtString = "2015-10-22T09:03:46.845Z";
     static String mockUpdatedAtString = "2016-10-22T09:03:46.845Z";
