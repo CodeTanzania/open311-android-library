@@ -23,6 +23,7 @@ import com.example.majifix311.ui.ProblemListActivity;
 import com.example.majifix311.ui.ProblemListFragment;
 import com.example.majifix311.ui.ProblemTabFragment;
 import com.example.majifix311.ui.ProgressBarFragment;
+import com.example.majifix311.ui.ReportProblemActivity;
 import com.example.majifix311.ui.adapters.OpenClosedTabAdapter;
 import com.example.majifix311.utils.DateUtils;
 
@@ -33,6 +34,7 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowApplication;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -103,6 +105,16 @@ public class ProblemListActivityTest {
 
         //TODO figure out how to go between tabs
         tabsShouldBeSortedByStatus();
+    }
+
+    @Test
+    public void fabClickShouldOpenNewReport() {
+        mFab.performClick();
+
+        String startedActivity = shadowOf(mActivity)
+                .getNextStartedActivity().getComponent().getClassName();
+        assertEquals("Fab click should start ReportProblemActivity",
+                ReportProblemActivity.class.getName(), startedActivity);
     }
 
     private void shouldAttemptToGetMyReportedProblems() {

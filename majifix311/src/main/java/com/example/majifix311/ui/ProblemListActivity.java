@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -25,9 +26,10 @@ import java.util.ArrayList;
  */
 
 public class ProblemListActivity extends AppCompatActivity implements ErrorFragment.OnReloadClickListener {
-    private @Utils.UiState
-    String mUiState = Utils.NONE;
+    @Utils.UiState
+    private String mUiState = Utils.NONE;
     private int mFragmentContainerRes = R.id.frl_fragmentContainer;
+    private FloatingActionButton mFab;
 
     private BroadcastReceiver mMyReportedProblemsReceived = new BroadcastReceiver() {
         @Override
@@ -55,6 +57,16 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+
+        mFab = (FloatingActionButton) findViewById(R.id.fab_reportIssue);
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent startReportIntent =
+                        new Intent(ProblemListActivity.this, ReportProblemActivity.class);
+                startActivity(startReportIntent);
+            }
+        });
 
         fetchMyReportedProblems();
     }
