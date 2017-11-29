@@ -122,7 +122,7 @@ public class ProblemContract {
     }
 
     static ArrayList<Problem> readProblems(DatabaseHelper helper) {
-        SQLiteDatabase db = helper.getReadableDatabase();
+        SQLiteDatabase db = helper.getWritableDatabase();
 
         String[] projection = {
                 Entry.COLUMN_TICKET_ID,

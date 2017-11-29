@@ -6,20 +6,19 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.util.Pair;
 
 import com.example.majifix311.EventHandler;
 import com.example.majifix311.db.DatabaseHelper;
+import com.example.majifix311.models.TaggedProblemList;
 import com.example.majifix311.models.Problem;
 
 import java.util.ArrayList;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
-import io.reactivex.Observer;
+import io.reactivex.ObservableTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
@@ -92,57 +91,28 @@ public class ReportService extends Service {
             }
         };
 
-        final Observable<ArrayList<Problem>> fakeDB = new Observable<ArrayList<Problem>>() {
+        Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>> dbWriteAlgo =
+                new Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>>() {
             @Override
-            protected void subscribeActual(Observer<? super ArrayList<Problem>> observer) {
-                Log.d(TAG, "Fake DB Observer ran on " + Thread.currentThread());
-                observer.onNext(new ArrayList<Problem>());
+            public ObservableSource<ArrayList<Problem>> apply(ArrayList<Problem> problems) throws Exception {
+                return db.saveMyReportedProblems(problems).toObservable();
             }
-        }
-                .subscribeOn(Schedulers.io())
-                .delay(10, TimeUnit.SECONDS);
-
-        final Observable<ArrayList<Problem>> realDB =
-                db.retrieveMyReportedProblems().subscribeOn(Schedulers.io()).toObservable();
-
-
-        Function<
-                Observable<Pair<ArrayList<Problem>, Boolean>>,
-                ObservableSource<Pair<ArrayList<Problem>, Boolean>>
-                > merger =
-                new Function<
-                        Observable<Pair<ArrayList<Problem>, Boolean>>,
-                        ObservableSource<Pair<ArrayList<Problem>, Boolean>>
-                        >() {
-                    @Override
-                    public ObservableSource<Pair<ArrayList<Problem>, Boolean>> apply(
-                            Observable<Pair<ArrayList<Problem>, Boolean>> network) throws Exception {
-                        return Observable.mergeDelayError(
-                                network,
-                                realDB.takeUntil(network).map(preliminizer(true))
-                        );
-                    }
-                };
+        };
 
         majiFixAPI.getProblemsByPhoneNumber(number)
-                .subscribeOn(Schedulers.io())
-                .flatMapObservable(new Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>>() {
-                    @Override
-                    public ObservableSource<ArrayList<Problem>> apply(ArrayList<Problem> problems) throws Exception {
-                        return db.saveMyReportedProblems(problems).toObservable();
-                    }
-                })
-                .map(preliminizer(false))
-                .publish(merger)
+                .toObservable()
+                .compose(transform(
+                        db.retrieveMyReportedProblems().toObservable(),
+                        dbWriteAlgo))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        new Consumer<Pair<ArrayList<Problem>,Boolean>>() {
+                        new Consumer<TaggedProblemList>() {
                             @Override
-                            public void accept(Pair<ArrayList<Problem>,Boolean> problems) throws Exception {
+                            public void accept(TaggedProblemList problems) throws Exception {
                                 EventHandler.retrievedMyRequests(
                                         getApplicationContext(),
-                                        problems.first,
-                                        problems.second
+                                        problems,
+                                        problems.mPreliminary
                                 );
                             }
                         },
@@ -150,11 +120,53 @@ public class ReportService extends Service {
                 );
     }
 
-    private Function<ArrayList<Problem>, Pair<ArrayList<Problem>, Boolean>> preliminizer(final boolean isPreliminary) {
-        return new Function<ArrayList<Problem>, Pair<ArrayList<Problem>, Boolean>>() {
+    private Function<ArrayList<Problem>, TaggedProblemList> preliminizer(final boolean isPreliminary) {
+        return new Function<ArrayList<Problem>, TaggedProblemList>() {
             @Override
-            public Pair<ArrayList<Problem>, Boolean> apply(ArrayList<Problem> problems) throws Exception {
-                return new Pair<>(problems, isPreliminary);
+            public TaggedProblemList apply(ArrayList<Problem> problems) throws Exception {
+                return new TaggedProblemList(problems, isPreliminary);
+            }
+        };
+    }
+
+
+    /**
+     * @param  cacheStream   an Observable that will supply our existing cached data
+     * @param  cacheSaveAlgo a Function for how to cache our network-retrieved data
+     * @return               a Transformer from network Observable to combined stream of fresh & cached
+     */
+    public ObservableTransformer<ArrayList<Problem>, TaggedProblemList>
+    transform(final Observable<ArrayList<Problem>> cacheStream,
+              final Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>> cacheSaveAlgo) {
+        return new ObservableTransformer<ArrayList<Problem>, TaggedProblemList>() {
+            @Override
+            public ObservableSource<TaggedProblemList> apply(Observable<ArrayList<Problem>> networkStream) {
+                Function<Observable<TaggedProblemList>,
+                        ObservableSource<TaggedProblemList>
+                        > merger =
+                        new Function<
+                                Observable<TaggedProblemList>,
+                                ObservableSource<TaggedProblemList>
+                                >() {
+                            @Override
+                            public ObservableSource<TaggedProblemList> apply(
+                                    Observable<TaggedProblemList> network) throws Exception {
+                                return Observable.mergeDelayError(
+                                        network,
+                                        cacheStream
+                                                .subscribeOn(Schedulers.io())
+                                                .takeUntil(network)
+                                                .map(preliminizer(true))
+                                );
+                            }
+                        };
+
+
+                return networkStream
+                        .subscribeOn(Schedulers.io())
+                        .flatMap(cacheSaveAlgo)
+                        .map(preliminizer(false))
+                        .publish(merger);
             }
         };
     }

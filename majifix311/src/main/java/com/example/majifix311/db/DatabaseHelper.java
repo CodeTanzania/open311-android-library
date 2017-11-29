@@ -97,8 +97,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             @Override
             public ArrayList<Problem> call() throws Exception {
                 ProblemContract.writeProblems(DatabaseHelper.this, problems);
-                Log.d(TAG, "Database written on thread" + Thread.currentThread());
-                return ProblemContract.readProblems(DatabaseHelper.this);
+                Log.d(TAG, "Database written on thread " + Thread.currentThread());
+                ArrayList<Problem> ret = ProblemContract.readProblems(DatabaseHelper.this);
+                Log.d(TAG, "Database write completed");
+                return ret;
             }
         });
     }
@@ -115,8 +117,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return Single.fromCallable(new Callable<ArrayList<Problem>>() {
             @Override
             public ArrayList<Problem> call() throws Exception {
-                Log.d(TAG, "Database pure read on thread" + Thread.currentThread());
-                return ProblemContract.readProblems(DatabaseHelper.this);
+                Log.d(TAG, "Database pure read on thread " + Thread.currentThread());
+                ArrayList<Problem> ret = ProblemContract.readProblems(DatabaseHelper.this);
+                Log.d(TAG, "Database pure read completed");
+                return ret;
             }
         });
     }

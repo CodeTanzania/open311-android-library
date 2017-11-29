@@ -1,5 +1,6 @@
 package com.example.majifix311;
 
+import com.example.majifix311.api.ApiModelConverter;
 import com.example.majifix311.api.models.ApiService;
 import com.example.majifix311.api.models.ApiServiceGroup;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
@@ -72,7 +73,8 @@ public class DatabaseHelperTest {
     @Test
     public void canWriteProblemsToDatabase() {
         final ArrayList<Problem> problems = new ArrayList<>(1);
-        Problem mockProblem = ProblemTest.buildMockProblem(new ProblemTest());
+        ApiServiceRequestGet before = ProblemTest.buildMockServerResponse();
+        Problem mockProblem = ApiModelConverter.convert(before);
         problems.add(mockProblem);
 
         //TestObserver<ArrayList<Problem>> tester = new TestObserver<>();
@@ -89,7 +91,7 @@ public class DatabaseHelperTest {
         //        serverResponses, onProblemsSavedInDatabase(), onError(), false);
 
         assertNotNull(mProblemResult);
-        ProblemTest.assertPostMatchesMock(mProblemResult.get(0));
+        ProblemTest.assertGetMatchesMock(mProblemResult.get(0));
     }
 
     private Consumer<List<Category>> onCategoriesSavedInDatabase() {
@@ -99,16 +101,6 @@ public class DatabaseHelperTest {
                 System.out.println("onRetrievedFromNetwork after Database save! "+categories);
                 mCategoriesResult = categories;
                 //EventHandler.sendResultReceived(mContext);
-            }
-        };
-    }
-
-    private Consumer<List<Problem>> onProblemsSavedInDatabase() {
-        return new Consumer<List<Problem>>() {
-            @Override
-            public void accept(List<Problem> problems) throws Exception {
-                System.out.println("onRetrievedFromNetwork after Database save! "+problems);
-                mProblemResult = problems;
             }
         };
     }
