@@ -21,7 +21,7 @@ import java.util.Calendar;
 import java.util.List;
 
 /**
- * Created by Dave - Work on 11/24/2017.
+ * This is used to store reported Problems in the database.
  */
 
 public class ProblemContract {
@@ -51,8 +51,7 @@ public class ProblemContract {
 
     static final String DELETE_PROBLEM_TABLE = "DROP TABLE IF EXISTS " + Entry.TABLE_NAME;
 
-    private ProblemContract() {
-    }
+    private ProblemContract() {}
 
     static void writeProblems(DatabaseHelper helper, List<Problem> problems) {
         SQLiteDatabase db = helper.getWritableDatabase();

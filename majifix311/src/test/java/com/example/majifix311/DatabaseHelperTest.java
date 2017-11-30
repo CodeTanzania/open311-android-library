@@ -77,8 +77,6 @@ public class DatabaseHelperTest {
         Problem mockProblem = ApiModelConverter.convert(before);
         problems.add(mockProblem);
 
-        //TestObserver<ArrayList<Problem>> tester = new TestObserver<>();
-
         mHelper.saveMyReportedProblems(problems)
                 .subscribe(new Consumer<ArrayList<Problem>>() {
                     @Override
@@ -86,9 +84,6 @@ public class DatabaseHelperTest {
                         mProblemResult = problems;
                     }
                 });
-
-        //mHelper.saveMyReportedProblems(
-        //        serverResponses, onProblemsSavedInDatabase(), onError(), false);
 
         assertNotNull(mProblemResult);
         ProblemTest.assertGetMatchesMock(mProblemResult.get(0));
