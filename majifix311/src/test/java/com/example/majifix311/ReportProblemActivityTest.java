@@ -1,7 +1,11 @@
 package com.example.majifix311;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.net.Uri;
+import android.os.Environment;
 import android.support.design.widget.TextInputLayout;
 import android.view.View;
 import android.widget.Button;
@@ -11,8 +15,10 @@ import android.widget.TextView;
 import com.example.majifix311.api.ReportService;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
+import com.example.majifix311.shadows.ShadowAttachmentUtils;
 import com.example.majifix311.ui.ReportProblemActivity;
 import com.example.majifix311.ui.views.AttachmentButton;
+import com.example.majifix311.utils.AttachmentUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +30,11 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import static android.app.Activity.RESULT_OK;
 import static com.example.majifix311.Mocks.mockCategoryCode;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -36,7 +47,7 @@ import static org.robolectric.Shadows.shadowOf;
  */
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, shadows = {ShadowAttachmentUtils.class})
 public class ReportProblemActivityTest {
     private ReportProblemActivity mActivity;
     private EditText mNameView;
@@ -137,6 +148,30 @@ public class ReportProblemActivityTest {
     }
 
     @Test
+    public void canAddAttachmentToPost() {
+        // mock taking photo by setting attachment url to file
+        Bitmap bitmap = BitmapFactory.decodeResource(mActivity.getResources(), R.drawable.ic_add_photo_black);
+        File file = createMockFile(bitmap);
+        mAttachmentButton.setAttachmentUrl(file.getAbsolutePath());
+
+        setFieldsAndSubmit(mockName, mockNumber, mockCategory,
+                mockLocation, mockAddress, mockDescription);
+
+        Intent receivedIntent = shadowOf(mActivity).getNextStartedService();
+        Problem sent = receivedIntent.getParcelableExtra(ReportService.NEW_PROBLEM_INTENT);
+
+        assertNotNull("Attachment should be sent", sent.getAttachments());
+        assertNotNull("Attachment should not be null", sent.getAttachments().get(0));
+        assertNotNull("Attachment name should not be null", sent.getAttachments().get(0).getName());
+        assertNotNull("Attachment caption should not be null", sent.getAttachments().get(0).getCaption());
+        assertNotNull("Attachment mime should not be null", sent.getAttachments().get(0).getMime());
+        assertNotNull("Attachment content should not be null", sent.getAttachments().get(0).getContent());
+
+        Bitmap afterSend = AttachmentUtils.decodeFromBase64String(sent.getAttachments().get(0).getContent());
+        assertNotNull("Attachment content should be real bitmap", afterSend);
+    }
+
+    @Test
     public void isRegisteredForBroadcasts() {
         // TODO Test error
 
@@ -155,6 +190,22 @@ public class ReportProblemActivityTest {
         mDescriptionView.setText(description);
 
         mSubmitButton.performClick();
+    }
+
+    private File createMockFile(Bitmap bitmap) {
+        String filename = "pippo.png";
+        File sd = Environment.getExternalStorageDirectory();
+        File dest = new File(sd, filename);
+
+        try {
+            FileOutputStream out = new FileOutputStream(dest);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
 

@@ -194,6 +194,10 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         builder.setLocation(mockLocation);
         builder.setAddress(mockAddress);
         builder.setDescription(mockDescription);
+
+        Attachment attachment = new Attachment(mockAttachmentTitle, mockAttachmentCaption, mockAttachmentMime, mockAttachmentContent);
+        builder.addAttachment(attachment);
+
         return builder.build();
     }
 
@@ -214,6 +218,11 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals(longitude, post.getLocation().getLongitude());
         assertEquals(mockAddress, post.getAddress());
         assertEquals(mockDescription, post.getDescription());
+
+        assertEquals(mockAttachmentTitle, post.getAttachments()[0].getName());
+        assertEquals(mockAttachmentCaption, post.getAttachments()[0].getCaption());
+        assertEquals(mockAttachmentMime, post.getAttachments()[0].getMime());
+        assertEquals(mockAttachmentContent, post.getAttachments()[0].getContent());
     }
 
     public static void assertPostMatchesMock(Problem problem) {
@@ -229,6 +238,8 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals("Longitude should be correct", longitude, problem.getLocation().getLongitude());
         assertEquals("Address should be correct", mockAddress, problem.getAddress());
         assertEquals("Description should be correct", mockDescription, problem.getDescription());
+
+        assertOneAttachmentMatches(problem);
     }
 
     public static void assertGetMatchesMock(Problem problem) {
@@ -241,7 +252,9 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         DateUtilTest.testCalendar(problem.getCreatedAt(), 2015, Calendar.OCTOBER, 22, 9, 3, 46);
         DateUtilTest.testCalendar(problem.getUpdatedAt(), 2016, Calendar.OCTOBER, 22, 9, 3, 46);
         DateUtilTest.testCalendar(problem.getResolvedAt(), 2017, Calendar.OCTOBER, 22, 9, 3, 46);
+    }
 
+    private static void assertOneAttachmentMatches(Problem problem) {
         assertEquals("There should be one attachment", 1, problem.getAttachments().size());
         Attachment attachment = problem.getAttachments().get(0);
         assertEquals("Attachment name should be correct", Mocks.mockAttachmentTitle, attachment.getName());

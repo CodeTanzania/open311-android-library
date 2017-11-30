@@ -80,8 +80,9 @@ public class AttachmentButton extends LinearLayout {
     }
 
     public boolean displayOnActivityResult(int requestCode, int resultCode, Intent data) {
-        return AttachmentUtils.setThumbnailFromActivityResult(mPreview, mPendingImageUrl,
+        mPendingImageUrl = AttachmentUtils.setThumbnailFromActivityResult(mPreview, mPendingImageUrl,
                                                        requestCode, resultCode, data);
+        return mPendingImageUrl == null;
     }
 
     public void onRequestPermissionResult(int requestCode, String permissions[], int[] grantResults) {

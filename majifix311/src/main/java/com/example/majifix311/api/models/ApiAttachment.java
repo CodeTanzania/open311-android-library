@@ -25,6 +25,14 @@ public class ApiAttachment {
         this.content = content;
     }
 
+    // TODO no hardcoding
+    public ApiAttachment(String name, String caption, String mime, String content) {
+        this.name = name;
+        this.caption = caption;
+        this.mime = mime;
+        this.content = content;
+    }
+
     public String getName() {
         return name;
     }

@@ -84,6 +84,7 @@ public class ProblemListFragment extends Fragment implements ProblemListAdapter.
     public void onItemClick(Problem problem) {
         // TODO go to item detail on click
         Toast.makeText(getContext(), "Problem "+problem.getTicketNumber()+" has been clicked", Toast.LENGTH_LONG).show();
+        ProblemDetailActivity.startActivity(getActivity(), problem);
         getActivity().finish();
     }
 }

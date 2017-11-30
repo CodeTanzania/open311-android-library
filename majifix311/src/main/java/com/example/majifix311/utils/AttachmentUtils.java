@@ -146,29 +146,31 @@ public class AttachmentUtils {
     /**
      * TAKE PICTURE | CHOOSE FROM GALLERY: Step 2 (OPTION B) -> This should be called in
      * displayOnActivityResult. This method will handle both the case where the image is saved in
-     * a file, and a simple thumbnail sent in the intent. It returns true when bitmap was found
+     * a file, and a simple thumbnail sent in the intent. It returns the URL String when bitmap was found
      * successfully.
      */
-    public static boolean setThumbnailFromActivityResult(ImageView imageView, String url,
+    public static String setThumbnailFromActivityResult(ImageView imageView, String url,
                                                          int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             if (data == null || data.getExtras() == null) {
                 // assume image is saved in file
-                return setPicFromFile(imageView, url);
+                boolean imageSuccessfullyFound =  setPicFromFile(imageView, url);
+                return imageSuccessfullyFound ? url : null;
             } else {
                 // use bitmap sent in intent
                 Bitmap bitmap = (Bitmap) data.getExtras().get("data");
                 if (bitmap != null) {
                     imageView.setImageBitmap(bitmap);
-                    return true;
+                    return null; //TODO save bitmap
                 }
             }
+        } else if (requestCode == REQUEST_BROWSE_MEDIA_STORE
+                && resultCode == RESULT_OK && data != null) {
+            String path = getRealPathFromMediaUri(imageView.getContext(), data.getData());
+            boolean success = setPicFromFile(imageView, path);
+            return success ? path : null;
         }
-        return requestCode == REQUEST_BROWSE_MEDIA_STORE
-                && resultCode == RESULT_OK && data != null
-                && setPicFromFile(imageView, getRealPathFromMediaUri(
-                    imageView.getContext(), data.getData()));
-
+        return null;
     }
 
     /** Newer devices may require a permission check. Please call this onRequestPermissionResult in the Activity */
@@ -186,11 +188,13 @@ public class AttachmentUtils {
 
     /** The majiFix api expects a Base64 string as the content for it's attachments */
     public static Attachment getPicAsAttachment(String url) {
-        String mime = getMimeType(url);
-        String content = getContentAsBase64String(url);
-        System.out.println(content);
-        if (mime != null && content != null) {
-            return new Attachment(null,null, mime, content);
+        if (url != null) {
+            String mime = getMimeType(url);
+            String content = getContentAsBase64String(url);
+            System.out.println(content);
+            if (content != null) {
+                return new Attachment("Photo", "from-app", mime, content);
+            }
         }
         return null;
     }
@@ -247,8 +251,9 @@ public class AttachmentUtils {
         if (extension != null) {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         }
-        System.out.println("Extension: "+extension+", type: "+type);
-        return type;
+
+        // If it's null, lets just assume it's a png
+        return type == null ? "image/png" : type;
     }
 
     /** This helps avoid OOM errors, by loading a bitmap already sized for the imageview */

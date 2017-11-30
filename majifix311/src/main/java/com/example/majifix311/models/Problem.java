@@ -175,6 +175,10 @@ public class Problem implements Parcelable {
         return mAttachments;
     }
 
+    public boolean hasAttachments() {
+        return mAttachments != null && !mAttachments.isEmpty();
+    }
+
 //    public List<Comment> getComments() {
 //        return mComments;
 //    }

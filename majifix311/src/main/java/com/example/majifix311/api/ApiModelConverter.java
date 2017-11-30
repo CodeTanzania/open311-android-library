@@ -68,10 +68,7 @@ public class ApiModelConverter {
         }
         request.setAddress(problem.getAddress());
         request.setDescription(problem.getDescription());
-//        request.setAttachments(new ApiAttachment[] {
-//                new ApiAttachment("Issue_" + (new Date()).getTime(),
-//                        problem.getDescription(), "bytes") // TODO: implement this
-//        });
+        request.setAttachments(convert(problem.getAttachments()));
         return request;
     }
 
@@ -92,5 +89,24 @@ public class ApiModelConverter {
             attachments.add(convert(attachment));
         }
         return attachments;
+    }
+
+    public static ApiAttachment convert(Attachment apiAttachment) {
+        if (apiAttachment == null) {
+            return null;
+        }
+        return new ApiAttachment(apiAttachment.getName(), apiAttachment.getCaption(),
+                apiAttachment.getMime(), apiAttachment.getContent());
+    }
+
+    public static ApiAttachment[] convert(List<Attachment> attachments) {
+        if (attachments == null) {
+            return null;
+        }
+        ApiAttachment[] apiAttachments = new ApiAttachment[attachments.size()];
+        for (int i = 0; i < attachments.size(); i++) {
+            apiAttachments[i] = convert(attachments.get(i));
+        }
+        return apiAttachments;
     }
 }
