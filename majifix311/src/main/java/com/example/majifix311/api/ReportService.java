@@ -19,6 +19,7 @@ import java.util.concurrent.CancellationException;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
@@ -103,7 +104,8 @@ public class ReportService extends Service {
                 .toObservable()
                 .compose(transform(
                         db.retrieveMyReportedProblems().toObservable(),
-                        dbWriteAlgo))
+                        dbWriteAlgo,
+                        Schedulers.io()))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         new Consumer<TaggedProblemList>() {
@@ -137,7 +139,8 @@ public class ReportService extends Service {
      */
     public ObservableTransformer<ArrayList<Problem>, TaggedProblemList>
     transform(final Observable<ArrayList<Problem>> cacheStream,
-              final Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>> cacheSaveAlgo) {
+              final Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>> cacheSaveAlgo,
+              final Scheduler runOn) {
         return new ObservableTransformer<ArrayList<Problem>, TaggedProblemList>() {
             @Override
             public ObservableSource<TaggedProblemList> apply(Observable<ArrayList<Problem>> networkStream) {
@@ -154,7 +157,7 @@ public class ReportService extends Service {
                                 return Observable.mergeDelayError(
                                         network,
                                         cacheStream
-                                                .subscribeOn(Schedulers.io())
+                                                .subscribeOn(runOn)
                                                 .takeUntil(network)
                                                 .map(preliminizer(true))
                                 );
@@ -163,7 +166,7 @@ public class ReportService extends Service {
 
 
                 return networkStream
-                        .subscribeOn(Schedulers.io())
+                        .subscribeOn(runOn)
                         .flatMap(cacheSaveAlgo)
                         .map(preliminizer(false))
                         .publish(merger);

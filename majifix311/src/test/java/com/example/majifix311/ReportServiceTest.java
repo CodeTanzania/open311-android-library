@@ -41,12 +41,15 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Notification;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
+import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subscribers.TestSubscriber;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -68,6 +71,8 @@ import static org.robolectric.Shadows.shadowOf;
 @Config(constants = BuildConfig.class)
 public class ReportServiceTest {
     private CountDownLatch mLatch;
+    private TestScheduler mTestS = new TestScheduler();
+    private Scheduler mNormS = Schedulers.io();
 
     @Before
     public void init() {
@@ -146,7 +151,8 @@ public class ReportServiceTest {
     }
 
     private TestObserver<TaggedProblemList> runTransformer(
-            long cacheDelayMs, long serverDelayMs, boolean cacheErrs, boolean serverErrs) {
+            long cacheDelayMs, long serverDelayMs, boolean cacheErrs,
+            boolean serverErrs, Scheduler runOn) {
         Observable<ArrayList<Problem>> empty = Observable.just(new ArrayList<Problem>());
         final Observable<ArrayList<Problem>> network =
                 (serverErrs ? errorMaker(new ServerError()) : empty);
@@ -164,16 +170,17 @@ public class ReportServiceTest {
         ReportService rs = new ReportService();
         System.out.println("cacheDelay: " + cacheDelayMs + ", serverDelay: " + serverDelayMs);
         return network
-                .delay(serverDelayMs, TimeUnit.MILLISECONDS)
+                .delay(serverDelayMs, TimeUnit.MILLISECONDS, true)
                 .doOnEach(notifier)
                 .compose(rs.transform(
-                        cache.delay(cacheDelayMs, TimeUnit.MILLISECONDS).doOnEach(notifier),
+                        cache.delay(cacheDelayMs, TimeUnit.MILLISECONDS, true).doOnEach(notifier),
                         new Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>>() {
                             @Override
                             public ObservableSource<ArrayList<Problem>> apply(ArrayList<Problem> problems) throws Exception {
                                 return network;
                             }
-                        }
+                        },
+                        runOn
                 ))
                 .test();
     }
@@ -218,7 +225,7 @@ public class ReportServiceTest {
         // db should send problems first
         // server should send problems
         TestObserver<TaggedProblemList> test =
-                runTransformer(0, 500, false, false);
+                runTransformer(0, 200, false, false, mNormS);
 
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
         test.assertValueCount(2);
@@ -233,7 +240,7 @@ public class ReportServiceTest {
         // server should send problems
 
         TestObserver<TaggedProblemList> test =
-                runTransformer(0, 500, true, false);
+                runTransformer(0, 200, true, false, mNormS);
 
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
         test.assertValueCount(1);
@@ -247,18 +254,13 @@ public class ReportServiceTest {
         // server should send error
 
         TestObserver<TaggedProblemList> test =
-                runTransformer(0, 500, false, true);
+                runTransformer(0, 200, false, true, mNormS);
 
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
         test.assertValueCount(1);
         test.assertValueAt(0, predicate(true));
         assertEquals("Multiple base errors emitted",1, test.errorCount());
         compositeStripper(test.errors().get(0), ServerError.class);
-        //test.assertError(CompositeException.class);
-        //assertEquals(1, test.errors().size());
-        //List<Throwable> errors = ((CompositeException) test.errors().get(0)).getExceptions();
-        //assertEquals(1, errors.size());
-        //assertTrue("Only inner error should be a ServerError", errors.get(0) instanceof ServerError);
     }
 
     @Test
@@ -267,16 +269,12 @@ public class ReportServiceTest {
         // server should send error
 
         TestObserver<TaggedProblemList> test =
-                runTransformer(0, 500, true, true);
+                runTransformer(0, 200, true, true, mNormS);
 
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
         test.assertValueCount(0);
         assertEquals("Multiple base errors emitted",1, test.errorCount());
         compositeStripper(test.errors().get(0), CacheError.class, ServerError.class);
-        //test.assertError(CompositeException.class);
-        //List<Throwable> errors = ((CompositeException) test.errors().get(0)).getExceptions();
-        //assertTrue("First error should be a CacheError", errors.get(0) instanceof CacheError);
-        //assertTrue("Second error should be a ServerError", errors.get(1) instanceof ServerError);
     }
 
     @Test
@@ -285,7 +283,7 @@ public class ReportServiceTest {
         // db does not send problems
 
         TestObserver<TaggedProblemList> test =
-                runTransformer(500, 0, false, false);
+                runTransformer(200, 0, false, false, mNormS);
 
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
         test.assertValueCount(1);
@@ -299,8 +297,15 @@ public class ReportServiceTest {
         // db does not send error
 
         TestObserver<TaggedProblemList> test =
-                runTransformer(1000, 0, true, false);
+                runTransformer(200, 0, true, false, mNormS);
 
+        //test.assertNoValues();
+        //test.assertNotComplete();
+        //
+        //mTestS.advanceTimeBy(500, TimeUnit.MILLISECONDS);
+        //test.assertValueCount(1);
+        //test.assertNotComplete();
+        //mTestS.advanceTimeBy(1200, TimeUnit.MILLISECONDS);
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
         test.assertValueCount(1);
         test.assertValueAt(0, predicate(false));
@@ -314,16 +319,14 @@ public class ReportServiceTest {
         //TODO this functionality needs to match the above, it doesn't.
 
         TestObserver<TaggedProblemList> test =
-                runTransformer(500, 0, false, true);
+                runTransformer(200, 0, false, true, mNormS);
 
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
         test.assertValueCount(0);
         assertEquals("Multiple base errors emitted", 1, test.errorCount());
+        assertTrue("Error in first stream should end up wrapped in a composite",
+                test.errors().get(0) instanceof CompositeException);
         compositeStripper(test.errors().get(0), ServerError.class);
-        //test.errors().get(0).printStackTrace();
-        //List<Throwable> errors = ((CompositeException) test.errors().get(0)).getExceptions();
-        //assertEquals(1, errors.size());
-        //assertTrue("Single inner error should be a ServerError", errors.get(0) instanceof ServerError);
     }
 
     @Test
@@ -332,17 +335,12 @@ public class ReportServiceTest {
         // db does not need to send error (ui already in error state)
 
         TestObserver<TaggedProblemList> test =
-                runTransformer(500, 0, true, true);
+                runTransformer(200, 0, true, true, mNormS);
 
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
         test.assertValueCount(0);
-        compositeStripper(test.errors().get(0), CacheError.class, ServerError.class);
-        assertEquals("Multiple base errors emitted", 1, test.errorCount());
-        test.assertError(CompositeException.class);
-        //assertEquals(1, test.errors().size());
-        //List<Throwable> errors = ((CompositeException) test.errors().get(0)).getExceptions();
-        //assertEquals(2, errors.size());
-        //assertTrue("First inner error should be a CacheError", errors.get(0) instanceof CacheError);
-        //assertTrue("Second inner error should be a ServerError", errors.get(1) instanceof ServerError);
+        assertTrue("Error in first stream should end up wrapped in a composite",
+                test.errors().get(0) instanceof CompositeException);
+        compositeStripper(test.errors().get(0), ServerError.class);
     }
 }
