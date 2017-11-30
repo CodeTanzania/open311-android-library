@@ -5,7 +5,6 @@ import android.support.annotation.StringDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
 /**
  * This is used for Utility methods.
  */

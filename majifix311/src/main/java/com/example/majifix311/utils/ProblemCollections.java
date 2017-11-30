@@ -12,7 +12,7 @@ import java.util.List;
  * This is used for funtions related to managing problem objects.
  */
 
-public class ProblemUtils {
+public class ProblemCollections {
     public static void sortByDate(List<Problem> problems) {
         Collections.sort(problems, newestFirstComparator);
     }

@@ -9,7 +9,7 @@ import com.example.majifix311.api.models.ApiServiceRequestPost;
 import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
-import com.example.majifix311.utils.ProblemUtils;
+import com.example.majifix311.utils.ProblemCollections;
 import com.google.gson.Gson;
 
 import org.junit.Before;
@@ -146,26 +146,40 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
     public void problemsAreSortedByDate() {
         Problem.Builder builder = new Problem.Builder(null);
 
-        Calendar earlier = Calendar.getInstance();
-        earlier.setTimeInMillis(100);
-        Calendar later = Calendar.getInstance();
-        later.setTimeInMillis(200);
+        Calendar stoneage = Calendar.getInstance();
+        stoneage.setTimeInMillis(100);
+        Calendar pyramids = Calendar.getInstance();
+        pyramids.setTimeInMillis(200);
+        Calendar castles = Calendar.getInstance();
+        castles.setTimeInMillis(300);
+        Calendar skyscrapers = Calendar.getInstance();
+        skyscrapers.setTimeInMillis(400);
 
         Problem p1 = builder.buildWithoutValidation(null, null, null,
                 null, null, null, null, null,
-                "1", null, earlier, null, null, null);
+                "1", null, stoneage, null, null, null);
         Problem p2 = builder.buildWithoutValidation(null, null, null,
                 null, null, null, null, null,
-                "1", null, later, null, null, null);
+                "1", null, skyscrapers, null, null, null);
+        Problem p3 = builder.buildWithoutValidation(null, null, null,
+                null, null, null, null, null,
+                "1", null, pyramids, null, null, null);
+        Problem p4 = builder.buildWithoutValidation(null, null, null,
+                null, null, null, null, null,
+                "1", null, castles, null, null, null);
 
         List<Problem> problems = new ArrayList<>(2);
         problems.add(p1);
         problems.add(p2);
+        problems.add(p3);
+        problems.add(p4);
 
-        ProblemUtils.sortByDate(problems);
+        ProblemCollections.sortByDate(problems);
 
         assertEquals(p2, problems.get(0));
-        assertEquals(p1, problems.get(1));
+        assertEquals(p4, problems.get(1));
+        assertEquals(p3, problems.get(2));
+        assertEquals(p1, problems.get(3));
     }
 
     public static Problem buildMockProblem(Problem.Builder.InvalidCallbacks listener) {

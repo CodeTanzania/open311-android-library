@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringDef;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -19,6 +20,8 @@ import com.example.majifix311.api.ReportService;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.utils.Utils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -26,6 +29,15 @@ import java.util.ArrayList;
  */
 
 public class ProblemListActivity extends AppCompatActivity implements ErrorFragment.OnReloadClickListener {
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({NONE, EMPTY, LOADING, SUCCESS, ERROR})
+    public @interface UiState {}
+    public static final String NONE = "none";
+    public static final String EMPTY = "empty";
+    public static final String LOADING = "loading";
+    public static final String SUCCESS = "success";
+    public static final String ERROR = "error";
+
     @Utils.UiState
     private String mUiState = Utils.NONE;
     private int mFragmentContainerRes = R.id.frl_fragmentContainer;

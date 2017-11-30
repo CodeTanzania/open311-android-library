@@ -8,7 +8,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import com.example.majifix311.R;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.ui.ProblemListFragment;
-import com.example.majifix311.utils.ProblemUtils;
+import com.example.majifix311.utils.ProblemCollections;
 
 import java.util.ArrayList;
 
@@ -46,16 +46,14 @@ public class OpenClosedTabAdapter extends FragmentStatePagerAdapter {
         open = new ArrayList<>();
         closed = new ArrayList<>();
 
-        ProblemUtils.sortByDate(all);
+        ProblemCollections.sortByDate(all);
         for (Problem request : requests) {
-            if (request != null) {
-                all.add(request);
+            all.add(request);
 
-                if (request.getStatus().isOpen()) {
-                    open.add(request);
-                } else {
-                    closed.add(request);
-                }
+            if (request.getStatus().isOpen()) {
+                open.add(request);
+            } else {
+                closed.add(request);
             }
         }
     }
