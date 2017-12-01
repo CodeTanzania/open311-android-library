@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.util.Pair;
 
 import com.example.majifix311.EventHandler;
 import com.example.majifix311.db.DatabaseHelper;
@@ -94,11 +93,11 @@ public class ReportService extends Service {
 
         Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>> dbWriteAlgo =
                 new Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>>() {
-            @Override
-            public ObservableSource<ArrayList<Problem>> apply(ArrayList<Problem> problems) throws Exception {
-                return db.saveMyReportedProblems(problems).toObservable();
-            }
-        };
+                    @Override
+                    public ObservableSource<ArrayList<Problem>> apply(ArrayList<Problem> problems) throws Exception {
+                        return db.saveMyReportedProblems(problems).toObservable();
+                    }
+                };
 
         majiFixAPI.getProblemsByPhoneNumber(number)
                 .toObservable()
@@ -131,11 +130,10 @@ public class ReportService extends Service {
         };
     }
 
-
     /**
-     * @param  cacheStream   an Observable that will supply our existing cached data
-     * @param  cacheSaveAlgo a Function for how to cache our network-retrieved data
-     * @return               a Transformer from network Observable to combined stream of fresh & cached
+     * @param cacheStream   an Observable that will supply our existing cached data
+     * @param cacheSaveAlgo a Function for how to cache our network-retrieved data
+     * @return a Transformer from network Observable to combined stream of fresh & cached
      */
     public ObservableTransformer<ArrayList<Problem>, TaggedProblemList>
     transform(final Observable<ArrayList<Problem>> cacheStream,
@@ -145,8 +143,7 @@ public class ReportService extends Service {
             @Override
             public ObservableSource<TaggedProblemList> apply(Observable<ArrayList<Problem>> networkStream) {
                 Function<Observable<TaggedProblemList>,
-                        ObservableSource<TaggedProblemList>
-                        > merger =
+                        ObservableSource<TaggedProblemList>> merger =
                         new Function<
                                 Observable<TaggedProblemList>,
                                 ObservableSource<TaggedProblemList>
@@ -154,16 +151,19 @@ public class ReportService extends Service {
                             @Override
                             public ObservableSource<TaggedProblemList> apply(
                                     Observable<TaggedProblemList> network) throws Exception {
+                                Observable<TaggedProblemList> filteredNetwork =
+                                        network.onErrorResumeNext(
+                                                Observable.<TaggedProblemList>never()
+                                        );
                                 return Observable.mergeDelayError(
                                         network,
                                         cacheStream
                                                 .subscribeOn(runOn)
-                                                .takeUntil(network)
+                                                .takeUntil(filteredNetwork)
                                                 .map(preliminizer(true))
                                 );
                             }
                         };
-
 
                 return networkStream
                         .subscribeOn(runOn)

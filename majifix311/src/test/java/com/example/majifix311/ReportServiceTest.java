@@ -316,16 +316,13 @@ public class ReportServiceTest {
     public void testCaseWhereFirstServerErrorThenDbSuccess() {
         // server should send error
         // db should send problems
-        //TODO this functionality needs to match the above, it doesn't.
 
         TestObserver<TaggedProblemList> test =
                 runTransformer(200, 0, false, true, mNormS);
 
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
-        test.assertValueCount(0);
+        test.assertValueCount(1);
         assertEquals("Multiple base errors emitted", 1, test.errorCount());
-        assertTrue("Error in first stream should end up wrapped in a composite",
-                test.errors().get(0) instanceof CompositeException);
         compositeStripper(test.errors().get(0), ServerError.class);
     }
 
@@ -339,8 +336,6 @@ public class ReportServiceTest {
 
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
         test.assertValueCount(0);
-        assertTrue("Error in first stream should end up wrapped in a composite",
-                test.errors().get(0) instanceof CompositeException);
-        compositeStripper(test.errors().get(0), ServerError.class);
+        compositeStripper(test.errors().get(0), ServerError.class, CacheError.class);
     }
 }
