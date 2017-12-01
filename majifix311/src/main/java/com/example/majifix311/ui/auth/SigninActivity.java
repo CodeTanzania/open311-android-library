@@ -230,7 +230,7 @@ public class SigninActivity extends AppCompatActivity {
                         //notify signin succeed
                         showMessage(R.string.auth_success_signin);
 
-                        //TODO fire party
+                        //TODO fire party over event bus
                     }
 
                     @Override
