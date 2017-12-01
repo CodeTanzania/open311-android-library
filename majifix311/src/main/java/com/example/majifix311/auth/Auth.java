@@ -278,6 +278,7 @@ public final class Auth {
      * @since 0.1.0
      */
     public synchronized Observable<Party> signin(String email, String password) {
+        //TODO if token exists and not expired return existing party
 
         //initialize credential
         Credential credential = new Credential(email, password);

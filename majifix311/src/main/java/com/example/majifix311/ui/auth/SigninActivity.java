@@ -1,24 +1,29 @@
 package com.example.majifix311.ui.auth;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 import com.example.majifix311.BuildConfig;
 import com.example.majifix311.R;
 import com.example.majifix311.auth.Auth;
+import com.example.majifix311.models.Party;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -28,6 +33,9 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Predicate;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.adapter.rxjava2.HttpException;
 
 /**
  * Reactive Signin activity
@@ -182,11 +190,78 @@ public class SigninActivity extends AppCompatActivity {
                 .subscribe(new Consumer<Object>() {
                     @Override
                     public void accept(Object o) throws Exception {
-                        String email = emailTextInput.getText().toString();
-                        String password = passwordTextInput.getText().toString();
-                        Log.d(TAG, "Email: " + email);
-                        Log.d(TAG, "Password: " + password);
+                        signIn();
                     }
+                });
+    }
+
+    /**
+     * Signin based on current supplied credentials
+     */
+    private void signIn() {
+
+        //obtain signin credentials
+        String email = emailTextInput.getText().toString();
+        String password = passwordTextInput.getText().toString();
+
+        //hide keyboard
+        hideKeyboard();
+
+        //initialize signin progress dialog
+        final ProgressDialog progressDialog =
+                new ProgressDialog(SigninActivity.this);
+        progressDialog.setMessage(getString(R.string.auth_label_signin));
+        progressDialog.setIndeterminate(true);
+
+        //show signin progress dialog
+        progressDialog.show();
+
+        Auth auth = Auth.getInstance();
+        auth.signin(email, password)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new DisposableObserver<Party>() {
+                    @Override
+                    public void onNext(Party party) {
+
+                        //dismiss progress dialog
+                        progressDialog.dismiss();
+
+                        //notify signin succeed
+                        showMessage(R.string.auth_success_signin);
+
+                        //TODO fire party
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                        //dismiss progress dialog
+                        progressDialog.dismiss();
+
+                        //notify invalid credentials error
+                        if (e instanceof HttpException) {
+                            int code = ((HttpException) e).code();
+                            if (code == 403) {
+                                showMessage(R.string.auth_error_invalid_credentials);
+                            }
+                        }
+
+                        //notify no connection
+                        if (e.getCause() != null && e.getCause() instanceof UnknownHostException) {
+                            showMessage(R.string.auth_error_not_connected);
+                        }
+
+                        //TODO notify other errors
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        //TODO finish signin activity and
+                        //TODO navigate to secured ui
+                    }
+
                 });
     }
 
@@ -307,5 +382,38 @@ public class SigninActivity extends AppCompatActivity {
 
         return false;
 
+    }
+
+    /**
+     * Notify signin success or failure
+     *
+     * @param message
+     */
+    protected void showMessage(String message) {
+        Snackbar snackbar =
+                Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT);
+        snackbar.show();
+    }
+
+    /**
+     * Notify signin success or failure
+     *
+     * @param resId
+     */
+    protected void showMessage(int resId) {
+        String message = getString(resId);
+        showMessage(message);
+    }
+
+    /**
+     * Hide keyboard
+     * TODO use KeyboardUtils
+     */
+    public void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(passwordTextInput.getWindowToken(), 0);
+        }
     }
 }
