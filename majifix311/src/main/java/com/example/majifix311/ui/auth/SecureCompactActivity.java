@@ -18,7 +18,7 @@ import com.example.majifix311.models.Party;
  * @version 0.1.0
  * @since 0.1.0
  */
-public class SecureActivity extends AppCompatActivity {
+public class SecureCompactActivity extends AppCompatActivity {
 
     public static final int SIGNIN_REQUEST = 1;
 
@@ -36,7 +36,7 @@ public class SecureActivity extends AppCompatActivity {
         //check if token expire and direct to auth activity
         Boolean isTokenExpired = auth.isTokenExpired();
         if (isTokenExpired) {
-            Intent intent = new Intent(SecureActivity.this, SigninActivity.class);
+            Intent intent = new Intent(SecureCompactActivity.this, SigninActivity.class);
             startActivityForResult(intent, SIGNIN_REQUEST);
         }
 
@@ -52,6 +52,7 @@ public class SecureActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         //handle signin request
         if (requestCode == SIGNIN_REQUEST) {
             if (resultCode == RESULT_OK) {
@@ -66,10 +67,21 @@ public class SecureActivity extends AppCompatActivity {
 
                 //notify party is already present
                 onParty();
+            } else {
+                //TODO notify login required
+
+                //recreate
+                recreate();
+
             }
-        } else {
+
+        }
+
+        //handle other activity request
+        else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+
     }
 
     /**

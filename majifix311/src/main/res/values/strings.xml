@@ -27,6 +27,7 @@
     <string name="auth_error_invalid_password">Invalid Password</string>
     <string name="auth_error_invalid_credentials">Invalid e-mail or password</string>
     <string name="auth_error_not_connected">No Internet connection</string>
+    <string name="auth_error_not_signin">Signin required</string>
     <string name="auth_success_signin">Signin successfully</string>
 
 </resources>

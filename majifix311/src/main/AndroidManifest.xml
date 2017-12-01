@@ -20,7 +20,7 @@
             android:name=".ui.ProblemListActivity"
             android:label=""
             android:launchMode="singleTask" />
-        <activity android:name=".ui.auth.SecureActivity" />
+        <activity android:name=".ui.auth.SecureCompactActivity" />
         <activity android:name=".ui.auth.SigninActivity"></activity>
     </application>
 
