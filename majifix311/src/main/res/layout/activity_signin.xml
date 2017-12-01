@@ -50,7 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/auth_signin_button_height"
         android:layout_marginTop="@dimen/auth_signin_button_margin_top"
-        android:background="@drawable/signin_button"
+        android:background="@drawable/enabled_signin_button"
         android:text="@string/auth_label_signin"
         android:textColor="@android:color/white"
         android:textSize="@dimen/auth_signin_button_text_size" />

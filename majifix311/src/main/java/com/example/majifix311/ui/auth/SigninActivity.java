@@ -1,8 +1,11 @@
 package com.example.majifix311.ui.auth;
 
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -30,6 +33,7 @@ import io.reactivex.functions.Predicate;
  * Reactive Signin activity
  *
  * @see <a href="https://academy.realm.io/posts/donn-felker-reactive-android-ui-programming-with-rxbinding/">https://academy.realm.io/posts/donn-felker-reactive-android-ui-programming-with-rxbinding/</a>
+ * @see <a href="https://medium.com/@etiennelawlor/rxjava-on-the-sign-in-screen-9ecb66b88572">https://medium.com/@etiennelawlor/rxjava-on-the-sign-in-screen-9ecb66b88572</a>
  */
 public class SigninActivity extends AppCompatActivity {
 
@@ -257,10 +261,24 @@ public class SigninActivity extends AppCompatActivity {
     private void enableOrDisableSignInButton(int enableOrDisable) {
         switch (enableOrDisable) {
             case 1: // enable button
+                Drawable activeBackground = ContextCompat.getDrawable(this, R.drawable.enabled_signin_button);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    signInButton.setBackground(activeBackground);
+                } else {
+                    signInButton.setBackgroundDrawable(activeBackground);
+                }
                 signInButton.setEnabled(true);
+                signInButton.setTextColor(ContextCompat.getColor(this, android.R.color.white));
                 break;
             case 2: // disable button
+                Drawable disabledBackground = ContextCompat.getDrawable(this, R.drawable.disabled_signin_button);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    signInButton.setBackground(disabledBackground);
+                } else {
+                    signInButton.setBackgroundDrawable(disabledBackground);
+                }
                 signInButton.setEnabled(false);
+                signInButton.setTextColor(ContextCompat.getColor(this, R.color.auth_disable_text));
                 break;
         }
 
