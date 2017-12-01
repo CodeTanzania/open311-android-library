@@ -258,8 +258,11 @@ public class SigninActivity extends AppCompatActivity {
 
                     @Override
                     public void onComplete() {
-                        //TODO finish signin activity and
-                        //TODO navigate to secured ui
+                        //finish signin activity
+                        setResult(RESULT_OK);
+                        finish();
+
+                        //TODO add finish smooth animation
                     }
 
                 });

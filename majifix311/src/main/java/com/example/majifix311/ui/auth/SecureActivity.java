@@ -2,9 +2,11 @@ package com.example.majifix311.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 
 import com.example.majifix311.BuildConfig;
+import com.example.majifix311.R;
 import com.example.majifix311.auth.Auth;
 import com.example.majifix311.models.Party;
 
@@ -18,7 +20,10 @@ import com.example.majifix311.models.Party;
  */
 public class SecureActivity extends AppCompatActivity {
 
+    public static final int SIGNIN_REQUEST = 1;
+
     protected Party party;
+    private Auth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,20 +31,50 @@ public class SecureActivity extends AppCompatActivity {
 
         //ensure party exists
         //TODO move to MajiFix initialization
-        Auth auth = Auth.init(getApplicationContext(), BuildConfig.END_POINT);
+        auth = Auth.init(getApplicationContext(), BuildConfig.END_POINT);
 
         //check if token expire and direct to auth activity
         Boolean isTokenExpired = auth.isTokenExpired();
         if (isTokenExpired) {
-            finish();
             Intent intent = new Intent(SecureActivity.this, SigninActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, SIGNIN_REQUEST);
         }
 
         //set party & continue
         else {
             this.party = auth.getParty();
+
+            //notify party is already present
+            onParty();
         }
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //handle signin request
+        if (requestCode == SIGNIN_REQUEST) {
+            if (resultCode == RESULT_OK) {
+
+                //notify signin succeed
+                Snackbar snackbar =
+                        Snackbar.make(findViewById(android.R.id.content), R.string.auth_success_signin, Snackbar.LENGTH_SHORT);
+                snackbar.show();
+
+                //set current party and continue
+                this.party = auth.getParty();
+
+                //notify party is already present
+                onParty();
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    /**
+     * Called when party successfully sign in
+     */
+    protected void onParty() {
     }
 }
