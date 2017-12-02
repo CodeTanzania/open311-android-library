@@ -188,8 +188,8 @@ public class ReportServiceTest {
     private Predicate<TaggedProblemList> predicate(final boolean isPreliminary) {
         return new Predicate<TaggedProblemList>() {
             @Override
-            public boolean test(TaggedProblemList pair) throws Exception {
-                return pair.mPreliminary == isPreliminary;
+            public boolean test(TaggedProblemList taggedList) throws Exception {
+                return taggedList.mPreliminary == isPreliminary;
             }
         };
     }
