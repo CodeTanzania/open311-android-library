@@ -135,10 +135,11 @@ public class ReportService extends Service {
      * @param cacheSaveAlgo a Function for how to cache our network-retrieved data
      * @return a Transformer from network Observable to combined stream of fresh & cached
      */
-    public ObservableTransformer<ArrayList<Problem>, TaggedProblemList>
-    transform(final Observable<ArrayList<Problem>> cacheStream,
-              final Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>> cacheSaveAlgo,
-              final Scheduler runOn) {
+    public ObservableTransformer<ArrayList<Problem>, TaggedProblemList> transform(
+            final Observable<ArrayList<Problem>> cacheStream,
+            final Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>> cacheSaveAlgo,
+            final Scheduler runOn
+    ) {
         return new ObservableTransformer<ArrayList<Problem>, TaggedProblemList>() {
             @Override
             public ObservableSource<TaggedProblemList> apply(Observable<ArrayList<Problem>> networkStream) {

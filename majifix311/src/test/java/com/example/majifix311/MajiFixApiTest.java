@@ -28,8 +28,15 @@ import static junit.framework.Assert.assertTrue;
 @Config(constants = BuildConfig.class)
 public class MajiFixApiTest {
 
+    static String getEndpoint() {
+        String currentEndpoint = MajiFix.getBaseEndpoint();
+        if (currentEndpoint.equals(BuildConfig.END_POINT))
+            return null;
+        return currentEndpoint;
+    }
+
     @Test
-    public void problemsByPhoneNumberTest() throws IOException{
+    public void problemsByPhoneNumberTest() throws IOException {
         int responses = 42;
         String[] mock = Mocks.generateProblemQueryResponse(responses);
 
@@ -37,20 +44,29 @@ public class MajiFixApiTest {
         for (int i = 0; i < mock.length; i++) {
             server.enqueue(new MockResponse().setBody(mock[i]));
         }
-        server.start();
 
-        MajiFix.setBaseEndpoint(server.url("/").toString());
+        String endpoint = getEndpoint();
+        if (endpoint == null) {
+            server.start();
+            MajiFix.setBaseEndpoint(server.url("/").toString());
+        } else {
+            String[] split = endpoint.split("[:/]");
+            endpoint = split[split.length - 1];
+            server.start(Integer.valueOf(endpoint));
+        }
+
+
 
         TestObserver<ArrayList<Problem>> tester =
                 MajiFixAPI.getInstance().getProblemsByPhoneNumber("8675309")
-                .test();
+                        .test();
 
         assertTrue("Stream didn't terminate", tester.awaitTerminalEvent());
         assertEquals("Should get out as many problems as were requested",
                 responses,
-                ((ArrayList<Problem>)tester.getEvents().get(0).get(0)).size());
+                ((ArrayList<Problem>) tester.getEvents().get(0).get(0)).size());
         assertEquals("Made the wrong number of server calls", mock.length, server.getRequestCount());
+
+        server.shutdown();
     }
-
-
 }

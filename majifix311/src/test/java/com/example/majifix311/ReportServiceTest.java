@@ -92,10 +92,19 @@ public class ReportServiceTest {
     public void serviceShouldAttemptPost() throws IOException, InterruptedException {
         MockWebServer server = new MockWebServer();
         server.enqueue(new MockResponse().setBody(Mocks.VALID_SERVICE_REQUEST_GET));
-        server.start();
 
         MockReportService service = new MockReportService();
-        service.setMockEndpoint(server.url("/").toString());
+
+        String endpoint = MajiFixApiTest.getEndpoint();
+        if (endpoint == null) {
+            server.start();
+            service.setMockEndpoint(server.url("/").toString());
+        } else {
+            String[] split = endpoint.split("[:/]");
+            endpoint = split[split.length - 1];
+            server.start(Integer.valueOf(endpoint));
+        }
+
         service.onCreate();
         service.onStartCommand(getServiceIntent(), 0, 0);
 
@@ -121,6 +130,8 @@ public class ReportServiceTest {
 
         // TODO assert response was handled correctly.
         //assertNotNull(service.getReportedProblem());
+
+        server.shutdown();
     }
 
     private Intent getServiceIntent() {
