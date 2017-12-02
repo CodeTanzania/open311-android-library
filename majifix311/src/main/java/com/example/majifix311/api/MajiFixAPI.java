@@ -56,7 +56,6 @@ public class MajiFixAPI {
     private static final String TAG = "MajiFixAPI";
     private Retrofit mRetrofit;
     private MajiFixRetrofitApi mApi;
-    private Observable<ApiServiceGroup> mRequestCache;
 
     private MajiFixAPI() {
         initRetrofit();
@@ -111,43 +110,19 @@ public class MajiFixAPI {
     }
 
     public Single<ArrayList<Problem>> getProblemsByPhoneNumber(final String phoneNumber) {
-        Observable<ApiServiceRequestGetMany> initCall = generateCall(phoneNumber, 1);
+        final Single<ApiServiceRequestGetMany> initCall = generateCall(phoneNumber, 1).cache();
 
-        //Function<Observable<ApiServiceRequestGetMany>, ObservableSource<ApiServiceRequestGetMany>> depager =
-        //        new Function<Observable<ApiServiceRequestGetMany>, ObservableSource<ApiServiceRequestGetMany>>() {
-        //            @Override
-        //            public ObservableSource<ApiServiceRequestGetMany> apply(Observable<ApiServiceRequestGetMany> firstCall) throws Exception {
-        //                int numPages = firstCall.elementAt(0).blockingGet().getPages();
-        //                List<Observable<ApiServiceRequestGetMany>> pages = new ArrayList<>(numPages);
-        //                pages.add(0, firstCall);
-        //                for (int i = 1; i < numPages; i++) {
-        //                    pages.add(i, generateCall(phoneNumber, i + 1));
-        //                }
-        //                return Observable.concat(pages);
-        //            }
-        //        };
-        //
-        //Consumer<Notification<?>> notifier =
-        //        new Consumer<Notification<?>>() {
-        //            @Override
-        //            public void accept(Notification<?> notification) throws Exception {
-        //                System.out.println(notification + " at " + System.currentTimeMillis());
-        //            }
-        //        };
-
-        return /*initCall
-                .publish(depager)*/
-        Observable.range(1, Integer.MAX_VALUE)
-                .concatMap(new Function<Integer, ObservableSource<ApiServiceRequestGetMany>>() {
+        return initCall
+                .flatMapObservable(new Function<ApiServiceRequestGetMany, ObservableSource<ApiServiceRequestGetMany>>() {
                     @Override
-                    public ObservableSource<ApiServiceRequestGetMany> apply(Integer integer) throws Exception {
-                        return generateCall(phoneNumber, integer);
-                    }
-                })
-                .takeWhile(new Predicate<ApiServiceRequestGetMany>() {
-                    @Override
-                    public boolean test(ApiServiceRequestGetMany incoming) throws Exception {
-                        return incoming.getServicerequests().size() > 0;
+                    public ObservableSource<ApiServiceRequestGetMany> apply(ApiServiceRequestGetMany feed) throws Exception {
+                        int numPages = feed.getPages();
+                        List<Single<ApiServiceRequestGetMany>> pages = new ArrayList<>(numPages);
+                        pages.add(0, initCall);
+                        for (int i = 1; i < numPages; i++) {
+                            pages.add(i, generateCall(phoneNumber, i + 1));
+                        }
+                        return Single.concat(pages).toObservable();
                     }
                 })
                 .concatMap(new Function<ApiServiceRequestGetMany, Observable<ApiServiceRequestGet>>() {
@@ -159,8 +134,6 @@ public class MajiFixAPI {
                 .map(new Function<ApiServiceRequestGet, Problem>() {
                     @Override
                     public Problem apply(ApiServiceRequestGet apiServiceRequest) throws Exception {
-                        // convert the server object into something the app can use
-                        //System.out.println("Conversion taking place! "+apiServiceRequest);
                         return ApiModelConverter.convert(apiServiceRequest);
                     }
                 })
@@ -172,7 +145,7 @@ public class MajiFixAPI {
                 });
     }
 
-    private Observable<ApiServiceRequestGetMany> generateCall(String phoneNumber, int page) {
+    private Single<ApiServiceRequestGetMany> generateCall(String phoneNumber, int page) {
         return mApi.getReportsWPhoneNo(
                 getAuthToken(),
                 "{\"reporter.phone\":\"" + phoneNumber + "\"}",
@@ -198,7 +171,7 @@ public class MajiFixAPI {
         // Use CustomTypeFactory? https://stackoverflow.com/a/43459059
         @GET("/servicerequests")
         @Headers({"Accept: application/json", "Content-Type: application/json"})
-        Observable<ApiServiceRequestGetMany> getReportsWPhoneNo(
+        Single<ApiServiceRequestGetMany> getReportsWPhoneNo(
                 @Header("Authorization") String authorization,
                 @Query("query") String query,
                 @Query("page") int page
