@@ -23,7 +23,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListPopupWindow;
+import android.widget.PopupMenu;
+import android.widget.SimpleAdapter;
 
 import com.example.majifix311.models.Attachment;
 
@@ -66,7 +71,7 @@ public class AttachmentUtils {
     private static final int REQUEST_BROWSE_MEDIA_STORE = 2;
     private static final int REQUEST_EXTERNAL_STORAGE_PERMISSION = 3;
 
-    private static final int MAX_SIZE = 1024;
+    private static final int MAX_SIZE = 500;
     private static final int DEFAULT_JPEG_COMPRESSION_QUALITY = 70;
 
     private static boolean phoneHasCamera(PackageManager packageManager) {
@@ -236,8 +241,16 @@ public class AttachmentUtils {
     private static String getContentAsBase64String(String url) {
         // Get scaled bitmap
         Bitmap bitmap = getScaledBitmap(url, MAX_SIZE, MAX_SIZE);
+
+        // Attempt to rotate image
+        try {
+            bitmap = rotateImageBasedOnExifData(bitmap, url);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Compress and encode
         if (bitmap != null) {
-            // Compress and encode
             ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, DEFAULT_JPEG_COMPRESSION_QUALITY, byteArrayOS);
             return Base64.encodeToString(byteArrayOS.toByteArray(), Base64.DEFAULT);

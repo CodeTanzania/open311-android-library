@@ -67,6 +67,7 @@
     <string name="category_label">Category</string>
     <string name="location_label">Location</string>
     <string name="description_label">Description</string>
+    <string name="call_user">Call %s: %s</string>
 
     <!-- issue list -->
     <string name="tab_open">Open</string>

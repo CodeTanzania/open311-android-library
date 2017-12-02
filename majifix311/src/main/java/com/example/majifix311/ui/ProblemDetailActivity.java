@@ -1,23 +1,22 @@
 package com.example.majifix311.ui;
 
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.majifix311.R;
-import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Problem;
-import com.example.majifix311.utils.AttachmentUtils;
+import com.example.majifix311.ui.views.ExpandableImageView;
 import com.example.majifix311.utils.MapUtils;
+
+import java.util.Locale;
 
 public class ProblemDetailActivity extends Activity {
     private static final String PROBLEM_INTENT = "problem";
@@ -25,7 +24,7 @@ public class ProblemDetailActivity extends Activity {
 
     private Toolbar mToolbar;
     private ImageView mIvMap;
-    private ImageView mIvPhoto;
+    private ExpandableImageView mIvPhoto;
     private TextView mTvReporter;
     private TextView mTvCategory;
     private TextView mTvLocation;
@@ -49,9 +48,11 @@ public class ProblemDetailActivity extends Activity {
         }
         mProblem = getIntent().getParcelableExtra(PROBLEM_INTENT);
 
-        mToolbar = (Toolbar) findViewById(R.id.tb_problemDetail);
+        setToolbar();
+        setFab();
+
         mIvMap = (ImageView) findViewById(R.id.iv_map);
-        mIvPhoto = (ImageView) findViewById(R.id.iv_photo);
+        mIvPhoto = (ExpandableImageView) findViewById(R.id.iv_photo);
         mTvReporter = (TextView) findViewById(R.id.tv_reporter);
         mTvCategory = (TextView) findViewById(R.id.tv_category);
         mTvLocation = (TextView) findViewById(R.id.tv_location);
@@ -64,38 +65,38 @@ public class ProblemDetailActivity extends Activity {
         setProblemData();
     }
 
-    private void setProblemData() {
-        // title to appbar
+    private void setToolbar() {
+        // disable default animation so ticket number is always at top
+        CollapsingToolbarLayout layout = (CollapsingToolbarLayout) findViewById(R.id.ctl_problemDetail);
+        layout.setTitleEnabled(false);
+
+        // set title to appbar
+        mToolbar = (Toolbar) findViewById(R.id.tb_problemDetail);
         if (mToolbar != null && mProblem.getTicketNumber() != null) {
             mToolbar.setTitle(mProblem.getTicketNumber());
         }
-        // map and photos to slider
-        System.out.println("map size:"+mIvMap.getWidth() + mIvMap.getHeight());
-        MapUtils.setStaticMap(mIvMap, mProblem.getLocation());
-        mIvMap.post(new Runnable() {
+    }
+
+    private void setFab() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_problemDetail);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
-                MapUtils.setStaticMap(mIvMap, mProblem.getLocation());
+            public void onClick(View v) {
+                callUser();
             }
         });
-        System.out.println("has attachments:"+mProblem.hasAttachments());
-        if (mProblem.hasAttachments()) {
-            System.out.println("has attachments:"+mProblem.getAttachments().get(0).getMime());
-            Attachment attachment = mProblem.getAttachments().get(0);
-            if (attachment != null) {
-                Bitmap photo = AttachmentUtils.decodeFromBase64String(attachment.getContent());
-                if (photo != null) {
-                    mIvPhoto.setImageBitmap(photo);
-                }
-            }
-        }
+    }
 
-        // rest to text views
+    private void setProblemData() {
+        setMap();
+        setExpandableAttachment();
+
+        // set other data to text views
         if (mProblem.getReporter() != null) {
             String name = mProblem.getReporter().getName();
             String phone = mProblem.getReporter().getPhone();
             String toDisplay = name == null ? phone :
-                    name + (phone == null ? "" : "\n"+phone);
+                    name + (phone == null ? "" : "\n+"+phone);
 
             if (toDisplay != null) {
                 mTvReporter.setText(toDisplay);
@@ -110,6 +111,57 @@ public class ProblemDetailActivity extends Activity {
         }
         if (mProblem.getDescription() != null) {
             mTvDescription.setText(mProblem.getDescription());
+        }
+    }
+
+    private void setMap() {
+        // add map only when view is measured (so as to get correct sized map from server)
+        mIvMap.post(new Runnable() {
+            @Override
+            public void run() {
+                MapUtils.setStaticMap(mIvMap, mProblem.getLocation());
+                mIvMap.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        goToLocation();
+                    }
+                });
+            }
+        });
+    }
+
+    private void setExpandableAttachment() {
+        if (mProblem.hasAttachments()) {
+            mIvPhoto.setAttachment(mProblem.getAttachments().get(0));
+        } else {
+            mIvPhoto.setVisibility(View.GONE);
+        }
+    }
+
+    private void callUser() {
+        // create intent to start phone call
+        String phoneNumber = mProblem.getReporter().getPhone();
+        Uri phoneUri = Uri.parse("tel:" + phoneNumber);
+        String title = String.format(Locale.getDefault(),
+                getString(R.string.call_user), mProblem.getReporter().getName(), phoneNumber);
+        Intent intent = new Intent(Intent.ACTION_DIAL, phoneUri);
+
+        // dispatch intent
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            Intent chooser = Intent.createChooser(intent, title);
+            startActivity(chooser);
+        }
+    }
+
+    private void goToLocation() {
+        Uri gmmIntentUri = Uri.parse("google.navigation:q="
+                +mProblem.getLocation().getLatitude()+ ","+mProblem.getLocation().getLongitude());
+        Intent intent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        intent.setPackage("com.google.android.apps.maps");
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            Intent chooser = Intent.createChooser(intent, "Get directions to "+mProblem.getAddress()+":");
+            startActivity(chooser);
         }
     }
 }
