@@ -6,11 +6,10 @@ import android.support.annotation.StringDef;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 /**
- * This is used for Utility methods.
+ * This is used for Enum types.
  */
 
-public class Utils {
-
+public class Flags {
     // This can be used to save the state of a ui (see ProblemListActivity for an example)
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({NONE, EMPTY, LOADING, SUCCESS, ERROR})

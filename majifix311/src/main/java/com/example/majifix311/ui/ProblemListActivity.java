@@ -6,10 +6,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringDef;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
@@ -18,10 +18,8 @@ import com.example.majifix311.EventHandler;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
 import com.example.majifix311.models.Problem;
-import com.example.majifix311.utils.Utils;
+import com.example.majifix311.utils.Flags;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -29,18 +27,11 @@ import java.util.ArrayList;
  */
 
 public class ProblemListActivity extends AppCompatActivity implements ErrorFragment.OnReloadClickListener {
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({NONE, EMPTY, LOADING, SUCCESS, ERROR})
-    public @interface UiState {}
-    public static final String NONE = "none";
-    public static final String EMPTY = "empty";
-    public static final String LOADING = "loading";
-    public static final String SUCCESS = "success";
-    public static final String ERROR = "error";
 
-    @Utils.UiState
-    private String mUiState = Utils.NONE;
+    @Flags.UiState
+    private String mUiState = Flags.NONE;
     private int mFragmentContainerRes = R.id.frl_fragmentContainer;
+    private SwipeRefreshLayout mRefreshLayout;
     private FloatingActionButton mFab;
 
     private BroadcastReceiver mMyReportedProblemsReceived = new BroadcastReceiver() {
@@ -54,10 +45,8 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
                         showEmptyFragment();
                     }
                 } else {
+                    mRefreshLayout.setRefreshing(isPreliminary);
                     showListTabs(problems);
-                    if (isPreliminary) {
-                        // TODO show spinner
-                    }
                 }
             } else {
                 showErrorFragment();
@@ -69,6 +58,14 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+
+        mRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.srf_problem_list);
+        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                fetchMyReportedProblems();
+            }
+        });
 
         mFab = (FloatingActionButton) findViewById(R.id.fab_reportIssue);
         mFab.setOnClickListener(new View.OnClickListener() {
@@ -96,7 +93,7 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
         ReportService.fetchProblems(getBaseContext(),"255714095061");
 
         // only show loading fragment if issues are not currently shown
-        if (!mUiState.equals(Utils.SUCCESS)) {
+        if (!mUiState.equals(Flags.SUCCESS)) {
             showLoadingFragment();
         }
     }
@@ -109,36 +106,36 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
     }
 
     private void showLoadingFragment() {
-        switchOutFragment(Utils.LOADING, false, new ProgressBarFragment());
+        switchOutFragment(Flags.LOADING, false, new ProgressBarFragment());
     }
 
     private void showErrorFragment() {
-        switchOutFragment(Utils.ERROR, false, new ErrorFragment());
+        switchOutFragment(Flags.ERROR, false, new ErrorFragment());
 
         // show toast to inform user that there was a server error
         Toast.makeText(this, R.string.error_server, Toast.LENGTH_LONG).show();
     }
 
     private void showEmptyFragment() {
-        switchOutFragment(Utils.EMPTY, false, new EmptyListFragment());
+        switchOutFragment(Flags.EMPTY, false, new EmptyListFragment());
     }
 
     private void showListTabs(ArrayList<Problem> problems) {
         // show service requests grouped into tabs
         boolean isNew = switchOutFragment(
-                Utils.SUCCESS, true, ProblemTabFragment.getNewInstance(problems));
+                Flags.SUCCESS, true, ProblemTabFragment.getNewInstance(problems));
 
         if (!isNew) {
             // if items are already displayed, just update data
             ProblemTabFragment tabFragment = (ProblemTabFragment) getSupportFragmentManager()
-                    .findFragmentByTag(Utils.SUCCESS);
+                    .findFragmentByTag(Flags.SUCCESS);
             if (tabFragment != null) {
                 tabFragment.updateProblems(problems);
             }
         }
     }
 
-    private boolean switchOutFragment(@Utils.UiState String state, boolean showMenu, Fragment fragment) {
+    private boolean switchOutFragment(@Flags.UiState String state, boolean showMenu, Fragment fragment) {
         if (mUiState.equals(state)) {
             return false;
         }
