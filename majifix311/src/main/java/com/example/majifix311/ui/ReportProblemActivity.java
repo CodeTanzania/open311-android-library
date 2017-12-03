@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.FragmentActivity;
@@ -28,12 +29,16 @@ import android.widget.Toast;
 import com.example.majifix311.EventHandler;
 import com.example.majifix311.location.FetchAddressIntentService;
 import com.example.majifix311.location.LocationTracker;
+import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
 import com.example.majifix311.db.DatabaseHelper;
+import com.example.majifix311.ui.views.AttachmentButton;
+import com.example.majifix311.utils.AttachmentUtils;
 import com.example.majifix311.utils.EmptyErrorTrigger;
+import com.example.majifix311.utils.MapUtils;
 import com.example.majifix311.utils.KeyboardUtils;
 import com.example.majifix311.utils.MapUtils;
 
@@ -73,7 +78,11 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
     private TextView mTvLocationError;
     private LocationTracker mLocationTracker;
 
+    private AttachmentButton mAbPhoto;
+
     private LinearLayout mLlPhoto;
+    private ImageView mIvPhoto;
+    private String mAttachmentUrl;
 
     private Button mSubmitButton;
 
@@ -112,7 +121,7 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         mLlLocation = (LinearLayout) findViewById(R.id.ll_add_location);
         mIvLocation = (ImageView) findViewById(R.id.iv_location);
         mTvLocationError = (TextView) findViewById(R.id.tv_location_error);
-        mLlPhoto = (LinearLayout) findViewById(R.id.ll_add_photo);
+        mAbPhoto = (AttachmentButton) findViewById(R.id.ab_add_photo);
 
         // for required fields: watch for text changes, and if empty, display error
         mEtName.addTextChangedListener(new EmptyErrorTrigger(mTilName));
@@ -122,10 +131,10 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         mEtDescription.addTextChangedListener(new EmptyErrorTrigger(mTilDescription));
 
         // add click listeners
-        setupCategoryPicker();
-        setupLocationPicker();
         mSubmitButton = (Button) findViewById(R.id.btn_submit);
         mSubmitButton.setOnClickListener(this);
+        setupCategoryPicker();
+        setupLocationPicker();
 
         // start location tracker to get current GPS location
         mLocationTracker = new LocationTracker(this);
@@ -143,6 +152,15 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         if (mLocationTracker != null) {
             mLocationTracker.respondToActivityResult(requestCode, resultCode);
         }
+
+        // Attachment button will handle result of camera or file intents, and display image
+        boolean photoCapturedSuccess = mAbPhoto.displayOnActivityResult(requestCode, resultCode, data);
+
+        // If sucess, add attachment to problem.
+       if (photoCapturedSuccess) {
+            Attachment attachment = AttachmentUtils.getPicAsAttachment(mAbPhoto.getAttachmentUrl());
+            mBuilder.addAttachment(attachment);
+        }
     }
 
     @Override
@@ -151,6 +169,8 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         if (mLocationTracker != null) {
             mLocationTracker.respondToPermissions(requestCode, grantResults);
         }
+        // Attachment button will handle photo permissions requests
+        mAbPhoto.onRequestPermissionResult(requestCode, permissions, grantResults);
     }
 
     @Override

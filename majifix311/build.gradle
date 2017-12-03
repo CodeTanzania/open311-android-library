@@ -65,4 +65,6 @@ dependencies {
     // images
     compile 'com.github.bumptech.glide:glide:4.3.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
+	
+//    compile 'com.squareup.sqlbrite2:sqlbrite:2.0.0'
 }

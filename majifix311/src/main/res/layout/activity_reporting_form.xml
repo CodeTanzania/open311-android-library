@@ -112,28 +112,12 @@
 
             </LinearLayout>
 
-            <!-- Photo -->
-            <LinearLayout
-                android:id="@+id/ll_add_photo"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:layout_width="@dimen/form_icon"
-                    android:layout_height="@dimen/form_icon"
-                    android:contentDescription="@string/content_desc_photo"
-                    app:srcCompat="@drawable/ic_add_photo_black" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/hint_photo" />
-
-            </LinearLayout>
+        <!-- Photo -->
+        <com.example.majifix311.ui.views.AttachmentButton
+            android:id="@+id/ab_add_photo"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1" />
 
         </LinearLayout>
 
