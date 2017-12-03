@@ -306,7 +306,7 @@ public class Problem implements Parcelable {
 
         // TODO Does this go here?
         public Problem build(ApiServiceRequestGet response) {
-            System.out.println("Converting ApiServiceResponseGet into Problem. \n" + response);
+            //System.out.println("Converting ApiServiceResponseGet into Problem. \n" + response);
             if (response == null) {
                 return null;
             }
