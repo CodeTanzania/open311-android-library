@@ -21,7 +21,7 @@ class Mocks {
     static String mockAddress = "55 Marimbo St";
     static String mockDescription = "Horrible horrible horrible!!";
     static String mockTicketNumber = "M123";
-    static String mockStatusName = "Open";
+    static String mockStatusName = "Closed";
     static String mockStatusColor = "#0D47A1";
     static String mockCreatedAtString = "2015-10-22T09:03:46.845Z";
     static String mockUpdatedAtString = "2016-10-22T09:03:46.845Z";
@@ -101,4 +101,34 @@ class Mocks {
             "    \"wasResolveTicketSent\": false,\n" +
             "    \"uri\": \"https://dawasco.herokuapp.com/servicerequests/59edde56ae89b300040499b9\"" +
     "}";
+
+    static String[] generateProblemQueryResponse(int responseCount){
+        int responsesPerPage = 10;
+        int numberPages = (int)Math.ceil(responseCount/(double)responsesPerPage);
+        String[] ret = new String[numberPages];
+
+        for (int i = 0; i < numberPages; i++) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("{\n" +
+                    "    \"servicerequests\": [\n");
+            int j;
+            if(i == numberPages - 1) j = responseCount%responsesPerPage;
+            else j = responsesPerPage;
+            for (int k = 0; k < j; k++) {
+                sb.append(VALID_SERVICE_REQUEST_GET);
+                if(k < j-1) sb.append(",\n");
+            }
+            sb.append("\n],\n" +
+                    "    \"pages\": ");
+            sb.append(numberPages);
+            sb.append(",\n");
+            sb.append("    \"count\": ");
+            sb.append(responseCount);
+            sb.append("\n" +
+                    "}");
+            ret[i] = sb.toString();
+        }
+
+        return ret;
+    }
 }

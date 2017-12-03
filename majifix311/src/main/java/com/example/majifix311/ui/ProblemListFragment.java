@@ -14,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.majifix311.EventHandler;
@@ -33,6 +34,7 @@ public class ProblemListFragment extends Fragment implements ProblemListAdapter.
     private final static String PROBLEMS_INTENT = "problems";
 
     private RecyclerView rvProblems;
+    private ProgressBar mProgress;
     private List<Problem> mProblems;
     private ProblemListAdapter mAdapter;
 
@@ -45,21 +47,6 @@ public class ProblemListFragment extends Fragment implements ProblemListAdapter.
         return instance;
     }
 
-    // TODO: Move this to activity
-    private BroadcastReceiver mMyReportedProblemsReceived = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getBooleanExtra(EventHandler.IS_SUCCESS, false)) {
-                mProblems = intent.getParcelableArrayListExtra(EventHandler.REQUEST_LIST);
-                System.out.println("Problems Received! "+mProblems.size());
-                setupRecyclerView();
-            } else {
-                // TODO Implement error logic
-                Toast.makeText(getContext(), "Failure!", Toast.LENGTH_LONG).show();
-            }
-        }
-    };
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -70,24 +57,27 @@ public class ProblemListFragment extends Fragment implements ProblemListAdapter.
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         rvProblems = (RecyclerView) view.findViewById(R.id.rv_problem_list);
+        mProgress = (ProgressBar) view.findViewById(R.id.progress_problem_list);
 
-
-        // TODO Broadcast management should be handled by activity
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mMyReportedProblemsReceived,
-                new IntentFilter(EventHandler.BROADCAST_MY_PROBLEMS_FETCHED));
-
-        ReportService.fetchProblems(getContext(),"255714095061");
+        if (getArguments() != null) {
+            mProblems = getArguments().getParcelableArrayList(PROBLEMS_INTENT);
+        }
+        if (mProblems != null) {
+            setupRecyclerView();
+        }
     }
 
     private void setupRecyclerView() {
-        mAdapter = new ProblemListAdapter(mProblems, this);
-        rvProblems.setAdapter(mAdapter);
-        rvProblems.setLayoutManager(
-                new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-        rvProblems.addItemDecoration(
-                new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
-        rvProblems.setHasFixedSize(true); // layout dimens of each item will always be consistent
-        rvProblems.setNestedScrollingEnabled(true);
+        if (getActivity() != null && isAdded()) {
+            mAdapter = new ProblemListAdapter(mProblems, this);
+            rvProblems.setAdapter(mAdapter);
+            rvProblems.setLayoutManager(
+                    new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+            rvProblems.addItemDecoration(
+                    new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
+            rvProblems.setHasFixedSize(true); // layout dimens of each item will always be consistent
+            rvProblems.setNestedScrollingEnabled(true);
+        }
     }
 
     @Override

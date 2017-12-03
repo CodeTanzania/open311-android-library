@@ -1,6 +1,10 @@
-<resources>
-    <string name="app_name">SimpleMajifixApp</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" tools:override="true">SimpleMajifixApp</string>
     <string name="report_issue">Report</string>
     <string name="see_list">See List</string>
+<<<<<<< HEAD
     <string name="secured_activity">Secured</string>
+=======
+
+>>>>>>> develop
 </resources>

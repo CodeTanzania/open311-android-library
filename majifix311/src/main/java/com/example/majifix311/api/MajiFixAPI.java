@@ -1,5 +1,6 @@
 package com.example.majifix311.api;
 
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import com.example.majifix311.BuildConfig;
@@ -15,7 +16,10 @@ import org.reactivestreams.Subscriber;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Notification;
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.ObservableTransformer;
 import io.reactivex.Observer;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
@@ -23,6 +27,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -34,27 +39,29 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
+import static android.support.annotation.VisibleForTesting.PACKAGE_PRIVATE;
+
 /**
  * This provides the endpoints for the MajiFix API.
- *
+ * <p>
  * Thanks to the following resources:
- *   https://medium.com/3xplore/handling-api-calls-using-retrofit-2-and-rxjava-2-1871c891b6ae
- *   http://blog.danlew.net/2014/09/15/grokking-rxjava-part-1/
+ * https://medium.com/3xplore/handling-api-calls-using-retrofit-2-and-rxjava-2-1871c891b6ae
+ * http://blog.danlew.net/2014/09/15/grokking-rxjava-part-1/
  */
 
-class MajiFixAPI {
+@VisibleForTesting(otherwise = PACKAGE_PRIVATE)
+public class MajiFixAPI {
     private static MajiFixAPI mSingleton;
 
     private static final String TAG = "MajiFixAPI";
     private Retrofit mRetrofit;
     private MajiFixRetrofitApi mApi;
-    private Observable<ApiServiceGroup> mRequestCache;
 
     private MajiFixAPI() {
         initRetrofit();
     }
 
-    static MajiFixAPI getInstance() {
+    public static MajiFixAPI getInstance() {
         if (mSingleton == null) {
             mSingleton = new MajiFixAPI();
         }
@@ -95,25 +102,30 @@ class MajiFixAPI {
                     @Override
                     public Problem apply(ApiServiceRequestGet apiServiceRequest) throws Exception {
                         // convert the server object into something the app can use
-                        System.out.println("Conversion taking place! "+apiServiceRequest);
+                        System.out.println("Conversion taking place! " + apiServiceRequest);
                         return ApiModelConverter.convert(apiServiceRequest);
                     }
                 })
                 .subscribe(onNext, onError);
     }
 
-    void getProblemsByPhoneNumber(SingleObserver<ArrayList<Problem>> observer, String phoneNumber){
+    public Single<ArrayList<Problem>> getProblemsByPhoneNumber(final String phoneNumber) {
+        final Single<ApiServiceRequestGetMany> initCall = generateCall(phoneNumber, 1).cache();
 
-        String test = "{\"reporter.phone\":\"" + phoneNumber + "\"}";
-        Log.d(TAG, "getProblemsByPhoneNumber: " + test);
-        Single<ApiServiceRequestGetMany> call = mApi.getReportsWPhoneNo(getAuthToken(),test
-                );
-
-        ArrayList<Problem> problems = new ArrayList<>();
-
-        call.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .flatMapObservable(new Function<ApiServiceRequestGetMany,Observable<ApiServiceRequestGet>>(){
+        return initCall
+                .flatMapObservable(new Function<ApiServiceRequestGetMany, ObservableSource<ApiServiceRequestGetMany>>() {
+                    @Override
+                    public ObservableSource<ApiServiceRequestGetMany> apply(ApiServiceRequestGetMany feed) throws Exception {
+                        int numPages = feed.getPages();
+                        List<Single<ApiServiceRequestGetMany>> pages = new ArrayList<>(numPages);
+                        pages.add(0, initCall);
+                        for (int i = 1; i < numPages; i++) {
+                            pages.add(i, generateCall(phoneNumber, i + 1));
+                        }
+                        return Single.concat(pages).toObservable();
+                    }
+                })
+                .concatMap(new Function<ApiServiceRequestGetMany, Observable<ApiServiceRequestGet>>() {
                     @Override
                     public Observable<ApiServiceRequestGet> apply(ApiServiceRequestGetMany getMany) throws Exception {
                         return Observable.fromIterable(getMany.getServicerequests());
@@ -122,25 +134,30 @@ class MajiFixAPI {
                 .map(new Function<ApiServiceRequestGet, Problem>() {
                     @Override
                     public Problem apply(ApiServiceRequestGet apiServiceRequest) throws Exception {
-                        // convert the server object into something the app can use
-                        System.out.println("Conversion taking place! "+apiServiceRequest);
                         return ApiModelConverter.convert(apiServiceRequest);
                     }
                 })
-                .collectInto(problems, new BiConsumer<List<Problem>, Problem>() {
+                .collectInto(new ArrayList<Problem>(), new BiConsumer<List<Problem>, Problem>() {
                     @Override
                     public void accept(List<Problem> list, Problem problem) throws Exception {
                         list.add(problem);
                     }
-                })
-                .subscribe(observer);
+                });
+    }
+
+    private Single<ApiServiceRequestGetMany> generateCall(String phoneNumber, int page) {
+        return mApi.getReportsWPhoneNo(
+                getAuthToken(),
+                "{\"reporter.phone\":\"" + phoneNumber + "\"}",
+                page
+        );
     }
 
     private String getAuthToken() {
         //TODO obfuscate token
-        String authToken = "Bearer "+ BuildConfig.APP_TOKEN;
-        System.out.println("Auth token: "+authToken);
-        return "Bearer "+ BuildConfig.APP_TOKEN;
+        String authToken = "Bearer " + BuildConfig.MAJIFIX_API_TOKEN;
+        System.out.println("Auth token: " + authToken);
+        return authToken;
     }
 
     private interface MajiFixRetrofitApi {
@@ -155,8 +172,9 @@ class MajiFixAPI {
         @GET("/servicerequests")
         @Headers({"Accept: application/json", "Content-Type: application/json"})
         Single<ApiServiceRequestGetMany> getReportsWPhoneNo(
-            @Header("Authorization") String authorization,
-            @Query("query") String query
+                @Header("Authorization") String authorization,
+                @Query("query") String query,
+                @Query("page") int page
         );
 
         @POST("/servicerequests")
@@ -164,8 +182,5 @@ class MajiFixAPI {
         Observable<ApiServiceRequestGet> postProblem(
                 @Header("Authorization") String authorization,
                 @Body ApiServiceRequestPost newProblem);
-
-
-
     }
 }
