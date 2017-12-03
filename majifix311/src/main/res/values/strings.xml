@@ -1,5 +1,14 @@
-<resources>
-    <string name="app_name">majifix311</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" tools:override="true">majifix311</string>
+    <string name="mapbox_style" translatable="false">mapbox://styles/mapbox/streets-v10</string>
+
+    <!--generic-->
+    <string name="default_content_description">icon</string>
+
+    <!--errors-->
+    <string name="network_error">Please check your internet connection and try again</string>
+    <string name="error_server">Error loading data from the server</string>
+    <string name="error_no_reported">You have not reported any issue.</string>
 
     <!--report issue form-->
     <string name="title_report">Report</string>
@@ -7,6 +16,7 @@
     <string name="hint_phone">Phone No: 255</string>
     <string name="hint_category">Category</string>
     <string name="hint_location">Add Location</string>
+    <string name="hint_finding_location">Finding Location</string>
     <string name="hint_photo">Add Photo</string>
     <string name="hint_ward">Ward</string>
     <string name="hint_street">Street</string>
@@ -18,4 +28,29 @@
     <string name="action_select_category">What type of problem is this?</string>
     <string name="action_select">Select</string>
     <string name="action_close">Close</string>
+    <string name="action_from_camera">Take new photo</string>
+    <string name="action_from_gallery">Use existing photo</string>
+
+    <!--select location fragment-->
+    <string name="location_marker_title">Problem Location</string>
+    <string name="location_marker_description">This is where the problem is</string>
+    <string name="default_coordinate_display">Coordinates unknown</string>
+    <string name="default_address_display">Location unknown</string>
+    <string name="coordinate_display">Latitude: %1$s, Longitude: %2$s</string>
+    <string name="label_location_selector">Location of Problem:</string>
+    <string name="use_location">Use Location</string>
+    <string name="change_address">Change Address</string>
+    <string name="location_permission_dialog_title">GPS Point is necessary to help DAWASCO find the problem.</string>
+    <string name="location_permission_dialog_description">Please allow the app to enable GPS.</string>
+    <string name="location_permission_denied">You must enable GPS to submit location.</string>
+    <string name="location_not_available">Location Not Available</string>
+    <string name="invalid_lat_long_used">Invalid longitude or latitude</string>
+    <string name="no_address_found">No address found</string>
+    <string name="address_found">Address found</string>
+
+    <!-- issue list -->
+    <string name="tab_open">Open</string>
+    <string name="tab_closed">Closed</string>
+    <string name="tab_all">All</string>
+    <string name="refresh">TRY AGAIN</string>
 </resources>

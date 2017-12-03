@@ -1,5 +1,6 @@
 package com.example.majifix311;
 
+import com.example.majifix311.api.ApiModelConverter;
 import com.example.majifix311.api.models.ApiService;
 import com.example.majifix311.api.models.ApiServiceGroup;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
@@ -17,7 +18,11 @@ import org.robolectric.annotation.Config;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observer;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Predicate;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.subscribers.TestSubscriber;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -67,12 +72,18 @@ public class DatabaseHelperTest {
 
     @Test
     public void canWriteProblemsToDatabase() {
-        List<ApiServiceRequestGet> serverResponses = new ArrayList<>(1);
-        ApiServiceRequestGet mockResponse = ProblemTest.buildMockServerResponse();
-        serverResponses.add(mockResponse);
+        final ArrayList<Problem> problems = new ArrayList<>(1);
+        ApiServiceRequestGet before = ProblemTest.buildMockServerResponse();
+        Problem mockProblem = ApiModelConverter.convert(before);
+        problems.add(mockProblem);
 
-        mHelper.saveMyReportedProblems(
-                serverResponses, onProblemsSavedInDatabase(), onError(), false);
+        mHelper.saveMyReportedProblems(problems)
+                .subscribe(new Consumer<ArrayList<Problem>>() {
+                    @Override
+                    public void accept(ArrayList<Problem> problems) throws Exception {
+                        mProblemResult = problems;
+                    }
+                });
 
         assertNotNull(mProblemResult);
         ProblemTest.assertGetMatchesMock(mProblemResult.get(0));
@@ -85,16 +96,6 @@ public class DatabaseHelperTest {
                 System.out.println("onRetrievedFromNetwork after Database save! "+categories);
                 mCategoriesResult = categories;
                 //EventHandler.sendResultReceived(mContext);
-            }
-        };
-    }
-
-    private Consumer<List<Problem>> onProblemsSavedInDatabase() {
-        return new Consumer<List<Problem>>() {
-            @Override
-            public void accept(List<Problem> problems) throws Exception {
-                System.out.println("onRetrievedFromNetwork after Database save! "+problems);
-                mProblemResult = problems;
             }
         };
     }
