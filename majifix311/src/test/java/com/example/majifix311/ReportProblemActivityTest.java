@@ -15,7 +15,6 @@ import android.widget.TextView;
 import com.example.majifix311.api.ReportService;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
-import com.example.majifix311.shadows.ShadowAttachmentUtils;
 import com.example.majifix311.ui.ReportProblemActivity;
 import com.example.majifix311.ui.views.AttachmentButton;
 import com.example.majifix311.utils.AttachmentUtils;
@@ -47,7 +46,7 @@ import static org.robolectric.Shadows.shadowOf;
  */
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, shadows = {ShadowAttachmentUtils.class})
+@Config(constants = BuildConfig.class)
 public class ReportProblemActivityTest {
     private ReportProblemActivity mActivity;
     private EditText mNameView;

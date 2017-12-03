@@ -63,7 +63,6 @@ public class ReportService extends Service {
 
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
-        System.out.println("Service started");
         if (intent != null && intent.getAction() != null) {
             switch (intent.getAction()) {
                 case START_FETCH_PROBLEMS_ACTION:

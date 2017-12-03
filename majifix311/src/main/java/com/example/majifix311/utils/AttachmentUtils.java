@@ -205,8 +205,13 @@ public class AttachmentUtils {
     }
 
     public static Bitmap decodeFromBase64String(String content) {
-        byte[] decodedBytes = Base64.decode(content, 0);
-        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+        try {
+            byte[] decodedBytes = Base64.decode(content, 0);
+            return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+        } catch (IllegalArgumentException e) {
+            // attachment string was not encoded correctly
+            return null;
+        }
     }
 
     /** This extracts a photo from a file to sets it to a given imageview */
