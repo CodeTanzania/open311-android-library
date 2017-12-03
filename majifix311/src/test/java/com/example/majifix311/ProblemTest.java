@@ -4,13 +4,12 @@ import android.location.Location;
 import android.os.Parcel;
 
 import com.example.majifix311.api.ApiModelConverter;
-import com.example.majifix311.api.models.ApiServiceRequest;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
 import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
-import com.example.majifix311.models.Reporter;
+import com.example.majifix311.utils.ProblemCollections;
 import com.google.gson.Gson;
 
 import org.junit.Before;
@@ -19,7 +18,9 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import static com.example.majifix311.Mocks.*;
 import static junit.framework.Assert.assertEquals;
@@ -141,6 +142,46 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertFalse(builder.isValidEmail(invalid));
     }
 
+    @Test
+    public void problemsAreSortedByDate() {
+        Problem.Builder builder = new Problem.Builder(null);
+
+        Calendar stoneage = Calendar.getInstance();
+        stoneage.setTimeInMillis(100);
+        Calendar pyramids = Calendar.getInstance();
+        pyramids.setTimeInMillis(200);
+        Calendar castles = Calendar.getInstance();
+        castles.setTimeInMillis(300);
+        Calendar skyscrapers = Calendar.getInstance();
+        skyscrapers.setTimeInMillis(400);
+
+        Problem p1 = builder.buildWithoutValidation(null, null, null,
+                null, null, null, null, null,
+                "1", null, stoneage, null, null, null);
+        Problem p2 = builder.buildWithoutValidation(null, null, null,
+                null, null, null, null, null,
+                "1", null, skyscrapers, null, null, null);
+        Problem p3 = builder.buildWithoutValidation(null, null, null,
+                null, null, null, null, null,
+                "1", null, pyramids, null, null, null);
+        Problem p4 = builder.buildWithoutValidation(null, null, null,
+                null, null, null, null, null,
+                "1", null, castles, null, null, null);
+
+        List<Problem> problems = new ArrayList<>(2);
+        problems.add(p1);
+        problems.add(p2);
+        problems.add(p3);
+        problems.add(p4);
+
+        ProblemCollections.sortByDate(problems);
+
+        assertEquals(p2, problems.get(0));
+        assertEquals(p4, problems.get(1));
+        assertEquals(p3, problems.get(2));
+        assertEquals(p1, problems.get(3));
+    }
+
     public static Problem buildMockProblem(Problem.Builder.InvalidCallbacks listener) {
         Problem.Builder builder = new Problem.Builder(listener);
         builder.setUsername(mockName);
@@ -195,6 +236,7 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals("Ticket number should be correct", mockTicketNumber, problem.getTicketNumber());
         assertEquals("Status name should be correct", mockStatusName, problem.getStatus().getName());
         assertEquals("Status color should be correct", mockStatusColor, problem.getStatus().getColor());
+        assertEquals("Status boolean should be correct", false, problem.getStatus().isOpen());
 
         DateUtilTest.testCalendar(problem.getCreatedAt(), 2015, Calendar.OCTOBER, 22, 9, 3, 46);
         DateUtilTest.testCalendar(problem.getUpdatedAt(), 2016, Calendar.OCTOBER, 22, 9, 3, 46);

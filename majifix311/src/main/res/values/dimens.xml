@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="form_icon">72dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="tab_height">48dp</dimen>
 </resources>

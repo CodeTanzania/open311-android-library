@@ -2,8 +2,13 @@
     <string name="app_name" tools:override="true">majifix311</string>
     <string name="mapbox_style" translatable="false">mapbox://styles/mapbox/streets-v10</string>
 
+    <!--generic-->
+    <string name="default_content_description">icon</string>
+
     <!--errors-->
     <string name="network_error">Please check your internet connection and try again</string>
+    <string name="error_server">Error loading data from the server</string>
+    <string name="error_no_reported">You have not reported any issue.</string>
 
     <!--report issue form-->
     <string name="title_report">Report</string>
@@ -42,4 +47,10 @@
     <string name="invalid_lat_long_used">Invalid longitude or latitude</string>
     <string name="no_address_found">No address found</string>
     <string name="address_found">Address found</string>
+
+    <!-- issue list -->
+    <string name="tab_open">Open</string>
+    <string name="tab_closed">Closed</string>
+    <string name="tab_all">All</string>
+    <string name="refresh">TRY AGAIN</string>
 </resources>

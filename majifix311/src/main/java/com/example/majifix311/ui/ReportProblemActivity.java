@@ -5,10 +5,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
 import android.support.annotation.NonNull;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,7 +21,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -35,16 +37,16 @@ import com.example.majifix311.models.Problem;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
 import com.example.majifix311.db.DatabaseHelper;
-import com.example.majifix311.ui.views.AttachmentButton;
 import com.example.majifix311.utils.AttachmentUtils;
+import com.example.majifix311.ui.views.AttachmentButton;
 import com.example.majifix311.utils.EmptyErrorTrigger;
 import com.example.majifix311.utils.MapUtils;
 import com.example.majifix311.utils.KeyboardUtils;
-import com.example.majifix311.utils.MapUtils;
 
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
+
 
 /**
  * This activity is for submitting problems to a municipal company that uses the majifix system.
@@ -233,6 +235,9 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
     }
 
     private void submit() {
+        // Clear location error so it can be reset as necessary
+        updateLocationIcon(false);
+
         // Creates a problem using a builder which will validate required inputs
         mBuilder.setUsername(mEtName.getText().toString());
         mBuilder.setPhoneNumber(mEtPhone.getText().toString());

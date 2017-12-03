@@ -6,6 +6,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.provider.BaseColumns;
 
+import com.example.majifix311.api.models.ApiAttachment;
+import com.example.majifix311.api.models.ApiLocation;
+import com.example.majifix311.api.models.ApiReporter;
+import com.example.majifix311.api.models.ApiService;
+import com.example.majifix311.api.models.ApiServiceRequestGet;
+import com.example.majifix311.api.models.ApiStatus;
 import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
@@ -216,7 +222,7 @@ public class ProblemContract {
         }
         cursor.close();
 
-        // todo: sort?
+        // todo: sortByDate?
 
         return problems;
     }
