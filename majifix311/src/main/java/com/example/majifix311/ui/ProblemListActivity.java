@@ -80,7 +80,11 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
                 startActivity(startReportIntent);
             }
         });
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         fetchMyReportedProblems();
     }
 
@@ -106,8 +110,8 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
             LocalBroadcastManager.getInstance(getBaseContext()).registerReceiver(mMyReportedProblemsReceived,
                     new IntentFilter(EventHandler.BROADCAST_MY_PROBLEMS_FETCHED));
 
-            ReportService.fetchProblems(getBaseContext(), "12");
-//        ReportService.fetchProblems(getBaseContext(),"255714095061");
+//            ReportService.fetchProblems(getBaseContext(), "12");
+            ReportService.fetchProblems(getBaseContext(), "255714095061");
 
             // only show loading fragment if issues are not currently shown
             if (!mUiState.equals(Flags.SUCCESS)) {
