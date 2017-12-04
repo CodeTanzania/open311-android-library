@@ -14,10 +14,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
@@ -37,7 +34,7 @@ import static junit.framework.Assert.assertTrue;
  * @author lally elias
  */
 
-@Config(sdk = 23)
+@Config(sdk = 23, constants = BuildConfig.class)
 @RunWith(RobolectricTestRunner.class)
 public class AuthTest {
 
@@ -127,7 +124,7 @@ public class AuthTest {
     public void testShouldBeAbleToSetPartyWithToken() {
 
         Party joe =
-                new Party("Joe", "don@joe.j", "255714199299", BuildConfig.APP_TOKEN);
+                new Party("Joe", "don@joe.j", "255714199299", BuildConfig.MAJIFIX_API_TOKEN);
         Auth auth = Auth.getInstance();
 
         auth.setParty(joe);
@@ -213,11 +210,14 @@ public class AuthTest {
 
         @Override
         public Observable<Response> signin(Auth.Credential credential) {
-            Auth auth = Auth.getInstance();
-            InputStream stream =
-                    AuthTest.this.getClass().getClassLoader().getResourceAsStream("auth_200_response.json");
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-            Response response = auth.getGson().fromJson(reader, Response.class);
+
+            //compose response
+            Response response = new Response();
+            Party party = new Party("John Doe", "jd@jd.com", "25571665232");
+            response.setParty(party);
+            response.setToken(BuildConfig.MAJIFIX_API_TOKEN);
+            response.setSuccess(true);
+
             return this.delegate.returningResponse(response).signin(credential);
         }
     }
