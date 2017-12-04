@@ -149,8 +149,7 @@ public class ReportProblemActivityTest {
     @Test
     public void canAddAttachmentToPost() {
         // mock taking photo by setting attachment url to file
-        Bitmap bitmap = BitmapFactory.decodeResource(mActivity.getResources(), R.drawable.ic_add_photo_black);
-        File file = createMockFile(bitmap);
+        File file = Mocks.createMockFile();
         mAttachmentButton.setAttachmentUrl(file.getAbsolutePath());
 
         setFieldsAndSubmit(mockName, mockNumber, mockCategory,
@@ -160,13 +159,9 @@ public class ReportProblemActivityTest {
         Problem sent = receivedIntent.getParcelableExtra(ReportService.NEW_PROBLEM_INTENT);
 
         assertNotNull("Attachment should be sent", sent.getAttachments());
-        assertNotNull("Attachment should not be null", sent.getAttachments().get(0));
-        assertNotNull("Attachment name should not be null", sent.getAttachments().get(0).getName());
-        assertNotNull("Attachment caption should not be null", sent.getAttachments().get(0).getCaption());
-        assertNotNull("Attachment mime should not be null", sent.getAttachments().get(0).getMime());
-        assertNotNull("Attachment content should not be null", sent.getAttachments().get(0).getContent());
-
-        Bitmap afterSend = AttachmentUtils.decodeFromBase64String(sent.getAttachments().get(0).getContent());
+        String url = sent.getAttachments().get(0);
+        assertNotNull("Attachment url should not be null", url);
+        Bitmap afterSend = AttachmentUtils.getScaledBitmap(url, 125, 125);
         assertNotNull("Attachment content should be real bitmap", afterSend);
     }
 
@@ -190,22 +185,4 @@ public class ReportProblemActivityTest {
 
         mSubmitButton.performClick();
     }
-
-    private File createMockFile(Bitmap bitmap) {
-        String filename = "pippo.png";
-        File sd = Environment.getExternalStorageDirectory();
-        File dest = new File(sd, filename);
-
-        try {
-            FileOutputStream out = new FileOutputStream(dest);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
-            out.flush();
-            out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return dest;
-    }
-
-
 }

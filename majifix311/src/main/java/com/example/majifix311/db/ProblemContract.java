@@ -95,7 +95,7 @@ public class ProblemContract {
                 values.put(Entry.COLUMN_ADDRESS, problem.getAddress());
                 values.put(Entry.COLUMN_DESCRIPTION, problem.getDescription());
 
-                List<Attachment> attachments = problem.getAttachments();
+                List<String> attachments = problem.getAttachments();
                 if (attachments != null && attachments.size() > 0) {
                     String json = new Gson().toJson(attachments);
                     values.put(Entry.COLUMN_ATTACHMENT_JSON, json);
@@ -191,8 +191,8 @@ public class ProblemContract {
             //TODO Implement attachments
             String attachmentJson = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_ATTACHMENT_JSON);
 
-            Type listType = new TypeToken<ArrayList<Attachment>>(){}.getType();
-            List<Attachment> attachments = new Gson().fromJson(attachmentJson, listType);
+            Type listType = new TypeToken<ArrayList<String>>(){}.getType();
+            List<String> attachments = new Gson().fromJson(attachmentJson, listType);
 
             // status
             boolean isOpen = cursor.getInt(

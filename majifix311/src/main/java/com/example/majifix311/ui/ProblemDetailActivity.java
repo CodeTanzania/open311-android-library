@@ -131,11 +131,17 @@ public class ProblemDetailActivity extends Activity {
     }
 
     private void setExpandableAttachment() {
-        if (mProblem.hasAttachments()) {
-            mIvPhoto.setAttachment(mProblem.getAttachments().get(0));
-        } else {
-            mIvPhoto.setVisibility(View.GONE);
-        }
+        // add image only when view is measured (so as to load the correctly sized bitmap from file)
+        mIvPhoto.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mProblem.hasAttachments()) {
+                    mIvPhoto.setAttachment(mProblem.getAttachments().get(0));
+                } else {
+                    mIvPhoto.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     private void callUser() {

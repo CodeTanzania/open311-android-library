@@ -1,8 +1,14 @@
 package com.example.majifix311;
 
+import android.graphics.Bitmap;
 import android.location.Location;
+import android.os.Environment;
 
 import com.example.majifix311.models.Category;
+import com.example.majifix311.utils.AttachmentUtils;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 /**
  * This is used as a quick and dirty way to create mock server responses.
@@ -130,5 +136,26 @@ class Mocks {
         }
 
         return ret;
+    }
+
+    public static File createMockFile() {
+        Bitmap bitmap = AttachmentUtils.decodeFromBase64String(mockAttachmentContent);
+        return createMockFile(bitmap);
+    }
+
+    public static File createMockFile(Bitmap bitmap) {
+        String filename = "pippo.png";
+        File sd = Environment.getExternalStorageDirectory();
+        File dest = new File(sd, filename);
+
+        try {
+            FileOutputStream out = new FileOutputStream(dest);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 }

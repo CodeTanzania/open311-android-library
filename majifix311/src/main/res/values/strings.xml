@@ -74,4 +74,5 @@
     <string name="tab_closed">Closed</string>
     <string name="tab_all">All</string>
     <string name="refresh">TRY AGAIN</string>
+    <string name="permission_required_list_view">Permission is required to retrieve issues</string>
 </resources>

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -17,7 +18,9 @@ import android.widget.Toast;
 import com.example.majifix311.EventHandler;
 import com.example.majifix311.R;
 import com.example.majifix311.api.ReportService;
+import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Problem;
+import com.example.majifix311.utils.AttachmentUtils;
 import com.example.majifix311.utils.Flags;
 
 import java.util.ArrayList;
@@ -37,9 +40,9 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
     private BroadcastReceiver mMyReportedProblemsReceived = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            boolean isPreliminary = intent.getBooleanExtra(EventHandler.IS_PRELIMINARY_DATA,false);
             if (intent.getBooleanExtra(EventHandler.IS_SUCCESS, false)) {
                 ArrayList<Problem> problems = intent.getParcelableArrayListExtra(EventHandler.REQUEST_LIST);
-                boolean isPreliminary = intent.getBooleanExtra(EventHandler.IS_PRELIMINARY_DATA,false);
                 if (problems == null || problems.isEmpty()) {
                     if (!isPreliminary) {
                         showEmptyFragment();
@@ -49,6 +52,7 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
                     showListTabs(problems);
                 }
             } else {
+                mRefreshLayout.setRefreshing(isPreliminary);
                 showErrorFragment();
             }
         }
@@ -81,20 +85,36 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (AttachmentUtils.permissionGranted(requestCode, grantResults)) {
+            fetchMyReportedProblems();
+        } else {
+            Toast.makeText(getBaseContext(), R.string.permission_required_list_view, Toast.LENGTH_LONG).show();
+            finish();
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMyReportedProblemsReceived);
         super.onDestroy();
     }
 
     private void fetchMyReportedProblems() {
-        LocalBroadcastManager.getInstance(getBaseContext()).registerReceiver(mMyReportedProblemsReceived,
-                new IntentFilter(EventHandler.BROADCAST_MY_PROBLEMS_FETCHED));
+        if (AttachmentUtils.hasPermissions(this)) {
+            LocalBroadcastManager.getInstance(getBaseContext()).registerReceiver(mMyReportedProblemsReceived,
+                    new IntentFilter(EventHandler.BROADCAST_MY_PROBLEMS_FETCHED));
 
-        ReportService.fetchProblems(getBaseContext(),"255714095061");
+            ReportService.fetchProblems(getBaseContext(), "12");
+//        ReportService.fetchProblems(getBaseContext(),"255714095061");
 
-        // only show loading fragment if issues are not currently shown
-        if (!mUiState.equals(Flags.SUCCESS)) {
-            showLoadingFragment();
+            // only show loading fragment if issues are not currently shown
+            if (!mUiState.equals(Flags.SUCCESS)) {
+                showLoadingFragment();
+            }
+        } else {
+            AttachmentUtils.requestPermissions(this);
         }
     }
 
@@ -110,7 +130,10 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
     }
 
     private void showErrorFragment() {
-        switchOutFragment(Flags.ERROR, false, new ErrorFragment());
+        // only show error fragment if list is not already loaded
+        if (!mUiState.equals(Flags.SUCCESS)) {
+            switchOutFragment(Flags.ERROR, false, new ErrorFragment());
+        }
 
         // show toast to inform user that there was a server error
         Toast.makeText(this, R.string.error_server, Toast.LENGTH_LONG).show();

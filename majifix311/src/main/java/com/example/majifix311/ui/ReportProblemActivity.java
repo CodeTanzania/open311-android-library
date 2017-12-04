@@ -240,10 +240,7 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         mBuilder.setDescription(mEtDescription.getText().toString());
 
         // Attempt to add attachment to problem.
-        Attachment attachment = AttachmentUtils.getPicAsAttachment(mAbPhoto.getAttachmentUrl());
-        if (attachment != null) {
-            mBuilder.addAttachment(attachment);
-        }
+         mBuilder.addAttachment(mAbPhoto.getAttachmentUrl());
 
         // Build and post
         Problem problem = mBuilder.build();

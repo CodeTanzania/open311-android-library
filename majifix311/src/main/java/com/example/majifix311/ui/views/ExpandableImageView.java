@@ -2,6 +2,7 @@ package com.example.majifix311.ui.views;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
@@ -41,14 +42,20 @@ public class ExpandableImageView extends AppCompatImageView {
         init();
     }
 
-    public void setAttachment(Attachment attachment) {
-        if (attachment != null) {
-            setBitmap(AttachmentUtils.decodeFromBase64String(attachment.getContent()));
+    public void setAttachment(String filePath) {
+        if (filePath != null) {
+            AttachmentUtils.setPicFromFile(this, filePath);
         }
+
+        // Get height and width of file
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filePath, bmOptions);
+        mBitmapWidth = bmOptions.outWidth;
+        mBitmapHeight = bmOptions.outHeight;
     }
 
     public void setBitmap(Bitmap bitmap) {
-        //mBitmap = bitmap;
         if (bitmap == null) {
             setVisibility(View.GONE);
         } else {
