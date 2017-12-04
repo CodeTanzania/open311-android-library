@@ -30,6 +30,19 @@
     <string name="action_close">Close</string>
     <string name="action_from_camera">Take new photo</string>
     <string name="action_from_gallery">Use existing photo</string>
+    
+
+    <!--auth strings-->
+    <string name="auth_label_signin">Signin</string>
+    <string name="auth_label_email">Email</string>
+    <string name="auth_label_password">Password</string>
+    <string name="auth_error_invalid_email">Invalid Email</string>
+    <string name="auth_error_invalid_password">Invalid Password</string>
+    <string name="auth_error_invalid_credentials">Invalid e-mail or password</string>
+    <string name="auth_error_not_connected">No Internet connection</string>
+    <string name="auth_error_not_signin">Signin required</string>
+    <string name="auth_success_signin">Signin successfully</string>
+
 
     <!--select location fragment-->
     <string name="location_marker_title">Problem Location</string>
