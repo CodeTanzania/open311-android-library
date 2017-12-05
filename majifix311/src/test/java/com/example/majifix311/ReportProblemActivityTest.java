@@ -1,7 +1,11 @@
 package com.example.majifix311;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.net.Uri;
+import android.os.Environment;
 import android.support.design.widget.TextInputLayout;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +17,7 @@ import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
 import com.example.majifix311.ui.ReportProblemActivity;
 import com.example.majifix311.ui.views.AttachmentButton;
+import com.example.majifix311.utils.AttachmentUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +29,11 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowActivity;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import static android.app.Activity.RESULT_OK;
 import static com.example.majifix311.Mocks.mockCategoryCode;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -137,6 +147,25 @@ public class ReportProblemActivityTest {
     }
 
     @Test
+    public void canAddAttachmentToPost() {
+        // mock taking photo by setting attachment url to file
+        File file = Mocks.createMockFile();
+        mAttachmentButton.setAttachmentUrl(file.getAbsolutePath());
+
+        setFieldsAndSubmit(mockName, mockNumber, mockCategory,
+                mockLocation, mockAddress, mockDescription);
+
+        Intent receivedIntent = shadowOf(mActivity).getNextStartedService();
+        Problem sent = receivedIntent.getParcelableExtra(ReportService.NEW_PROBLEM_INTENT);
+
+        assertNotNull("Attachment should be sent", sent.getAttachments());
+        String url = sent.getAttachments().get(0);
+        assertNotNull("Attachment url should not be null", url);
+        Bitmap afterSend = AttachmentUtils.getScaledBitmap(url, 125, 125);
+        assertNotNull("Attachment content should be real bitmap", afterSend);
+    }
+
+    @Test
     public void isRegisteredForBroadcasts() {
         // TODO Test error
 
@@ -156,6 +185,4 @@ public class ReportProblemActivityTest {
 
         mSubmitButton.performClick();
     }
-
-
 }

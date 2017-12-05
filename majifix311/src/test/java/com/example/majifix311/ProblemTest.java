@@ -1,5 +1,6 @@
 package com.example.majifix311;
 
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Parcel;
 
@@ -9,6 +10,7 @@ import com.example.majifix311.api.models.ApiServiceRequestPost;
 import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
+import com.example.majifix311.utils.AttachmentUtils;
 import com.example.majifix311.utils.ProblemCollections;
 import com.google.gson.Gson;
 
@@ -18,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -194,6 +197,10 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         builder.setLocation(mockLocation);
         builder.setAddress(mockAddress);
         builder.setDescription(mockDescription);
+
+        File file = Mocks.createMockFile();
+        builder.addAttachment(file.getAbsolutePath());
+
         return builder.build();
     }
 
@@ -214,6 +221,12 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals(longitude, post.getLocation().getLongitude());
         assertEquals(mockAddress, post.getAddress());
         assertEquals(mockDescription, post.getDescription());
+
+        assertNotNull(post.getAttachments()[0].getName());
+        assertNotNull(post.getAttachments()[0].getCaption());
+        assertEquals(mockAttachmentMime, post.getAttachments()[0].getMime());
+        Bitmap bitmap = AttachmentUtils.decodeFromBase64String(post.getAttachments()[0].getContent());
+        assertNotNull(bitmap);
     }
 
     public static void assertPostMatchesMock(Problem problem) {
@@ -229,6 +242,8 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals("Longitude should be correct", longitude, problem.getLocation().getLongitude());
         assertEquals("Address should be correct", mockAddress, problem.getAddress());
         assertEquals("Description should be correct", mockDescription, problem.getDescription());
+
+        assertOneAttachmentMatches(problem);
     }
 
     public static void assertGetMatchesMock(Problem problem) {
@@ -241,13 +256,12 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         DateUtilTest.testCalendar(problem.getCreatedAt(), 2015, Calendar.OCTOBER, 22, 9, 3, 46);
         DateUtilTest.testCalendar(problem.getUpdatedAt(), 2016, Calendar.OCTOBER, 22, 9, 3, 46);
         DateUtilTest.testCalendar(problem.getResolvedAt(), 2017, Calendar.OCTOBER, 22, 9, 3, 46);
+    }
 
+    private static void assertOneAttachmentMatches(Problem problem) {
         assertEquals("There should be one attachment", 1, problem.getAttachments().size());
-        Attachment attachment = problem.getAttachments().get(0);
-        assertEquals("Attachment name should be correct", Mocks.mockAttachmentTitle, attachment.getName());
-        assertEquals("Attachment caption should be correct", Mocks.mockAttachmentCaption, attachment.getCaption());
-        assertEquals("Attachment mime should be correct", Mocks.mockAttachmentMime, attachment.getMime());
-        assertEquals("Attachment content should be correct", Mocks.mockAttachmentContent, attachment.getContent());
+        Bitmap bitmap = AttachmentUtils.getScaledBitmap(problem.getAttachments().get(0), 125, 125);
+        assertNotNull("Bitmap should be saved at attachment url", bitmap);
     }
 
     @Override

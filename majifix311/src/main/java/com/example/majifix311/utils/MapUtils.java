@@ -36,6 +36,9 @@ public class MapUtils {
     }
 
     public static void setStaticMap(ImageView imageView, Location location) {
+        if (imageView == null || location == null) {
+            return;
+        }
         String url = "https://api.mapbox.com/v4/mapbox.streets/" +
                 "pin-m-circle+285A98("+location.getLongitude()+","+location.getLatitude()+")/" +
                 "auto/" +

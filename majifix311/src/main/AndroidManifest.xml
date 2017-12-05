@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <!-- Needed only if your app targets Android 5.0 (API level 21) or higher. -->
     <uses-feature android:name="android.hardware.location.gps" />
@@ -26,8 +27,8 @@
             android:exported="false"/>
 
         <provider
-            android:authorities="com.example.majifix311.fileprovider"
             android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.example.majifix311.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS"
@@ -42,8 +43,12 @@
             android:name=".ui.ProblemListActivity"
             android:label=""
             android:launchMode="singleTask" />
+        <activity
+            android:name=".ui.ProblemDetailActivity"
+            android:label="@string/title_activity_problem_detail"
+            android:launchMode="singleTask" />
         <activity android:name=".ui.auth.SecureCompactActivity" />
-        <activity android:name=".ui.auth.SigninActivity"></activity>
+        <activity android:name=".ui.auth.SigninActivity" />
     </application>
 
 </manifest>

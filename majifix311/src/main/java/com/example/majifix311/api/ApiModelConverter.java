@@ -1,5 +1,7 @@
 package com.example.majifix311.api;
 
+import android.support.annotation.VisibleForTesting;
+
 import com.example.majifix311.api.models.ApiService;
 import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
@@ -11,14 +13,17 @@ import com.example.majifix311.api.models.ApiReporter;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
 import com.example.majifix311.models.Reporter;
+import com.example.majifix311.utils.AttachmentUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
- * This is used to convert between the objects from the server, and the objects
+ * This is used to saveToFile between the objects from the server, and the objects
  * used within the MajiFix application.
+ *
+ * Note: Attachments are saved to file system, and accessed from there via a URL, so as
+ * to ensure that the can easily be passed around via parcelables and intents.
  */
 
 public class ApiModelConverter {
@@ -57,9 +62,9 @@ public class ApiModelConverter {
                 apiCategory.getCode());
     }
 
-    private static ApiServiceRequest convertShared(ApiServiceRequest request, Problem problem) {
+    private static void convertShared(ApiServiceRequest request, Problem problem) {
         if (problem == null || request == null) {
-            return null;
+            return;
         }
         request.setReporter(new ApiReporter(problem.getReporter()));
         if (problem.getLocation() != null) {
@@ -68,13 +73,37 @@ public class ApiModelConverter {
         }
         request.setAddress(problem.getAddress());
         request.setDescription(problem.getDescription());
-//        request.setAttachments(new ApiAttachment[] {
-//                new ApiAttachment("Issue_" + (new Date()).getTime(),
-//                        problem.getDescription(), "bytes") // TODO: implement this
-//        });
-        return request;
+        request.setAttachments(getFromFile(problem.getAttachments()));
     }
 
+    public static List<String> saveToFile(ApiAttachment[] apiAttachments) {
+        if (apiAttachments == null) {
+            return null;
+        }
+        List<String> attachments = new ArrayList<>(apiAttachments.length);
+        for (ApiAttachment apiAttachment : apiAttachments) {
+            Attachment attachment = convert(apiAttachment);
+            String path = AttachmentUtils.saveAttachment(attachment);
+            attachments.add(path);
+        }
+        return attachments;
+    }
+
+    public static ApiAttachment[] getFromFile(List<String> attachmentUrls) {
+        if (attachmentUrls == null || attachmentUrls.isEmpty()) {
+            return null;
+        }
+        ApiAttachment[] apiAttachments = new ApiAttachment[attachmentUrls.size()];
+        for (int i = 0; i < attachmentUrls.size(); i++) {
+            Attachment attachment = AttachmentUtils.getPicAsAttachment(attachmentUrls.get(i));
+            if (attachment != null) {
+                apiAttachments[i] = convert(attachment);
+            }
+        }
+        return apiAttachments;
+    }
+
+    @VisibleForTesting
     public static Attachment convert(ApiAttachment apiAttachment) {
         if (apiAttachment == null) {
             return null;
@@ -83,14 +112,12 @@ public class ApiModelConverter {
                 apiAttachment.getMime(), apiAttachment.getContent());
     }
 
-    public static List<Attachment> convert(ApiAttachment[] apiAttachments) {
-        if (apiAttachments == null) {
+    @VisibleForTesting
+    public static ApiAttachment convert(Attachment attachment) {
+        if (attachment == null) {
             return null;
         }
-        List<Attachment> attachments = new ArrayList<>(apiAttachments.length);
-        for (ApiAttachment attachment : apiAttachments) {
-            attachments.add(convert(attachment));
-        }
-        return attachments;
+        return new ApiAttachment(attachment.getName(), attachment.getCaption(),
+                attachment.getMime(), attachment.getContent());
     }
 }

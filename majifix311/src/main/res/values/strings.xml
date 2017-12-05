@@ -60,10 +60,19 @@
     <string name="invalid_lat_long_used">Invalid longitude or latitude</string>
     <string name="no_address_found">No address found</string>
     <string name="address_found">Address found</string>
+    <string name="title_activity_problem_detail">Ticket</string>
+
+    <!--problem details fragment-->
+    <string name="reporter_label">Reporter</string>
+    <string name="category_label">Category</string>
+    <string name="location_label">Location</string>
+    <string name="description_label">Description</string>
+    <string name="call_user">Call %s: %s</string>
 
     <!-- issue list -->
     <string name="tab_open">Open</string>
     <string name="tab_closed">Closed</string>
     <string name="tab_all">All</string>
     <string name="refresh">TRY AGAIN</string>
+    <string name="permission_required_list_view">Permission is required to retrieve issues</string>
 </resources>

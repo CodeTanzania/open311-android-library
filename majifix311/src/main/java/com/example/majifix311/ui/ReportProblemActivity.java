@@ -156,13 +156,7 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         }
 
         // Attachment button will handle result of camera or file intents, and display image
-        boolean photoCapturedSuccess = mAbPhoto.displayOnActivityResult(requestCode, resultCode, data);
-
-        // If sucess, add attachment to problem.
-       if (photoCapturedSuccess) {
-            Attachment attachment = AttachmentUtils.getPicAsAttachment(mAbPhoto.getAttachmentUrl());
-            mBuilder.addAttachment(attachment);
-        }
+        mAbPhoto.displayOnActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -244,8 +238,12 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         mBuilder.setCategory(mSelectedCategory);
         mBuilder.setAddress(mEtAddress.getText().toString());
         mBuilder.setDescription(mEtDescription.getText().toString());
-        Problem problem = mBuilder.build();
 
+        // Attempt to add attachment to problem.
+         mBuilder.addAttachment(mAbPhoto.getAttachmentUrl());
+
+        // Build and post
+        Problem problem = mBuilder.build();
         if (problem != null) {
             ReportService.postNewProblem(ReportProblemActivity.this, problem);
         }

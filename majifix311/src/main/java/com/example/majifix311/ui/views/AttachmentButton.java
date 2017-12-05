@@ -17,7 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 
 import com.example.majifix311.R;
-import com.example.majifix311.models.Attachment;
 import com.example.majifix311.utils.AttachmentUtils;
 
 /**
@@ -25,7 +24,7 @@ import com.example.majifix311.utils.AttachmentUtils;
  * start a camera or select from gallery.
  *
  * To have the view handle the intent correctly, please call `button.displayOnActivityResult()`
- * and `button.onRequestPermissionResult()` in the Activity lifecycle methods. This will ensure
+ * and `button.takePictureOnRequestPermissionResult()` in the Activity lifecycle methods. This will ensure
  * that the AttachmentUrl is properly set, and the thumbnail is properly displayed in the
  * 'mPreview' ImageView.
  *
@@ -80,12 +79,13 @@ public class AttachmentButton extends LinearLayout {
     }
 
     public boolean displayOnActivityResult(int requestCode, int resultCode, Intent data) {
-        return AttachmentUtils.setThumbnailFromActivityResult(mPreview, mPendingImageUrl,
+        mPendingImageUrl = AttachmentUtils.setThumbnailFromActivityResult(mPreview, mPendingImageUrl,
                                                        requestCode, resultCode, data);
+        return mPendingImageUrl == null;
     }
 
     public void onRequestPermissionResult(int requestCode, String permissions[], int[] grantResults) {
-        mPendingImageUrl = AttachmentUtils.onRequestPermissionResult(
+        mPendingImageUrl = AttachmentUtils.takePictureOnRequestPermissionResult(
                                     getActivity(), requestCode, permissions, grantResults);
     }
 
