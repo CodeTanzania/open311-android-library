@@ -1,1 +1,1 @@
-include ':app', ':majifix311'
+include ':sample-app', ':library-core', ':library-ui'
