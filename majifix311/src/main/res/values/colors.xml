@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="accent">#3A8BCA</color>
+    <color name="secondary">#D5EFD4</color>
+    <color name="background">#FAFAFA</color>
 
     <color name="error">#cc0000</color>
     <color name="separator">#999999</color>
 
     <color name="open">@color/accent</color>
     <color name="resolved">#3CCA68</color>
+
+    <!--auth colors-->
+    <color name="auth_primary">#3F51B5</color>
+    <color name="auth_primary_dark">#303F9F</color>
+    <color name="auth_accent">#FF4081</color>
+    <color name="auth_blue_material">#1565c0</color>
+    <color name="auth_white">#ffffff</color>
+    <color name="auth_disable">#E0E0E0</color>
+    <color name="auth_disable_text">#424242</color>
+    <color name="auth_neon_blue">#5C44FC</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="darkGray">#666666</color>
+    <color name="black">#000000</color>
 
 </resources>

@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <style name="AuthTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/auth_primary</item>
+        <item name="colorPrimaryDark">@color/auth_primary_dark</item>
+        <item name="colorAccent">@color/auth_primary</item>
+    </style>
+
     <style name="ItemCardTextView">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -8,7 +16,18 @@
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
 
+    <style name="ItemCardTextView.Header">
+        <item name="android:layout_marginTop">24dp</item>
+    </style>
+
     <style name="ItemCardTextView.Medium">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+    <style name="MajifixButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:scaleType">fitXY</item>
+        <item name="android:layout_marginTop">16dp</item>
     </style>
 </resources>

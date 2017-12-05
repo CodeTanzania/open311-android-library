@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment"
-    android:name="com.example.majifix311.ui.ProblemListFragment"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:layout="@layout/fragment_problem_list" />
+    android:layout_height="match_parent" >
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/nsv_TicketsActivity"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:layout_gravity="fill_vertical"
+        android:background="@android:color/white"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/srf_problem_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <FrameLayout
+                android:id="@+id/frl_fragmentContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_reportIssue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="@dimen/fab_margin"
+        app:srcCompat="@drawable/ic_plus_white" />
+
+</android.support.constraint.ConstraintLayout>

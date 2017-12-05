@@ -3,6 +3,7 @@ package com.example.majifix311;
 import android.content.Context;
 
 import com.example.majifix311.api.CategoriesManager;
+import com.example.majifix311.utils.AttachmentUtils;
 
 /**
  * This is used as the base library file, and is used for configuration by applications.
@@ -22,6 +23,8 @@ public class MajiFix {
         //TODO does this go here?
         CategoriesManager service = new CategoriesManager(context);
         service.getCategories();
+
+        AttachmentUtils.setCacheDirectory(context.getCacheDir());
     }
 
     public boolean isSetup() {

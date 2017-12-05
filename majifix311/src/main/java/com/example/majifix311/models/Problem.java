@@ -6,7 +6,6 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.example.majifix311.api.ApiModelConverter;
-import com.example.majifix311.api.models.ApiAttachment;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 
 import java.util.ArrayList;
@@ -28,7 +27,9 @@ public class Problem implements Parcelable {
     private Location mLocation;
     private String mAddress;
     private String mDescription;
-    private List<Attachment> mAttachments; //TODO Implement
+
+    // Attachment URLs are saved here
+    private List<String> mAttachments;
 
     // for get
     private String mTicketNumber;
@@ -39,7 +40,8 @@ public class Problem implements Parcelable {
 //    private List<Comment> mComments; //TODO Implement
 
     private Problem(String username, String phone, String email, String account,
-                    Category category, Location location, String address, String description) {
+                    Category category, Location location, String address, String description,
+                    List<String> attachments) {
         mReporter = new Reporter();
         mReporter.setName(username);
         mReporter.setPhone(phone);
@@ -50,20 +52,21 @@ public class Problem implements Parcelable {
         mLocation = location;
         mAddress = address;
         mDescription = description;
+
+        mAttachments = attachments;
     }
 
     private Problem(String username, String phone, String email, String account,
                     Category category, Location location, String address, String description,
                     String ticketNumber, Status status, Calendar createdAt, Calendar updatedAt,
-                    Calendar resolvedAt, List<Attachment> attachments) {
-        this(username, phone, email, account, category, location, address, description);
+                    Calendar resolvedAt, List<String> attachments) {
+        this(username, phone, email, account, category, location, address, description, attachments);
 
         mTicketNumber = ticketNumber;
         mStatus = status;
         mCreatedAt = createdAt;
         mUpdatedAt = updatedAt;
         mResolvedAt = resolvedAt;
-        mAttachments = attachments;
     }
 
     private Problem(Parcel in) {
@@ -74,7 +77,7 @@ public class Problem implements Parcelable {
         mDescription = in.readString();
 
         mAttachments = new ArrayList<>();
-        in.readList(mAttachments, Attachment.class.getClassLoader());
+        in.readStringList(mAttachments);
 
         mTicketNumber = in.readString();
         mStatus = in.readParcelable(Status.class.getClassLoader());
@@ -169,8 +172,12 @@ public class Problem implements Parcelable {
         return mResolvedAt;
     }
 
-    public List<Attachment> getAttachments() {
+    public List<String> getAttachments() {
         return mAttachments;
+    }
+
+    public boolean hasAttachments() {
+        return mAttachments != null && !mAttachments.isEmpty();
     }
 
 //    public List<Comment> getComments() {
@@ -190,7 +197,7 @@ public class Problem implements Parcelable {
         dest.writeString(mAddress);
         dest.writeString(mDescription);
 
-        dest.writeList(mAttachments);
+        dest.writeStringList(mAttachments);
         dest.writeString(mTicketNumber);
         dest.writeParcelable(mStatus, flags);
         dest.writeLong(mCreatedAt == null ? -1 : mCreatedAt.getTimeInMillis());
@@ -210,6 +217,7 @@ public class Problem implements Parcelable {
         Location tempLocation;
         String tempAddress;
         String tempDescription;
+        List<String> tempAttachments;
 
         public Builder(InvalidCallbacks listener) {
             mListener = listener;
@@ -276,12 +284,18 @@ public class Problem implements Parcelable {
             tempDescription = description.trim();
         }
 
+        public void addAttachment(String url) {
+            if (tempAttachments == null) {
+                tempAttachments = new ArrayList<>();
+            }
+            tempAttachments.add(url);
+        }
+
         public Problem build() {
-            //TODO add back the validation when location is added
 //            return new Problem(tempUsername, tempPhone, tempCategory,
 //                    tempLocation, tempAddress, tempDescription);
             return validate() ? new Problem(tempUsername, tempPhone, tempEmail, tempAccount,
-                    tempCategory, tempLocation, tempAddress, tempDescription) : null;
+                    tempCategory, tempLocation, tempAddress, tempDescription, tempAttachments) : null;
         }
 
         public Problem buildWithoutValidation(String username, String phone, String email,
@@ -289,7 +303,7 @@ public class Problem implements Parcelable {
                                               Location location, String address, String description,
                                               String ticketNumber, Status status,
                                               Calendar createdAt, Calendar updatedAt, Calendar resolvedAt,
-                                              List<Attachment> attachments) {
+                                              List<String> attachments) {
             return new Problem(username, phone, email, accountNumber,
                     category, location, address, description, ticketNumber, status,
                     createdAt, updatedAt, resolvedAt, attachments);
@@ -297,7 +311,6 @@ public class Problem implements Parcelable {
 
         // TODO Does this go here?
         public Problem build(ApiServiceRequestGet response) {
-            System.out.println("Converting ApiServiceResponseGet into Problem. \n" + response);
             if (response == null) {
                 return null;
             }
@@ -318,7 +331,7 @@ public class Problem implements Parcelable {
             String ticketNumber = response.getTicketId();
             Status status = new Status(response.isOpen(),
                     response.getStatus().getName(), response.getStatus().getColor());
-            List<Attachment> attachments = ApiModelConverter.convert(response.getAttachments());
+            List<String> attachments = ApiModelConverter.saveToFile(response.getAttachments());
 
             return new Problem(tempUsername, tempPhone, tempEmail, tempAccount, tempCategory,
                     tempLocation, tempAddress, tempDescription, ticketNumber, status,

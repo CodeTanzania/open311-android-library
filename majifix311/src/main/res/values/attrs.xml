@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AttachmentButton">
+        <attr name="ab_layout" format="integer" />
+        <attr name="ab_preview_id" format="integer" />
+    </declare-styleable>
+</resources>

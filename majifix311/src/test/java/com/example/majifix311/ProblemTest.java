@@ -1,16 +1,17 @@
 package com.example.majifix311;
 
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Parcel;
 
 import com.example.majifix311.api.ApiModelConverter;
-import com.example.majifix311.api.models.ApiServiceRequest;
 import com.example.majifix311.api.models.ApiServiceRequestGet;
 import com.example.majifix311.api.models.ApiServiceRequestPost;
 import com.example.majifix311.models.Attachment;
 import com.example.majifix311.models.Category;
 import com.example.majifix311.models.Problem;
-import com.example.majifix311.models.Reporter;
+import com.example.majifix311.utils.AttachmentUtils;
+import com.example.majifix311.utils.ProblemCollections;
 import com.google.gson.Gson;
 
 import org.junit.Before;
@@ -19,7 +20,10 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import static com.example.majifix311.Mocks.*;
 import static junit.framework.Assert.assertEquals;
@@ -141,6 +145,46 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertFalse(builder.isValidEmail(invalid));
     }
 
+    @Test
+    public void problemsAreSortedByDate() {
+        Problem.Builder builder = new Problem.Builder(null);
+
+        Calendar stoneage = Calendar.getInstance();
+        stoneage.setTimeInMillis(100);
+        Calendar pyramids = Calendar.getInstance();
+        pyramids.setTimeInMillis(200);
+        Calendar castles = Calendar.getInstance();
+        castles.setTimeInMillis(300);
+        Calendar skyscrapers = Calendar.getInstance();
+        skyscrapers.setTimeInMillis(400);
+
+        Problem p1 = builder.buildWithoutValidation(null, null, null,
+                null, null, null, null, null,
+                "1", null, stoneage, null, null, null);
+        Problem p2 = builder.buildWithoutValidation(null, null, null,
+                null, null, null, null, null,
+                "1", null, skyscrapers, null, null, null);
+        Problem p3 = builder.buildWithoutValidation(null, null, null,
+                null, null, null, null, null,
+                "1", null, pyramids, null, null, null);
+        Problem p4 = builder.buildWithoutValidation(null, null, null,
+                null, null, null, null, null,
+                "1", null, castles, null, null, null);
+
+        List<Problem> problems = new ArrayList<>(2);
+        problems.add(p1);
+        problems.add(p2);
+        problems.add(p3);
+        problems.add(p4);
+
+        ProblemCollections.sortByDate(problems);
+
+        assertEquals(p2, problems.get(0));
+        assertEquals(p4, problems.get(1));
+        assertEquals(p3, problems.get(2));
+        assertEquals(p1, problems.get(3));
+    }
+
     public static Problem buildMockProblem(Problem.Builder.InvalidCallbacks listener) {
         Problem.Builder builder = new Problem.Builder(listener);
         builder.setUsername(mockName);
@@ -153,6 +197,10 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         builder.setLocation(mockLocation);
         builder.setAddress(mockAddress);
         builder.setDescription(mockDescription);
+
+        File file = Mocks.createMockFile();
+        builder.addAttachment(file.getAbsolutePath());
+
         return builder.build();
     }
 
@@ -173,6 +221,12 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals(longitude, post.getLocation().getLongitude());
         assertEquals(mockAddress, post.getAddress());
         assertEquals(mockDescription, post.getDescription());
+
+        assertNotNull(post.getAttachments()[0].getName());
+        assertNotNull(post.getAttachments()[0].getCaption());
+        assertEquals(mockAttachmentMime, post.getAttachments()[0].getMime());
+        Bitmap bitmap = AttachmentUtils.decodeFromBase64String(post.getAttachments()[0].getContent());
+        assertNotNull(bitmap);
     }
 
     public static void assertPostMatchesMock(Problem problem) {
@@ -188,6 +242,8 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals("Longitude should be correct", longitude, problem.getLocation().getLongitude());
         assertEquals("Address should be correct", mockAddress, problem.getAddress());
         assertEquals("Description should be correct", mockDescription, problem.getDescription());
+
+        assertOneAttachmentMatches(problem);
     }
 
     public static void assertGetMatchesMock(Problem problem) {
@@ -195,17 +251,17 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals("Ticket number should be correct", mockTicketNumber, problem.getTicketNumber());
         assertEquals("Status name should be correct", mockStatusName, problem.getStatus().getName());
         assertEquals("Status color should be correct", mockStatusColor, problem.getStatus().getColor());
+        assertEquals("Status boolean should be correct", false, problem.getStatus().isOpen());
 
         DateUtilTest.testCalendar(problem.getCreatedAt(), 2015, Calendar.OCTOBER, 22, 9, 3, 46);
         DateUtilTest.testCalendar(problem.getUpdatedAt(), 2016, Calendar.OCTOBER, 22, 9, 3, 46);
         DateUtilTest.testCalendar(problem.getResolvedAt(), 2017, Calendar.OCTOBER, 22, 9, 3, 46);
+    }
 
+    private static void assertOneAttachmentMatches(Problem problem) {
         assertEquals("There should be one attachment", 1, problem.getAttachments().size());
-        Attachment attachment = problem.getAttachments().get(0);
-        assertEquals("Attachment name should be correct", Mocks.mockAttachmentTitle, attachment.getName());
-        assertEquals("Attachment caption should be correct", Mocks.mockAttachmentCaption, attachment.getCaption());
-        assertEquals("Attachment mime should be correct", Mocks.mockAttachmentMime, attachment.getMime());
-        assertEquals("Attachment content should be correct", Mocks.mockAttachmentContent, attachment.getContent());
+        Bitmap bitmap = AttachmentUtils.getScaledBitmap(problem.getAttachments().get(0), 125, 125);
+        assertNotNull("Bitmap should be saved at attachment url", bitmap);
     }
 
     @Override
