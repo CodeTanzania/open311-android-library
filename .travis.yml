@@ -6,12 +6,12 @@ android:
   components:
     - tools
     - build-tools-26.0.2
+    # this is a hack to get 26 to work
+    - tools
     - platform-tools
     - extra-android-m2repository
     - extra-google-android-support
 
-    # this is a hack to get 26 to work
-    - tools
 
     # The SDK version used to compile your project
     - android-15
