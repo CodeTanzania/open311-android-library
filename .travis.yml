@@ -11,9 +11,7 @@ android:
     - extra-google-android-support
 
     # The SDK version used to compile your project
-    - android-16
-    - android-21
-    - android-22
+    - android-15
     - android-25
 
 jdk: oraclejdk8
@@ -23,6 +21,11 @@ os:
 before_install:
   - chmod +x gradlew
 
++install: [
+  "echo yes | sdkmanager \"extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2\"",
+  "echo yes | sdkmanager \"extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.2\"",
+]
+
 # whitelist
 branches:
   only:
@@ -31,7 +34,8 @@ branches:
 script:
  #run automated tests
  - ./gradlew test
- - ./gradlew majifix311:test
+ - ./gradlew library-core:test
+ - ./gradlew library-ui:test
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
