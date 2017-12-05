@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import com.github.codetanzania.open311.android.library.R;
 import com.github.codetanzania.open311.android.library.models.Problem;
 import com.github.codetanzania.open311.android.library.ui.adapters.OpenClosedTabAdapter;
+import com.github.codetanzania.open311.android.library.utils.ProblemCollections;
 
 import java.util.ArrayList;
 

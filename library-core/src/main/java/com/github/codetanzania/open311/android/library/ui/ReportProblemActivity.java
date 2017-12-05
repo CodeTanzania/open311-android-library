@@ -14,6 +14,7 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,9 +24,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.codetanzania.open311.android.library.EventHandler;
+import com.github.codetanzania.open311.android.library.auth.Auth;
 import com.github.codetanzania.open311.android.library.location.FetchAddressIntentService;
 import com.github.codetanzania.open311.android.library.location.LocationTracker;
 import com.github.codetanzania.open311.android.library.models.Category;
+import com.github.codetanzania.open311.android.library.models.Party;
 import com.github.codetanzania.open311.android.library.models.Problem;
 import com.github.codetanzania.open311.android.library.R;
 import com.github.codetanzania.open311.android.library.api.ReportService;
@@ -56,7 +59,7 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
     private Category mSelectedCategory;
 
     private TextInputLayout mTilName;
-    private TextInputLayout mTilNumber;
+    private TextInputLayout mTilPhone;
     private TextInputLayout mTilCategory;
     private TextInputLayout mTilAddress;
     private TextInputLayout mTilDescription;
@@ -103,7 +106,7 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
 
         // find all views
         mTilName = (TextInputLayout) findViewById(R.id.til_name);
-        mTilNumber = (TextInputLayout) findViewById(R.id.til_phone);
+        mTilPhone = (TextInputLayout) findViewById(R.id.til_phone);
         mTilCategory = (TextInputLayout) findViewById(R.id.til_category);
         mTilAddress = (TextInputLayout) findViewById(R.id.til_address);
         mTilDescription = (TextInputLayout) findViewById(R.id.til_description);
@@ -117,9 +120,10 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
         mTvLocationError = (TextView) findViewById(R.id.tv_location_error);
         mAbPhoto = (AttachmentButton) findViewById(R.id.ab_add_photo);
 
+        // show or hide name and phone based on whether name and phone are stored
+        displayLoggedInUser();
+
         // for required fields: watch for text changes, and if empty, display error
-        mEtName.addTextChangedListener(new EmptyErrorTrigger(mTilName));
-        mEtPhone.addTextChangedListener(new EmptyErrorTrigger(mTilNumber));
         mEtCategory.addTextChangedListener(new EmptyErrorTrigger(mTilCategory));
         mEtAddress.addTextChangedListener(new EmptyErrorTrigger(mTilAddress));
         mEtDescription.addTextChangedListener(new EmptyErrorTrigger(mTilDescription));
@@ -169,6 +173,33 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
             mLocationTracker.onPause();
         }
         super.onDestroy();
+    }
+
+    private void displayLoggedInUser() {
+        Party party = Auth.getInstance().getParty();
+        if (Auth.getInstance().isLogin() & party != null) {
+            String name = party.getName();
+            String phone = party.getPhone();
+
+            // if name and phone are not null, set to edit texts (for retrieval on submit)
+            // and hide the fields, as they should not be changed
+            if (name != null && !name.isEmpty()) {
+                mEtName.setText(party.getName());
+                mTilName.setVisibility(View.GONE);
+            } else {
+                mEtName.addTextChangedListener(new EmptyErrorTrigger(mTilName));
+            }
+            if (!TextUtils.isEmpty(phone)) {
+                mEtPhone.setText(party.getPhone());
+                mTilPhone.setVisibility(View.GONE);
+            } else {
+                mEtPhone.addTextChangedListener(new EmptyErrorTrigger(mTilPhone));
+            }
+        } else {
+            // otherwise add verification
+            mEtName.addTextChangedListener(new EmptyErrorTrigger(mTilName));
+            mEtPhone.addTextChangedListener(new EmptyErrorTrigger(mTilPhone));
+        }
     }
 
     private void setupCategoryPicker() {
@@ -268,7 +299,7 @@ public class ReportProblemActivity extends AppCompatActivity implements View.OnC
 
     @Override
     public void onInvalidPhoneNumber() {
-        mTilNumber.setError(getString(R.string.required));
+        mTilPhone.setError(getString(R.string.required));
     }
 
     @Override

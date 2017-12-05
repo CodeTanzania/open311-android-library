@@ -3,6 +3,7 @@ package com.github.codetanzania.open311.android.library;
 import android.content.Context;
 
 import com.github.codetanzania.open311.android.library.api.CategoriesManager;
+import com.github.codetanzania.open311.android.library.auth.Auth;
 import com.github.codetanzania.open311.android.library.utils.AttachmentUtils;
 
 /**
@@ -18,12 +19,18 @@ public class MajiFix {
 
     public static void setup(Context context) {
         isSetup = true;
+
+        // Initialize auth for token management. DO BEFORE NETWORK CALLS!
+        Auth.init(context, BuildConfig.END_POINT);
+
         //TODO take config from builder for app
 
         //TODO does this go here?
+        // Get categories and save in db
         CategoriesManager service = new CategoriesManager(context);
         service.getCategories();
 
+        // Set directory for saving temporary attachment files
         AttachmentUtils.setCacheDirectory(context.getCacheDir());
     }
 
