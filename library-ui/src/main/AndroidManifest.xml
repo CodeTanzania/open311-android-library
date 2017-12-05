@@ -1,0 +1,3 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.github.codetanzania.open311.android.library.ui" >
+</manifest>
