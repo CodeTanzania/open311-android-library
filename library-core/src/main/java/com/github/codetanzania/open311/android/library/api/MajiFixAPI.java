@@ -5,6 +5,7 @@ import android.support.annotation.VisibleForTesting;
 import com.github.codetanzania.open311.android.library.BuildConfig;
 import com.github.codetanzania.open311.android.library.MajiFix;
 import com.github.codetanzania.open311.android.library.api.models.ApiServiceRequestGetMany;
+import com.github.codetanzania.open311.android.library.auth.Auth;
 import com.github.codetanzania.open311.android.library.models.Problem;
 import com.github.codetanzania.open311.android.library.api.models.ApiServiceGroup;
 import com.github.codetanzania.open311.android.library.api.models.ApiServiceRequestGet;
@@ -129,7 +130,7 @@ public class MajiFixAPI {
                         return ApiModelConverter.convert(apiServiceRequest);
                     }
                 })
-                .collectInto(new ArrayList<Problem>(), new BiConsumer<List<Problem>, Problem>() {
+                .collectInto(new ArrayList<>(), new BiConsumer<List<Problem>, Problem>() {
                     @Override
                     public void accept(List<Problem> list, Problem problem) throws Exception {
                         list.add(problem);
@@ -147,9 +148,11 @@ public class MajiFixAPI {
 
     private String getAuthToken() {
         //TODO obfuscate token
-        String authToken = "Bearer " + BuildConfig.MAJIFIX_API_TOKEN;
-        System.out.println("Auth token: " + authToken);
-        return authToken;
+        if (Auth.getInstance().isLogin()) {
+            return "Bearer " + Auth.getInstance().getToken();
+        } else {
+            return "Bearer " + BuildConfig.MAJIFIX_API_TOKEN;
+        }
     }
 
     private interface MajiFixRetrofitApi {

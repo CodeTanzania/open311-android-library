@@ -30,8 +30,7 @@ public class SecureCompactActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         //ensure party exists
-        //TODO move to MajiFix initialization
-        auth = Auth.init(getApplicationContext(), BuildConfig.END_POINT);
+        auth = Auth.getInstance();
 
         //check if token expire and direct to auth activity
         Boolean isTokenExpired = auth.isTokenExpired();

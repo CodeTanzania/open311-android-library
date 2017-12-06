@@ -18,7 +18,9 @@ import android.widget.Toast;
 import com.github.codetanzania.open311.android.library.EventHandler;
 import com.github.codetanzania.open311.android.library.R;
 import com.github.codetanzania.open311.android.library.api.ReportService;
+import com.github.codetanzania.open311.android.library.auth.Auth;
 import com.github.codetanzania.open311.android.library.models.Problem;
+import com.github.codetanzania.open311.android.library.ui.auth.SecureCompactActivity;
 import com.github.codetanzania.open311.android.library.utils.AttachmentUtils;
 import com.github.codetanzania.open311.android.library.utils.Flags;
 
@@ -28,7 +30,7 @@ import java.util.ArrayList;
  * This activity shows a list of reported issues.
  */
 
-public class ProblemListActivity extends AppCompatActivity implements ErrorFragment.OnReloadClickListener {
+public class ProblemListActivity extends SecureCompactActivity implements ErrorFragment.OnReloadClickListener {
 
     @Flags.UiState
     private String mUiState = Flags.NONE;
@@ -109,8 +111,9 @@ public class ProblemListActivity extends AppCompatActivity implements ErrorFragm
             LocalBroadcastManager.getInstance(getBaseContext()).registerReceiver(mMyReportedProblemsReceived,
                     new IntentFilter(EventHandler.BROADCAST_MY_PROBLEMS_FETCHED));
 
-//            ReportService.fetchProblems(getBaseContext(), "12");
-            ReportService.fetchProblems(getBaseContext(), "255714095061");
+            // As this is a secure activity, Party should never be null at this point
+            String phone = Auth.getInstance().getParty().getPhone();
+            ReportService.fetchProblems(getBaseContext(), phone);
 
             // only show loading fragment if issues are not currently shown
             if (!mUiState.equals(Flags.SUCCESS)) {
