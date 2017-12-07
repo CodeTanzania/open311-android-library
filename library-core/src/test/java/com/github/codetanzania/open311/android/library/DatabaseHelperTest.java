@@ -69,7 +69,7 @@ public class DatabaseHelperTest {
     @Test
     public void canWriteProblemsToDatabase() {
         final ArrayList<Problem> problems = new ArrayList<>(1);
-        ApiServiceRequestGet before = ProblemTest.buildMockServerResponse();
+        ApiServiceRequestGet before = Mocks.buildMockServerResponse();
         Problem mockProblem = ApiModelConverter.convert(before);
         problems.add(mockProblem);
 

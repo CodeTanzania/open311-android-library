@@ -37,7 +37,7 @@ branches:
 script:
  #run automated tests
  - ./gradlew test
- - ./gradlew library:test
+ - ./gradlew library-core:test
  - ./gradlew library-ui:test
 
 before_cache:

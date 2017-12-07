@@ -27,7 +27,7 @@ ext{
     rxbindingVersion = '2.0.0'
     jwtdecodeVersion = '1.1.1'
     retrofitVersion = '2.3.0'
-    androidSupportVersion = '26.1.0'
+    androidSupportVersion = '27.0.2'
 }
 
 task clean(type: Delete) {
