@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.github.codetanzania.open311.android.library">
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- Needed only if your app targets Android 5.0 (API level 21) or higher. -->
+    <uses-feature android:name="android.hardware.location.gps" />
+    <uses-feature android:name="android.hardware.camera"
+                  android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:theme="@style/Theme.AppCompat"
+        android:supportsRtl="true">
+
+        <service android:name="com.github.codetanzania.open311.android.library.api.ReportService" />
+
+        <service android:name="com.github.codetanzania.open311.android.library.location.FetchAddressIntentService"
+            android:exported="false"/>
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.github.codetanzania.open311.android.library.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+
+</manifest>

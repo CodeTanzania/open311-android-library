@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--FetchAddressIntentService-->
+    <string name="location_not_available">Location Not Available</string>
+    <string name="invalid_lat_long_used">Invalid longitude or latitude</string>
+    <string name="no_address_found">No address found</string>
+    <string name="address_found">Address found</string>
+</resources>

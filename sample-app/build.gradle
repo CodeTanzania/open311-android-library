@@ -11,6 +11,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -22,11 +23,12 @@ android {
             includeAndroidResources = true
         }
     }
+
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':library-core')
+    api project(path: ':library', configuration:'default')
 
     implementation "com.android.support:appcompat-v7:$androidSupportVersion"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'

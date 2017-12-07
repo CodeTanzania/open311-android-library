@@ -1,8 +1,5 @@
 package com.github.codetanzania.open311.android.library.sampleapp;
 
-import com.github.codetanzania.open311.android.library.ui.ProblemListActivity;
-import com.github.codetanzania.open311.android.library.ui.ReportProblemActivity;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
