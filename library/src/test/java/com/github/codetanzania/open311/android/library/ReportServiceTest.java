@@ -4,6 +4,7 @@ import android.content.Intent;
 
 import com.github.codetanzania.open311.android.library.api.ReportService;
 import com.github.codetanzania.open311.android.library.api.models.ApiServiceRequestPost;
+import com.github.codetanzania.open311.android.library.auth.Auth;
 import com.github.codetanzania.open311.android.library.models.Problem;
 import com.github.codetanzania.open311.android.library.models.TaggedProblemList;
 import com.google.gson.Gson;
@@ -12,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.IOException;
@@ -69,6 +71,7 @@ public class ReportServiceTest {
 
     @Test
     public void serviceShouldAttemptPost() throws IOException, InterruptedException {
+
         MockWebServer server = new MockWebServer();
         server.enqueue(new MockResponse().setBody(Mocks.VALID_SERVICE_REQUEST_GET));
 
@@ -83,6 +86,7 @@ public class ReportServiceTest {
             endpoint = split[split.length - 1];
             server.start(Integer.valueOf(endpoint));
         }
+        Auth.init(RuntimeEnvironment.application, BuildConfig.END_POINT);
 
         service.onCreate();
         service.onStartCommand(getServiceIntent(), 0, 0);

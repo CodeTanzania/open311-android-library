@@ -1,4 +1,4 @@
-package com.github.codetanzania.open311.android.library.shadows;
+package com.github.codetanzania.open311.android.library.ui.shadows;
 
 import android.support.v4.widget.SwipeRefreshLayout;
 

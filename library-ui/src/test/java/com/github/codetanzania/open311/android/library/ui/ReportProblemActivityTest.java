@@ -1,4 +1,4 @@
-package com.github.codetanzania.open311.android.library;
+package com.github.codetanzania.open311.android.library.ui;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -9,9 +9,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.github.codetanzania.open311.android.library.BuildConfig;
+import com.github.codetanzania.open311.android.library.EventHandler;
 import com.github.codetanzania.open311.android.library.api.ReportService;
 import com.github.codetanzania.open311.android.library.models.Category;
 import com.github.codetanzania.open311.android.library.models.Problem;
+import com.github.codetanzania.open311.android.library.ui.report.AttachmentButton;
+import com.github.codetanzania.open311.android.library.ui.report.ReportProblemActivity;
 import com.github.codetanzania.open311.android.library.utils.AttachmentUtils;
 
 import org.junit.Before;
@@ -24,7 +28,7 @@ import org.robolectric.annotation.Config;
 
 import java.io.File;
 
-import static com.github.codetanzania.open311.android.library.Mocks.mockCategoryCode;
+import static com.github.codetanzania.open311.android.library.ui.Mocks.mockCategoryCode;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;

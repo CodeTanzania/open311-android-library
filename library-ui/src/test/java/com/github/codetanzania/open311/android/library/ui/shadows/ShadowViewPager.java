@@ -1,7 +1,8 @@
-package com.github.codetanzania.open311.android.library.shadows;
+package com.github.codetanzania.open311.android.library.ui.shadows;
 
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+
 import org.robolectric.Robolectric;
 import org.robolectric.ShadowsAdapter;
 import org.robolectric.annotation.Implementation;

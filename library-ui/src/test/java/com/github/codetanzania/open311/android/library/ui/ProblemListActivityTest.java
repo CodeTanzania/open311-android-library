@@ -1,4 +1,4 @@
-package com.github.codetanzania.open311.android.library;
+package com.github.codetanzania.open311.android.library.ui;
 
 import android.Manifest;
 import android.content.Intent;
@@ -12,14 +12,23 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.github.codetanzania.open311.android.library.BuildConfig;
+import com.github.codetanzania.open311.android.library.EventHandler;
 import com.github.codetanzania.open311.android.library.api.ApiModelConverter;
 import com.github.codetanzania.open311.android.library.api.ReportService;
 import com.github.codetanzania.open311.android.library.models.Category;
 import com.github.codetanzania.open311.android.library.models.Problem;
 import com.github.codetanzania.open311.android.library.models.Status;
-import com.github.codetanzania.open311.android.library.shadows.ShadowSwipeRefreshLayout;
-import com.github.codetanzania.open311.android.library.shadows.ShadowViewPager;
-import com.github.codetanzania.open311.android.library.ui.adapters.OpenClosedTabAdapter;
+import com.github.codetanzania.open311.android.library.ui.listview.OpenClosedTabAdapter;
+import com.github.codetanzania.open311.android.library.ui.listview.ProblemListActivity;
+import com.github.codetanzania.open311.android.library.ui.listview.ProblemListFragment;
+import com.github.codetanzania.open311.android.library.ui.listview.ProblemTabFragment;
+import com.github.codetanzania.open311.android.library.ui.report.ReportProblemActivity;
+import com.github.codetanzania.open311.android.library.ui.shadows.ShadowSwipeRefreshLayout;
+import com.github.codetanzania.open311.android.library.ui.shadows.ShadowViewPager;
+import com.github.codetanzania.open311.android.library.ui.state.EmptyListFragment;
+import com.github.codetanzania.open311.android.library.ui.state.ErrorFragment;
+import com.github.codetanzania.open311.android.library.ui.state.ProgressBarFragment;
 import com.github.codetanzania.open311.android.library.utils.DateUtils;
 
 import org.junit.Before;
@@ -40,7 +49,6 @@ import static com.github.codetanzania.open311.android.library.api.ReportService.
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static org.robolectric.Shadows.shadowOf;
 
@@ -152,7 +160,7 @@ public class ProblemListActivityTest {
     }
 
     private void shouldBeAbleToStartDataReloadFromError() {
-        ImageView ivReload = (ImageView) mActivity.findViewById(R.id.iv_reload);
+        ImageView ivReload = (ImageView) mActivity.findViewById( R.id.iv_reload);
         assertNotNull("Reload should be shown", ivReload);
 
         ivReload.performClick();
@@ -161,24 +169,24 @@ public class ProblemListActivityTest {
 
     private void shouldShowEmptyFragment() {
         Fragment fragment = mActivity.getSupportFragmentManager()
-                .findFragmentById(R.id.frl_fragmentContainer);
+                .findFragmentById( R.id.frl_fragmentContainer);
         assertTrue("Should display EmptyFragment",
                 fragment instanceof EmptyListFragment);
-        assertNotNull("Icon should be shown",mActivity.findViewById(R.id.iv_emptyIssues));
-        assertNotNull("Message should be shown", mActivity.findViewById(R.id.iv_emptyIssues));
+        assertNotNull("Icon should be shown",mActivity.findViewById( R.id.iv_emptyIssues));
+        assertNotNull("Message should be shown", mActivity.findViewById( R.id.iv_emptyIssues));
     }
 
     private void shouldShowTabFragment() {
         Fragment fragment = mActivity.getSupportFragmentManager()
-                .findFragmentById(R.id.frl_fragmentContainer);
+                .findFragmentById( R.id.frl_fragmentContainer);
 
         assertTrue("Should display TabFragment",
                 fragment instanceof ProblemTabFragment);
-        assertNotNull("Tab bar should be shown",mActivity.findViewById(R.id.tab_layout));
-        assertNotNull("View pager should be shown", mActivity.findViewById(R.id.vp_ticketsActivity));
+        assertNotNull("Tab bar should be shown",mActivity.findViewById( R.id.tab_layout));
+        assertNotNull("View pager should be shown", mActivity.findViewById( R.id.vp_ticketsActivity));
 
         SwipeRefreshLayout refreshLayout =
-                (SwipeRefreshLayout) mActivity.findViewById(R.id.srf_problem_list);
+                (SwipeRefreshLayout) mActivity.findViewById( R.id.srf_problem_list);
         assertFalse(refreshLayout.isRefreshing());
     }
 
@@ -246,12 +254,12 @@ public class ProblemListActivityTest {
     }
 
     private void sendEmpty() {
-        EventHandler.retrievedMyRequests(RuntimeEnvironment.application, new ArrayList<>(), false);
+        EventHandler.retrievedMyRequests(RuntimeEnvironment.application, new ArrayList<Problem>(), false);
     }
 
     private void sendMocks() {
         Problem.Builder builder = new Problem.Builder(null);
-        Problem fullProblem = ApiModelConverter.convert(ProblemTest.buildMockServerResponse());
+        Problem fullProblem = ApiModelConverter.convert(Mocks.buildMockServerResponse());
         Problem partialProblem1 = builder.buildWithoutValidation(null, null, null,
                 null, new Category("Puddle", "123", 3, "PU"),
                 null, null, "Magnificent!", "TIC123",
