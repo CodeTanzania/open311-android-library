@@ -9,6 +9,7 @@ android:
     - tools # this is a hack to get 26 to work
     - platform-tools
     - extra-android-m2repository
+    - extra-google-m2repository
     - extra-google-android-support
     - extra-android-m2repository
 
