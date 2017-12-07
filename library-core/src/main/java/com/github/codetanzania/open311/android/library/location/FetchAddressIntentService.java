@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.github.codetanzania.open311.android.library.R;
-import com.mapbox.mapboxsdk.geometry.LatLng;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,14 +37,6 @@ public final class FetchAddressIntentService extends IntentService {
     public static final String LONGITUDE_DATA_EXTRA = PACKAGE_NAME + ".LONGITUDE_DATA_EXTRA";
 
     protected ResultReceiver mReceiver;
-
-
-    public static void findAddressWithGoogle(Context context, LatLng location, ResultReceiver handler) {
-        if (location == null) {
-            return;
-        }
-        findAddressWithGoogle(context, location.getLatitude(), location.getLongitude(), handler);
-    }
 
     public static void findAddressWithGoogle(Context context, Location location, ResultReceiver handler) {
         if (location == null) {

@@ -1,4 +1,4 @@
-package com.github.codetanzania.open311.android.library;
+package com.github.codetanzania.open311.android.library.ui;
 
 import android.graphics.Bitmap;
 import android.os.Environment;

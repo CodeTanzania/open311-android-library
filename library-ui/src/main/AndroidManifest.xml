@@ -1,3 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.github.codetanzania.open311.android.library.ui" >
+
+    <!--<uses-library-->
+        <!--android:name="com.github.codetanzania.open311.android.library"-->
+        <!--android:required="true" />-->
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <application>
+        <activity android:name="com.github.codetanzania.open311.android.library.ui.listview.ProblemListActivity"></activity>
+        <activity android:name="com.github.codetanzania.open311.android.library.ui.report.ReportProblemActivity"></activity>
+        <activity android:name="com.github.codetanzania.open311.android.library.ui.auth.SigninActivity"></activity>
+        <activity android:name="com.github.codetanzania.open311.android.library.ui.detailview.ProblemDetailActivity"></activity>
+    </application>
 </manifest>

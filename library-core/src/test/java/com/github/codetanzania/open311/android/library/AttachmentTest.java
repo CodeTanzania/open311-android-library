@@ -25,7 +25,6 @@ import static junit.framework.Assert.assertNotNull;
 
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class)
 public class AttachmentTest {
     private String name = "Kitty";
     private String caption = "is CUTE";

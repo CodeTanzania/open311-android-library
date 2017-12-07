@@ -38,7 +38,7 @@ script:
  #run automated tests
  - ./gradlew test
  - ./gradlew library-core:test
-# - ./gradlew library-ui:test
+ - ./gradlew library-ui:test
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock

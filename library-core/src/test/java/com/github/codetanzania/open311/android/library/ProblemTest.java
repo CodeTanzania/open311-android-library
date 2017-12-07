@@ -203,13 +203,6 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         return builder.build();
     }
 
-    public static ApiServiceRequestGet buildMockServerResponse() {
-        ApiServiceRequestGet fromJson = new Gson().fromJson(VALID_SERVICE_REQUEST_GET, ApiServiceRequestGet.class);
-        assertNotNull(fromJson);
-
-        return fromJson;
-    }
-
     private void assertApiServiceRequestMatchesMock(ApiServiceRequestPost post) {
         assertEquals(mockName, post.getReporter().getName());
         assertEquals(mockNumber, post.getReporter().getPhone());

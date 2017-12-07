@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.github.krtonga.library_ui.test", appContext.getPackageName());
+        assertEquals("com.github.codetanzania.open311.android.library.ui.test", appContext.getPackageName());
     }
 }

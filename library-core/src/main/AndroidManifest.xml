@@ -16,8 +16,6 @@
 
     <application
         android:allowBackup="true"
-        android:label="@string/app_name"
-        android:theme="@style/Theme.AppCompat"
         android:supportsRtl="true">
 
         <service android:name="com.github.codetanzania.open311.android.library.api.ReportService" />
@@ -33,21 +31,6 @@
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <activity
-            android:name="com.github.codetanzania.open311.android.library.ui.ReportProblemActivity"
-            android:label=""
-            android:launchMode="singleTask" />
-        <activity
-            android:name="com.github.codetanzania.open311.android.library.ui.ProblemListActivity"
-            android:label=""
-            android:launchMode="singleTask" />
-        <activity
-            android:name="com.github.codetanzania.open311.android.library.ui.ProblemDetailActivity"
-            android:label="@string/title_activity_problem_detail"
-            android:launchMode="singleTask" />
-        <activity android:name="com.github.codetanzania.open311.android.library.ui.auth.SecureCompactActivity" />
-        <activity android:name="com.github.codetanzania.open311.android.library.ui.auth.SigninActivity" />
     </application>
 
 </manifest>

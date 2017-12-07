@@ -1,16 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 26
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.example.krtonga.simplemajifixapp"
         minSdkVersion 15
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -22,13 +23,16 @@ android {
             includeAndroidResources = true
         }
     }
+
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':library-core')
+    //implementation project(':library')
+    implementation project(':library-ui')
 
     implementation "com.android.support:appcompat-v7:$androidSupportVersion"
+    implementation "com.android.support:support-v4:$androidSupportVersion"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 
     testImplementation 'junit:junit:4.12'
