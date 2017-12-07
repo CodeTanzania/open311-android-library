@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 26
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.example.krtonga.simplemajifixapp"
         minSdkVersion 15
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -28,7 +28,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    api project(path: ':library', configuration:'default')
+    //implementation project(':library')
+    implementation project(':library-ui')
 
     implementation "com.android.support:appcompat-v7:$androidSupportVersion"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'

@@ -4,12 +4,12 @@ apply plugin: 'com.github.dcendents.android-maven'
 group = 'com.github.CodeTanzania'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 26
     buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
 
@@ -24,22 +24,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    // OPTION A: Tells Gradle to build all variants of the library. Note that this
-    // may increase build times because Gradle must build multiple AARs,
-    // instead of only one.
-     publishNonDefault true
-
-    // OPTION B: Only build uiRelease flavor
-//    defaultPublishConfig "uiRelease"
-
-    productFlavors {
-        // includes models, db, api, etc.
-        core {}
-        // includes activities, vies, etc.
-        ui {}
-    }
-    flavorDimensions "default"
-
     testOptions {
         unitTests {
             includeAndroidResources = true
@@ -50,24 +34,8 @@ android {
         sourceCompatibility 1.8
     }
 }
-// Creates Gradle dependency configurations to use in the dependencies block.
-//configurations {
-//    // Initializes placeholder configurations that the Android plugin can use when targeting
-//    // the corresponding variant of the app.
-//    coreDebugCompile{}
-//    coreReleaseCompile{}
-//    uiDebugCompile{}
-//    uiReleaseCompile{}
-//}
 
 dependencies {
-    // If the library configures multiple build variants using product flavors,
-    // you must target one of the library's variants using its full configuration name.
-//    coreDebugCompile project(path: ':library', configuration: 'coreDebug')
-//    coreReleaseCompile project(path: ':library', configuration: 'coreRelease')
-//    uiDebugCompile project(path: ':library', configuration: 'uiDebug')
-//    uiReleaseCompile project(path: ':library', configuration: 'uiRelease')
-
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     //testing dependencies
@@ -92,20 +60,6 @@ dependencies {
     // location
     api 'com.google.android.gms:play-services-location:11.6.0'
     api 'com.google.android.gms:play-services-maps:11.6.0'
-    uiImplementation('com.mapbox.mapboxsdk:mapbox-android-sdk:5.1.2@aar') { transitive=true }
-    uiImplementation('com.mapbox.mapboxsdk:mapbox-android-services:2.2.0@aar') { transitive=true }
-    uiImplementation 'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.2.0'
-
-    // android supports & views dependencies
-    uiImplementation "com.android.support:appcompat-v7:$androidSupportVersion"
-    uiImplementation "com.android.support:design:$androidSupportVersion"
-    uiImplementation "com.android.support.constraint:constraint-layout:1.0.2"
-    uiImplementation "com.android.support:recyclerview-v7:$androidSupportVersion"
-    uiImplementation "com.android.support:cardview-v7:$androidSupportVersion"
-
-    // images
-    uiImplementation 'com.github.bumptech.glide:glide:4.3.1'
-    uiAnnotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
 
 //    implementation 'com.squareup.sqlbrite2:sqlbrite:2.0.0'
 

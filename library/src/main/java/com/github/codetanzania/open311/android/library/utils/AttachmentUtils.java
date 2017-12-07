@@ -262,7 +262,7 @@ public class AttachmentUtils {
                 if (photoFile != null) {
                     // If file was created, start intent with uri.
                     Uri photoUri = FileProvider.getUriForFile(activity,
-                            "com.example.majifix311.fileprovider",
+                            "com.github.codetanzania.open311.android.library.fileprovider",
                             photoFile);
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
                     // Limit photo size to around 1MB TODO Does this work? I think not...

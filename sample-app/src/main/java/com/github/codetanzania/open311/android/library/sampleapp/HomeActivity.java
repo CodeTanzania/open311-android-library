@@ -6,6 +6,11 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
 
+import com.github.codetanzania.open311.android.library.MajiFix;
+import com.github.codetanzania.open311.android.library.ui.auth.SigninActivity;
+import com.github.codetanzania.open311.android.library.ui.listview.ProblemListActivity;
+import com.github.codetanzania.open311.android.library.ui.report.ReportProblemActivity;
+
 public class HomeActivity extends FragmentActivity implements View.OnClickListener {
     private Button mReportButton;
     private Button mSignInButton;
