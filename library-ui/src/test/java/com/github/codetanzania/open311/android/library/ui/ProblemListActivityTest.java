@@ -16,6 +16,7 @@ import com.github.codetanzania.open311.android.library.BuildConfig;
 import com.github.codetanzania.open311.android.library.EventHandler;
 import com.github.codetanzania.open311.android.library.api.ApiModelConverter;
 import com.github.codetanzania.open311.android.library.api.ReportService;
+import com.github.codetanzania.open311.android.library.auth.Auth;
 import com.github.codetanzania.open311.android.library.models.Category;
 import com.github.codetanzania.open311.android.library.models.Problem;
 import com.github.codetanzania.open311.android.library.models.Status;
@@ -67,6 +68,7 @@ public class ProblemListActivityTest {
 
     @Before
     public void startActivity() {
+        Auth.init(RuntimeEnvironment.application, BuildConfig.END_POINT);
         ShadowApplication.getInstance().grantPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         mActivity = Robolectric.buildActivity(ProblemListActivity.class)
