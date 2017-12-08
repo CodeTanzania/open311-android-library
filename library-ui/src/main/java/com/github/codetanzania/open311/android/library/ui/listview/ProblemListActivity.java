@@ -90,7 +90,7 @@ public class ProblemListActivity extends SecureCompactActivity implements ErrorF
     @Override
     protected void onResume() {
         super.onResume();
-        fetchMyReportedProblems();
+            fetchMyReportedProblems();
     }
 
     @Override
@@ -111,7 +111,8 @@ public class ProblemListActivity extends SecureCompactActivity implements ErrorF
     }
 
     private void fetchMyReportedProblems() {
-        if (AttachmentUtils.hasPermissions(this)) {
+        if (Auth.getInstance().isLogin()
+                && AttachmentUtils.hasPermissions(this)) {
             LocalBroadcastManager.getInstance(getBaseContext()).registerReceiver(mMyReportedProblemsReceived,
                     new IntentFilter(EventHandler.BROADCAST_MY_PROBLEMS_FETCHED));
 
