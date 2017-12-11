@@ -26,13 +26,6 @@ import static junit.framework.Assert.assertTrue;
 @Config(constants = BuildConfig.class)
 public class MajiFixApiTest {
 
-    static String getEndpoint() {
-        String currentEndpoint = MajiFix.getBaseEndpoint();
-        if (currentEndpoint.equals(BuildConfig.END_POINT))
-            return null;
-        return currentEndpoint;
-    }
-
     @Test
     public void problemsByPhoneNumberTest() throws IOException {
         int responses = 42;
@@ -43,20 +36,14 @@ public class MajiFixApiTest {
             server.enqueue(new MockResponse().setBody(mock[i]));
         }
 
-        String endpoint = getEndpoint();
-        if (endpoint == null) {
-            server.start();
-            MajiFix.setBaseEndpoint(server.url("/").toString());
-        } else {
-            String[] split = endpoint.split("[:/]");
-            endpoint = split[split.length - 1];
-            server.start(Integer.valueOf(endpoint));
-        }
+        server.start();
+        MajiFix.setBaseEndpoint(server.url("/").toString());
+        MajiFixAPI api = MajiFixAPI.getInstance();
 
+        api.initRetrofit();
 
-
-        TestObserver<ArrayList<Problem>> tester =
-                MajiFixAPI.getInstance().getProblemsByPhoneNumber("8675309")
+        TestObserver<ArrayList<Problem>> tester = api
+                        .getProblemsByPhoneNumber("8675309")
                         .test();
 
         assertTrue("Stream didn't terminate", tester.awaitTerminalEvent());

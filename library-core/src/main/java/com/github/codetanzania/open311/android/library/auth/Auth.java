@@ -392,9 +392,9 @@ public final class Auth {
      * @author lally elias <a href="mailto:lallyelias87@gmail.com">lallyelias87@gmail.com</a>
      * @since 0.1.0
      */
-    public synchronized Boolean isLogin() {
+    public synchronized boolean isLogin() {
         //check for token expiry
-        Boolean isTokenExpired;
+        boolean isTokenExpired;
         isTokenExpired = this.isTokenExpired();
         return !isTokenExpired;
     }

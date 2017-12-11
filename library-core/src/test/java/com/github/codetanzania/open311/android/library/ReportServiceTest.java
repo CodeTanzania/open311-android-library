@@ -2,6 +2,7 @@ package com.github.codetanzania.open311.android.library;
 
 import android.content.Intent;
 
+import com.github.codetanzania.open311.android.library.api.MajiFixAPI;
 import com.github.codetanzania.open311.android.library.api.ReportService;
 import com.github.codetanzania.open311.android.library.api.models.ApiServiceRequestPost;
 import com.github.codetanzania.open311.android.library.auth.Auth;
@@ -77,15 +78,10 @@ public class ReportServiceTest {
 
         MockReportService service = new MockReportService();
 
-        String endpoint = MajiFixApiTest.getEndpoint();
-        if (endpoint == null) {
-            server.start();
-            service.setMockEndpoint(server.url("/").toString());
-        } else {
-            String[] split = endpoint.split("[:/]");
-            endpoint = split[split.length - 1];
-            server.start(Integer.valueOf(endpoint));
-        }
+        server.start();
+        service.setMockEndpoint(server.url("/").toString());
+        MajiFixAPI.getInstance().initRetrofit();
+
         Auth.init(RuntimeEnvironment.application, BuildConfig.END_POINT);
 
         service.onCreate();
@@ -95,8 +91,8 @@ public class ReportServiceTest {
         RecordedRequest request = server.takeRequest(1, TimeUnit.SECONDS);
 
         // assert request to server was made
-        assertNotNull("Server call was made", request);
-        assertEquals("Only one server call was made", 1, server.getRequestCount());
+        assertNotNull("No server call was made", request);
+        assertEquals("Only one server call should be made", 1, server.getRequestCount());
 
         // assert correct information was sent to server
         Gson gson = new Gson();
@@ -115,103 +111,6 @@ public class ReportServiceTest {
         //assertNotNull(service.getReportedProblem());
 
         server.shutdown();
-    }
-
-    private Intent getServiceIntent() {
-        Intent startIntent = new Intent();
-        startIntent.setAction(ReportService.START_POST_PROBLEM_ACTION);
-        startIntent.putExtra(ReportService.NEW_PROBLEM_INTENT, ProblemTest.buildMockProblem(null));
-        return startIntent;
-    }
-
-    private class MockReportService extends ReportService {
-        String mBaseEndpoint;
-
-        void setMockEndpoint(String endpoint) {
-            MajiFix.setBaseEndpoint(endpoint);
-        }
-
-//        @Override
-//        protected Consumer<Problem> onNext() {
-//            return new Consumer<Problem>() {
-//                @Override
-//                public void accept(Problem problem) throws Exception {
-//                    mLatch.countDown();
-//                    System.out.println("onNext! "+problem);
-//                    mProblem = problem;
-//                }
-//            };
-//        }
-    }
-
-    private TestObserver<TaggedProblemList> runTransformer(
-            long cacheDelayMs, long serverDelayMs, boolean cacheErrs,
-            boolean serverErrs, Scheduler runOn) {
-        Observable<ArrayList<Problem>> empty = Observable.just(new ArrayList<Problem>());
-        final Observable<ArrayList<Problem>> network =
-                (serverErrs ? errorMaker(new ServerError()) : empty);
-        final Observable<ArrayList<Problem>> cache =
-                (cacheErrs ? errorMaker(new CacheError()) : empty);
-
-        Consumer<Notification<ArrayList<Problem>>> notifier =
-                new Consumer<Notification<ArrayList<Problem>>>() {
-            @Override
-            public void accept(Notification<ArrayList<Problem>> notification) throws Exception {
-                System.out.println(notification + " at " + System.currentTimeMillis());
-            }
-        };
-
-        ReportService rs = new ReportService();
-        System.out.println("cacheDelay: " + cacheDelayMs + ", serverDelay: " + serverDelayMs);
-        return network
-                .delay(serverDelayMs, TimeUnit.MILLISECONDS, true)
-                .doOnEach(notifier)
-                .compose(rs.transform(
-                        cache.delay(cacheDelayMs, TimeUnit.MILLISECONDS, true).doOnEach(notifier),
-                        new Function<ArrayList<Problem>, ObservableSource<ArrayList<Problem>>>() {
-                            @Override
-                            public ObservableSource<ArrayList<Problem>> apply(ArrayList<Problem> problems) throws Exception {
-                                return network;
-                            }
-                        },
-                        runOn
-                ))
-                .test();
-    }
-
-    private Predicate<TaggedProblemList> predicate(final boolean isPreliminary) {
-        return new Predicate<TaggedProblemList>() {
-            @Override
-            public boolean test(TaggedProblemList taggedList) throws Exception {
-                return taggedList.mPreliminary == isPreliminary;
-            }
-        };
-    }
-
-    private <T extends Error> Observable<ArrayList<Problem>> errorMaker(T error) {
-        return Observable.error(error);
-    }
-
-    private class CacheError extends Error {
-    }
-
-    private class ServerError extends Error {
-    }
-
-    @SafeVarargs
-    private final void compositeStripper(Throwable error, Class<? extends Throwable>... expectedErrors) {
-        if (expectedErrors.length == 1 && !(error instanceof CompositeException)) {
-            assertEquals("Incorrect Error type", expectedErrors[0], error.getClass());
-        } else {
-            List<Throwable> innerErrors = ((CompositeException) error).getExceptions();
-            assertEquals("Incorrect number of errors", expectedErrors.length,
-                    innerErrors.size());
-            if(innerErrors.size() == 1) System.out.println("Single Error wrapped in a Composite");
-            for (int i = 0; i < innerErrors.size(); i++) {
-                assertEquals("Error #" + i + "'s type incorrect", expectedErrors[i],
-                        innerErrors.get(i).getClass());
-            }
-        }
     }
 
     @Test
@@ -253,7 +152,7 @@ public class ReportServiceTest {
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
         test.assertValueCount(1);
         test.assertValueAt(0, predicate(true));
-        assertEquals("Multiple base errors emitted",1, test.errorCount());
+        assertEquals("Multiple base errors emitted", 1, test.errorCount());
         compositeStripper(test.errors().get(0), ServerError.class);
     }
 
@@ -267,7 +166,7 @@ public class ReportServiceTest {
 
         assertTrue("Stream didn't terminate", test.awaitTerminalEvent());
         test.assertValueCount(0);
-        assertEquals("Multiple base errors emitted",1, test.errorCount());
+        assertEquals("Multiple base errors emitted", 1, test.errorCount());
         compositeStripper(test.errors().get(0), CacheError.class, ServerError.class);
     }
 
@@ -332,4 +231,93 @@ public class ReportServiceTest {
         test.assertValueCount(0);
         compositeStripper(test.errors().get(0), ServerError.class, CacheError.class);
     }
+
+    private Intent getServiceIntent() {
+        Intent startIntent = new Intent();
+        startIntent.setAction(ReportService.START_POST_PROBLEM_ACTION);
+        startIntent.putExtra(ReportService.NEW_PROBLEM_INTENT, ProblemTest.buildMockProblem(null));
+        return startIntent;
+    }
+
+    private class MockReportService extends ReportService {
+        String mBaseEndpoint;
+
+        void setMockEndpoint(String endpoint) {
+            MajiFix.setBaseEndpoint(endpoint);
+        }
+
+//        @Override
+//        protected Consumer<Problem> onNext() {
+//            return new Consumer<Problem>() {
+//                @Override
+//                public void accept(Problem problem) throws Exception {
+//                    mLatch.countDown();
+//                    System.out.println("onNext! "+problem);
+//                    mProblem = problem;
+//                }
+//            };
+//        }
+    }
+
+    private TestObserver<TaggedProblemList> runTransformer(
+            long cacheDelayMs, long serverDelayMs, boolean cacheErrs,
+            boolean serverErrs, Scheduler runOn) {
+        Observable<ArrayList<Problem>> empty = Observable.just(new ArrayList<Problem>());
+        final Observable<ArrayList<Problem>> network =
+                (serverErrs ? errorMaker(new ServerError()) : empty);
+        final Observable<ArrayList<Problem>> cache =
+                (cacheErrs ? errorMaker(new CacheError()) : empty);
+
+        //Consumer<Notification<ArrayList<Problem>>> notifier =
+        //        new Consumer<Notification<ArrayList<Problem>>>() {
+        //            @Override
+        //            public void accept(Notification<ArrayList<Problem>> notification) throws Exception {
+        //                System.out.println(notification + " at " + System.currentTimeMillis());
+        //            }
+        //        };
+
+        ReportService rs = new ReportService();
+        //System.out.println("cacheDelay: " + cacheDelayMs + ", serverDelay: " + serverDelayMs);
+        return network
+                .delay(serverDelayMs, TimeUnit.MILLISECONDS, true)
+                //.doOnEach(notifier)
+                .compose(rs.transform(
+                        cache.delay(cacheDelayMs, TimeUnit.MILLISECONDS, true)/*.doOnEach(notifier)*/,
+                        problems -> network,
+                        runOn
+                ))
+                .test();
+    }
+
+    private Predicate<TaggedProblemList> predicate(final boolean isPreliminary) {
+        return taggedList -> taggedList.mPreliminary == isPreliminary;
+    }
+
+    private <T extends Error> Observable<ArrayList<Problem>> errorMaker(T error) {
+        return Observable.error(error);
+    }
+
+    private class CacheError extends Error {
+    }
+
+    private class ServerError extends Error {
+    }
+
+    @SafeVarargs
+    private final void compositeStripper(Throwable error, Class<? extends Throwable>... expectedErrors) {
+        if (expectedErrors.length == 1 && !(error instanceof CompositeException)) {
+            assertEquals("Incorrect Error type", expectedErrors[0], error.getClass());
+        } else {
+            List<Throwable> innerErrors = ((CompositeException) error).getExceptions();
+            assertEquals("Incorrect number of errors", expectedErrors.length,
+                    innerErrors.size());
+            if (innerErrors.size() == 1) System.out.println("Single Error wrapped in a Composite");
+            for (int i = 0; i < innerErrors.size(); i++) {
+                assertEquals("Error #" + i + "'s type incorrect", expectedErrors[i],
+                        innerErrors.get(i).getClass());
+            }
+        }
+    }
+
+
 }
