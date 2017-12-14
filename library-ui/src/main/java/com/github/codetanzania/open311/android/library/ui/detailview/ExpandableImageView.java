@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 
 import com.github.codetanzania.open311.android.library.utils.AttachmentUtils;
@@ -19,6 +20,7 @@ import com.github.codetanzania.open311.android.library.utils.AttachmentUtils;
  */
 
 public class ExpandableImageView extends AppCompatImageView {
+    private String mFilepath;
     private int mBitmapHeight;
     private int mBitmapWidth;
 
@@ -41,17 +43,35 @@ public class ExpandableImageView extends AppCompatImageView {
         init();
     }
 
-    public void setAttachment(String filePath) {
-        if (filePath != null) {
-            AttachmentUtils.setPicFromFile(this, filePath);
+    public void setAttachment(final String filePath) {
+        mFilepath = filePath;
+
+        // when view is laid out
+        getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        // display given attachment
+                        displayUrl();
+                    }
+        });
+    }
+
+    private void displayUrl() {
+        if (mFilepath == null) {
+            return;
         }
+        AttachmentUtils.setPicFromFile(ExpandableImageView.this, mFilepath);
 
         // Get height and width of file
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(filePath, bmOptions);
+        BitmapFactory.decodeFile(mFilepath, bmOptions);
         mBitmapWidth = bmOptions.outWidth;
         mBitmapHeight = bmOptions.outHeight;
+        if (mBitmapHeight == 0) {
+            setVisibility(GONE);
+        }
     }
 
     public void setBitmap(Bitmap bitmap) {
@@ -85,6 +105,7 @@ public class ExpandableImageView extends AppCompatImageView {
                         isExpanded = !isExpanded;
                     }
                 });
+        setVisibility(GONE);
     }
 
     /** This resizes the image so that aspect ratio of photo is maintained */

@@ -12,6 +12,7 @@ public abstract class ApiServiceRequest {
     private ApiLocation location;
     private String description;
     private ApiAttachment[] attachments;
+    private ApiChangelog[] changelogs;
 
     public ApiReporter getReporter() {
         return reporter;
@@ -51,5 +52,13 @@ public abstract class ApiServiceRequest {
 
     public void setAttachments(ApiAttachment[] attachments) {
         this.attachments = attachments;
+    }
+
+    public ApiChangelog[] getChangelogs() {
+        return changelogs;
+    }
+
+    public void setChangelogs(ApiChangelog[] changelogs) {
+        this.changelogs = changelogs;
     }
 }

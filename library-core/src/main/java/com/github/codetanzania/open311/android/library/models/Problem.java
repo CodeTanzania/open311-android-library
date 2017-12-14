@@ -7,9 +7,11 @@ import android.text.TextUtils;
 
 import com.github.codetanzania.open311.android.library.api.ApiModelConverter;
 import com.github.codetanzania.open311.android.library.api.models.ApiServiceRequestGet;
+import com.github.codetanzania.open311.android.library.utils.DateUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static android.text.TextUtils.isEmpty;
@@ -34,10 +36,11 @@ public class Problem implements Parcelable {
     // for get
     private String mTicketNumber;
     private Status mStatus;
+    private Priority mPriority;
     private Calendar mCreatedAt;
     private Calendar mUpdatedAt;
     private Calendar mResolvedAt;
-//    private List<Comment> mComments; //TODO Implement
+    private List<ChangeLog> mChangeLog;
 
     private Problem(String username, String phone, String email, String account,
                     Category category, Location location, String address, String description,
@@ -58,15 +61,18 @@ public class Problem implements Parcelable {
 
     private Problem(String username, String phone, String email, String account,
                     Category category, Location location, String address, String description,
-                    String ticketNumber, Status status, Calendar createdAt, Calendar updatedAt,
-                    Calendar resolvedAt, List<String> attachments) {
+                    String ticketNumber, Status status, Priority priority,
+                    Calendar createdAt, Calendar updatedAt, Calendar resolvedAt,
+                    List<String> attachments, List<ChangeLog> changelog) {
         this(username, phone, email, account, category, location, address, description, attachments);
 
         mTicketNumber = ticketNumber;
         mStatus = status;
+        mPriority = priority;
         mCreatedAt = createdAt;
         mUpdatedAt = updatedAt;
         mResolvedAt = resolvedAt;
+        mChangeLog = changelog;
     }
 
     private Problem(Parcel in) {
@@ -81,23 +87,14 @@ public class Problem implements Parcelable {
 
         mTicketNumber = in.readString();
         mStatus = in.readParcelable(Status.class.getClassLoader());
+        mPriority = in.readParcelable(Priority.class.getClassLoader());
 
-        long mills = in.readLong();
-        if (mills != -1) {
-            mCreatedAt = Calendar.getInstance();
-            mCreatedAt.setTimeInMillis(mills);
-        }
-        mills = in.readLong();
-        if (mills != -1) {
-            mUpdatedAt = Calendar.getInstance();
-            mUpdatedAt.setTimeInMillis(mills);
-        }
-        mills = in.readLong();
-        if (mills != -1) {
-            mResolvedAt = Calendar.getInstance();
-            mResolvedAt.setTimeInMillis(mills);
-        }
-//        mComments = in.readList(Comment.class.getClassLoader());
+        mCreatedAt = DateUtils.getCalendarFromParcel(in);
+        mUpdatedAt = DateUtils.getCalendarFromParcel(in);
+        mResolvedAt = DateUtils.getCalendarFromParcel(in);
+
+        mChangeLog = new ArrayList<>();
+        in.readTypedList(mChangeLog, ChangeLog.CREATOR);
     }
 
     public static final Creator<Problem> CREATOR = new Creator<Problem>() {
@@ -156,8 +153,16 @@ public class Problem implements Parcelable {
         return mTicketNumber;
     }
 
+    public boolean isOpen() {
+        return mResolvedAt == null || mResolvedAt.getTime() != new Date(0);
+    }
+
     public Status getStatus() {
         return mStatus;
+    }
+
+    public Priority getPriority() {
+        return mPriority;
     }
 
     public Calendar getCreatedAt() {
@@ -180,9 +185,9 @@ public class Problem implements Parcelable {
         return mAttachments != null && !mAttachments.isEmpty();
     }
 
-//    public List<Comment> getComments() {
-//        return mComments;
-//    }
+    public List<ChangeLog> getChangeLog() {
+        return mChangeLog;
+    }
 
     @Override
     public int describeContents() {
@@ -200,10 +205,11 @@ public class Problem implements Parcelable {
         dest.writeStringList(mAttachments);
         dest.writeString(mTicketNumber);
         dest.writeParcelable(mStatus, flags);
-        dest.writeLong(mCreatedAt == null ? -1 : mCreatedAt.getTimeInMillis());
-        dest.writeLong(mUpdatedAt == null ? -1 : mUpdatedAt.getTimeInMillis());
-        dest.writeLong(mResolvedAt == null ? -1 : mResolvedAt.getTimeInMillis());
-//        dest.writeList(mComments, flags);
+        dest.writeParcelable(mPriority, flags);
+        DateUtils.setCalendarInParcel(dest, mCreatedAt);
+        DateUtils.setCalendarInParcel(dest, mUpdatedAt);
+        DateUtils.setCalendarInParcel(dest, mResolvedAt);
+        dest.writeTypedList(mChangeLog);
     }
 
     public static class Builder {
@@ -301,42 +307,12 @@ public class Problem implements Parcelable {
         public Problem buildWithoutValidation(String username, String phone, String email,
                                               String accountNumber, Category category,
                                               Location location, String address, String description,
-                                              String ticketNumber, Status status,
+                                              String ticketNumber, Status status, Priority priority,
                                               Calendar createdAt, Calendar updatedAt, Calendar resolvedAt,
-                                              List<String> attachments) {
+                                              List<String> attachments, List<ChangeLog> changeLogs) {
             return new Problem(username, phone, email, accountNumber,
-                    category, location, address, description, ticketNumber, status,
-                    createdAt, updatedAt, resolvedAt, attachments);
-        }
-
-        // TODO Does this go here?
-        public Problem build(ApiServiceRequestGet response) {
-            if (response == null) {
-                return null;
-            }
-            tempUsername = response.getReporter().getName();
-            tempPhone = response.getReporter().getPhone();
-            tempEmail = response.getReporter().getEmail();
-            tempAccount = response.getReporter().getAccount();
-            tempCategory = ApiModelConverter.convert(response.getService());
-            if (response.getLocation() != null) {
-                tempLocation = new Location("");
-                tempLocation.setLatitude(response.getLocation().getLatitude());
-                tempLocation.setLongitude(response.getLocation().getLongitude());
-            }
-            tempAddress = response.getAddress();
-            tempDescription = response.getDescription();
-
-            // TODO: Is there a better way to set these fields?
-            String ticketNumber = response.getTicketId();
-            Status status = new Status(response.isOpen(),
-                    response.getStatus().getName(), response.getStatus().getColor());
-            List<String> attachments = ApiModelConverter.saveToFile(response.getAttachments());
-
-            return new Problem(tempUsername, tempPhone, tempEmail, tempAccount, tempCategory,
-                    tempLocation, tempAddress, tempDescription, ticketNumber, status,
-                    response.getCreatedAt(), response.getUpdatedAt(), response.getResolvedAt(),
-                    attachments);
+                    category, location, address, description, ticketNumber, status, priority,
+                    createdAt, updatedAt, resolvedAt, attachments, changeLogs);
         }
 
         private boolean validate() {

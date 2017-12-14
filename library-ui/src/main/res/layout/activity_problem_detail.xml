@@ -80,7 +80,7 @@
 
             <TextView
                 android:id="@+id/tv_category_label"
-                style="ItemCardTextView.Header"
+                style="@style/ItemCardTextView.Header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:labelFor="@+id/et_category"
@@ -94,8 +94,38 @@
                 android:layout_marginBottom="24dp"/>
 
             <TextView
+                android:id="@+id/tv_status_label"
+                style="@style/ItemCardTextView.Header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:labelFor="@+id/et_category"
+                android:text="@string/status_label" />
+
+            <TextView
+                android:id="@+id/tv_status"
+                style="@style/ItemCardTextView.Medium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"/>
+
+            <TextView
+                android:id="@+id/tv_priority_label"
+                style="@style/ItemCardTextView.Header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:labelFor="@+id/tv_priority"
+                android:text="@string/priority_label" />
+
+            <TextView
+                android:id="@+id/tv_priority"
+                style="@style/ItemCardTextView.Medium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"/>
+
+            <TextView
                 android:id="@+id/tv_location_label"
-                style="ItemCardTextView.Header"
+                style="@style/ItemCardTextView.Header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:labelFor="@+id/iv_location"
@@ -109,7 +139,7 @@
 
             <TextView
                 android:id="@+id/tv_description_label"
-                style="ItemCardTextView.Header"
+                style="@style/ItemCardTextView.Header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:labelFor="@+id/et_description"
@@ -120,6 +150,47 @@
                 style="@style/ItemCardTextView.Medium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+
+            <com.stfalcon.chatkit.messages.MessagesList
+                android:id="@+id/ml_changelogs"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <!--<LinearLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:background="@color/separator"-->
+                <!--android:orientation="horizontal">-->
+
+                <!--<Spinner-->
+                    <!--android:id="@+id/status"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:autofillHints="Status"-->
+                    <!--android:layout_weight="1"/>-->
+
+                <!--<Spinner-->
+                    <!--android:id="@+id/priority"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:autofillHints="Priority"-->
+                    <!--android:layout_weight="1"/>-->
+
+                <!--<Spinner-->
+                    <!--android:id="@+id/assign"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:autofillHints="Assignee"-->
+                    <!--android:layout_weight="1"/>-->
+
+            <!--</LinearLayout>-->
+
+            <!--<com.stfalcon.chatkit.messages.MessageInput-->
+                <!--android:id="@+id/input"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_alignParentBottom="true"-->
+                <!--app:inputHint="Comment"/>-->
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>

@@ -28,7 +28,7 @@ import io.reactivex.functions.Consumer;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "MajiFix.db";
     //private BriteDatabase mDatabase;
     private static final String TAG = "DatabaseHelper";
@@ -95,9 +95,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             @Override
             public ArrayList<Problem> call() throws Exception {
                 ProblemContract.writeProblems(DatabaseHelper.this, problems);
-                Log.d(TAG, "Database written on thread " + Thread.currentThread());
+                Log.d(TAG, "Save reported poblems db write started on thread: " + Thread.currentThread());
                 ArrayList<Problem> ret = ProblemContract.readProblems(DatabaseHelper.this);
-                Log.d(TAG, "Database write completed");
+                Log.d(TAG, "Save reported poblems db write completed for "+ret.size()+" items");
                 return ret;
             }
         });

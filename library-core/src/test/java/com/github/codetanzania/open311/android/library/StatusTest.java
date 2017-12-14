@@ -19,7 +19,7 @@ import static junit.framework.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class StatusTest {
-    private int mockType = Status.OPEN;
+    private String mockId = "123";
     private String mockName = "In Progress";
     private String mockColor = "#000000";
 
@@ -27,20 +27,12 @@ public class StatusTest {
 
     @Before
     public void setup() {
-        mockStatus = new Status(true, mockName, mockColor);
+        mockStatus = new Status(mockId, mockName, mockColor);
     }
 
     @Test
     public void status_isCreated() {
         assertMatchesMock(mockStatus);
-    }
-
-    @Test
-    public void isOpen_worksAsExpected() {
-        Status open = new Status(true, mockName, mockColor);
-        Status closed = new Status(false, mockName, mockColor);
-        assertTrue(open.isOpen());
-        assertFalse(closed.isOpen());
     }
 
     @Test
@@ -54,7 +46,7 @@ public class StatusTest {
     }
 
     private void assertMatchesMock(Status status) {
-        assertEquals("Type should be correct", mockType, status.getType());
+        assertEquals("Type should be correct", mockId, status.getId());
         assertEquals("Name should be correct", mockName, status.getName());
         assertEquals("Color should be correct", mockColor, status.getColor());
     }

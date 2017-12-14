@@ -49,7 +49,7 @@ public class OpenClosedTabAdapter extends FragmentStatePagerAdapter {
         for (Problem request : requests) {
             all.add(request);
 
-            if (request.getStatus().isOpen()) {
+            if (request.isOpen()) {
                 open.add(request);
             } else {
                 closed.add(request);

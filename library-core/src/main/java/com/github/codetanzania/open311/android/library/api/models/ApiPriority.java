@@ -15,10 +15,25 @@ import android.support.annotation.VisibleForTesting;
    }
  */
 
-class ApiPriority {
+public class ApiPriority {
+    private String _id;
+    private String name;
+    private String color;
     private int weight;
 
-    int getWeight() {
+    public String getId() {
+        return _id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public int getWeight() {
         return weight;
     }
 

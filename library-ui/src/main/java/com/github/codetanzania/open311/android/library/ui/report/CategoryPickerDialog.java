@@ -40,6 +40,7 @@ public class CategoryPickerDialog extends DialogFragment {
                 .setPositiveButton(R.string.action_select, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        // note listener set on item selection will close dialog
                         System.out.println("Category selected: "+which);
                         if (mListener != null) {
                             mListener.onItemSelected(mOptions[mSelected], mSelected);
@@ -64,6 +65,10 @@ public class CategoryPickerDialog extends DialogFragment {
                 public void onClick(DialogInterface dialog, int which) {
                     System.out.println("Is selected: "+which);
                     mSelected = which;
+                    if (mListener != null) {
+                        mListener.onItemSelected(mOptions[mSelected], mSelected);
+                        dialog.dismiss();
+                    }
                 }
             });
         }

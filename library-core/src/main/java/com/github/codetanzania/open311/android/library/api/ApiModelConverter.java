@@ -1,10 +1,17 @@
 package com.github.codetanzania.open311.android.library.api;
 
+import android.location.Location;
 import android.support.annotation.VisibleForTesting;
 
+import com.github.codetanzania.open311.android.library.api.models.ApiChangelog;
+import com.github.codetanzania.open311.android.library.api.models.ApiPriority;
 import com.github.codetanzania.open311.android.library.api.models.ApiService;
+import com.github.codetanzania.open311.android.library.api.models.ApiStatus;
 import com.github.codetanzania.open311.android.library.models.Attachment;
 import com.github.codetanzania.open311.android.library.models.Category;
+import com.github.codetanzania.open311.android.library.models.ChangeLog;
+import com.github.codetanzania.open311.android.library.models.Party;
+import com.github.codetanzania.open311.android.library.models.Priority;
 import com.github.codetanzania.open311.android.library.models.Problem;
 import com.github.codetanzania.open311.android.library.api.models.ApiAttachment;
 import com.github.codetanzania.open311.android.library.api.models.ApiServiceRequest;
@@ -13,9 +20,12 @@ import com.github.codetanzania.open311.android.library.api.models.ApiReporter;
 import com.github.codetanzania.open311.android.library.api.models.ApiServiceRequestGet;
 import com.github.codetanzania.open311.android.library.api.models.ApiServiceRequestPost;
 import com.github.codetanzania.open311.android.library.models.Reporter;
+import com.github.codetanzania.open311.android.library.models.Status;
 import com.github.codetanzania.open311.android.library.utils.AttachmentUtils;
+import com.github.codetanzania.open311.android.library.utils.DateUtils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -42,8 +52,48 @@ public class ApiModelConverter {
         if (response == null) {
             return null;
         }
-        // This logic is in the builder because the Problem constructor is protected
-        return new Problem.Builder(null).build(response);
+        Problem.Builder builder = new Problem.Builder(null);
+        return builder.buildWithoutValidation(response.getReporter().getName(),
+                response.getReporter().getPhone(),
+                response.getReporter().getEmail(),
+                response.getReporter().getAccount(),
+                convert(response.getService()),
+                convert(response.getLocation()),
+                response.getAddress(),
+                response.getDescription(),
+                response.getTicketId(),
+                convert(response.getStatus()),
+                convert(response.getPriority()),
+                response.getCreatedAt(),
+                response.getUpdatedAt(),
+                response.getResolvedAt(),
+                saveToFile(response.getAttachments()),
+                convert(response.getChangelogs()));
+    }
+
+    public static Location convert(ApiLocation apiLocation) {
+        if (apiLocation == null) {
+            return null;
+        }
+        Location location = new Location("");
+        location.setLatitude(apiLocation.getLatitude());
+        location.setLongitude(apiLocation.getLongitude());
+        return location;
+    }
+
+    public static ApiLocation convert(Location location) {
+        if (location == null) {
+            return null;
+        }
+        return new ApiLocation(location.getLatitude(),
+                location.getLongitude());
+    }
+
+    public static Status convert(ApiStatus apiStatus) {
+        if (apiStatus == null) {
+            return null;
+        }
+        return new Status(apiStatus.getId(), apiStatus.getName(), apiStatus.getColor());
     }
 
     public static Reporter convert(ApiReporter apiReporter) {
@@ -67,10 +117,7 @@ public class ApiModelConverter {
             return;
         }
         request.setReporter(new ApiReporter(problem.getReporter()));
-        if (problem.getLocation() != null) {
-            request.setLocation(new ApiLocation(problem.getLocation().getLatitude(),
-                            problem.getLocation().getLongitude()));
-        }
+        request.setLocation(convert(problem.getLocation()));
         request.setAddress(problem.getAddress());
         request.setDescription(problem.getDescription());
         request.setAttachments(getFromFile(problem.getAttachments()));
@@ -119,5 +166,41 @@ public class ApiModelConverter {
         }
         return new ApiAttachment(attachment.getName(), attachment.getCaption(),
                 attachment.getMime(), attachment.getContent());
+    }
+
+    public static List<ChangeLog> convert(ApiChangelog[] apiChangelogs) {
+        if (apiChangelogs == null || apiChangelogs.length < 1) {
+            return null;
+        }
+        List<ChangeLog> changeLogs = new ArrayList<>();
+        for (ApiChangelog log : apiChangelogs) {
+            if (log == null) {
+                return null;
+            }
+            Party changer = log.getChanger();
+            boolean isVisible = log.isPublic();
+
+            if (log.getStatus() != null) {
+                changeLogs.add(new ChangeLog(changer, convert(log.getStatus()), log.getCreatedAt(), isVisible));
+            }
+            if (log.getComment() != null) {
+                changeLogs.add(new ChangeLog(changer, log.getComment(), log.getCreatedAt(), isVisible));
+            }
+            if (log.getAssignee() !=  null) {
+                changeLogs.add(new ChangeLog(changer, log.getAssignee(), log.getCreatedAt(), isVisible));
+            }
+            if (log.getPriority() != null) {
+                changeLogs.add(new ChangeLog(changer, convert(log.getPriority()), log.getCreatedAt(), isVisible));
+            }
+        }
+        return changeLogs;
+    }
+
+    public static Priority convert(ApiPriority apiPriority) {
+        if (apiPriority == null) {
+            return null;
+        }
+        return new Priority(apiPriority.getId(), apiPriority.getName(),
+                            apiPriority.getColor(), apiPriority.getWeight());
     }
 }

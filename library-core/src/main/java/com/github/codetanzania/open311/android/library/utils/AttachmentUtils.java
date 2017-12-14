@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Base64;
+import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 
@@ -29,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -121,7 +123,7 @@ public class AttachmentUtils {
         try {
             // Create a file in cache with unique filename
             String suffix = attachment.getMime().split("/")[1];
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
             String prefix = attachment.getName()+"_" + timeStamp + "_";
             File newFile = File.createTempFile(prefix, suffix, mCacheDir);
 
@@ -154,6 +156,8 @@ public class AttachmentUtils {
         if (view == null || uri == null) {
             return false;
         }
+        // ensure that view is visible
+        view.setVisibility(View.VISIBLE);
 
         // Get dimens of the view
         int targetW = view.getWidth();
@@ -424,7 +428,7 @@ public class AttachmentUtils {
      */
     private static File createEmptyImageFile() throws IOException {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         return File.createTempFile(imageFileName, ".png", storageDirectory);

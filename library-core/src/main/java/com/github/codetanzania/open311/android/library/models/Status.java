@@ -14,37 +14,31 @@ import java.lang.annotation.RetentionPolicy;
 
 public class Status implements Parcelable {
 
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({OPEN, CLOSED})
-    public @interface Type {}
-    public static final int OPEN = 0;
-    public static final int CLOSED = 1;
+//    @Retention(RetentionPolicy.SOURCE)
+//    @IntDef({OPEN, CLOSED})
+//    public @interface Type {}
+//    public static final int OPEN = 0;
+//    public static final int CLOSED = 1;
 
-    @Type
-    private int mType;
+    private String mId;
     private String mName;
-
     private String mColor;
 
-    public Status(boolean isOpen, String name, String color){
-        this.mType = isOpen ? OPEN : CLOSED;
+    public Status(String id, String name, String color){
+        this.mId = id;
         this.mName = name;
         this.mColor = color;
     }
 
     @SuppressWarnings("ResourceType")
     private Status(Parcel in) {
-        mType = in.readInt();
+        mId = in.readString();
         mName = in.readString();
         mColor = in.readString();
     }
 
-    public boolean isOpen() {
-        return mType == OPEN;
-    }
-
-    public int getType() {
-        return mType;
+    public String getId() {
+        return mId;
     }
 
     public String getName() {
@@ -75,7 +69,7 @@ public class Status implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(mType);
+        parcel.writeString(mId);
         parcel.writeString(mName);
         parcel.writeString(mColor);
     }
