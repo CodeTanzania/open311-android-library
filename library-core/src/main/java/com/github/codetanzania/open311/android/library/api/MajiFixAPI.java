@@ -33,6 +33,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 import static android.support.annotation.VisibleForTesting.PACKAGE_PRIVATE;
+import static android.support.annotation.VisibleForTesting.PRIVATE;
 
 /**
  * This provides the endpoints for the MajiFix API.
@@ -61,7 +62,8 @@ public class MajiFixAPI {
         return mSingleton;
     }
 
-    private void initRetrofit() {
+    @VisibleForTesting(otherwise = PRIVATE)
+    public void initRetrofit() {
         // Configures retrofit
         mRetrofit = new Retrofit.Builder()
                 .baseUrl(MajiFix.getBaseEndpoint())
@@ -130,10 +132,10 @@ public class MajiFixAPI {
                         return ApiModelConverter.convert(apiServiceRequest);
                     }
                 })
-                .collectInto(new ArrayList<>(), new BiConsumer<List<Problem>, Problem>() {
+                .collectInto(new ArrayList<Problem>(), new BiConsumer<ArrayList<Problem>, Problem>() {
                     @Override
-                    public void accept(List<Problem> list, Problem problem) throws Exception {
-                        list.add(problem);
+                    public void accept(ArrayList<Problem> objects, Problem problem) throws Exception {
+                        objects.add(problem);
                     }
                 });
     }
@@ -148,7 +150,8 @@ public class MajiFixAPI {
 
     private String getAuthToken() {
         //TODO obfuscate token
-        if (Auth.getInstance().isLogin()) {
+        Auth auth = Auth.getInstance();
+        if (auth != null && auth.isLogin()) {
             return "Bearer " + Auth.getInstance().getToken();
         } else {
             return "Bearer " + BuildConfig.MAJIFIX_API_TOKEN;
