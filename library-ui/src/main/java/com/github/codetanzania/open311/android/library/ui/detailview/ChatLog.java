@@ -38,7 +38,9 @@ public class ChatLog implements IMessage {
 
     public ChatLog(ChangeLog changeLog) {
         mLog = changeLog;
-        mUser = new ChatUser(mLog.getChanger());
+        if (mLog.getChanger() != null) {
+            mUser = new ChatUser(mLog.getChanger());
+        }
     }
 
     @Override
