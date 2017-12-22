@@ -94,6 +94,7 @@ import java.util.Calendar;
 
 public class ApiServiceRequestGet extends ApiServiceRequest {
     private ApiService service;
+    private ApiPriority priority;
     private ApiStatus status;
     private String code;
     private String createdAt;
@@ -102,6 +103,10 @@ public class ApiServiceRequestGet extends ApiServiceRequest {
 
     public ApiService getService() {
         return service;
+    }
+
+    public ApiPriority getPriority() {
+        return priority;
     }
 
     public String getTicketId() {

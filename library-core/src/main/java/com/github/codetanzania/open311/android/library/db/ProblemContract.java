@@ -7,6 +7,8 @@ import android.location.Location;
 import android.provider.BaseColumns;
 
 import com.github.codetanzania.open311.android.library.models.Category;
+import com.github.codetanzania.open311.android.library.models.ChangeLog;
+import com.github.codetanzania.open311.android.library.models.Priority;
 import com.github.codetanzania.open311.android.library.models.Problem;
 import com.github.codetanzania.open311.android.library.models.Reporter;
 import com.github.codetanzania.open311.android.library.models.Status;
@@ -39,13 +41,17 @@ public class ProblemContract {
             Entry.COLUMN_ADDRESS + " TEXT, " +
             Entry.COLUMN_DESCRIPTION + " TEXT, " +
             Entry.COLUMN_ATTACHMENT_JSON + " TEXT, " +
-            Entry.COLUMN_STATUS_IS_OPEN + " INTEGER," +
+            Entry.COLUMN_STATUS_ID + " TEXT," +
             Entry.COLUMN_STATUS_NAME + " TEXT," +
             Entry.COLUMN_STATUS_COLOR + " TEXT," +
+            Entry.COLUMN_PRIORITY_NAME + " TEXT," +
+            Entry.COLUMN_PRIORITY_COLOR + " TEXT," +
+            Entry.COLUMN_PRIORITY_ID + " TEXT," +
+            Entry.COLUMN_PRIORITY_WEIGHT + " INTEGER," +
             Entry.COLUMN_CREATED_AT + " INTEGER," +
             Entry.COLUMN_UPDATED_AT + " INTEGER," +
             Entry.COLUMN_RESOLVED_AT + " INTEGER," +
-            Entry.COLUMN_COMMENT_JSON + " TEXT," +
+            Entry.COLUMN_CHANGELOG_JSON + " TEXT," +
             Entry.COLUMN_POSTED + " INTEGER)";
 
     static final String DELETE_PROBLEM_TABLE = "DROP TABLE IF EXISTS " + Entry.TABLE_NAME;
@@ -79,6 +85,21 @@ public class ProblemContract {
                     values.put(Entry.COLUMN_CATEGORY_CODE, category.getCode());
                 }
 
+                Status status = problem.getStatus();
+                if (status != null) {
+                    values.put(Entry.COLUMN_STATUS_NAME, status.getName());
+                    values.put(Entry.COLUMN_STATUS_COLOR, status.getColor());
+                    values.put(Entry.COLUMN_STATUS_ID, status.getId());
+                }
+
+                Priority priority = problem.getPriority();
+                if (priority != null) {
+                    values.put(Entry.COLUMN_PRIORITY_ID, priority.getId());
+                    values.put(Entry.COLUMN_PRIORITY_NAME, priority.getName());
+                    values.put(Entry.COLUMN_PRIORITY_COLOR, priority.getColor());
+                    values.put(Entry.COLUMN_PRIORITY_WEIGHT, priority.getWeight());
+                }
+
                 Location location = problem.getLocation();
                 if (location != null) {
                     values.put(Entry.COLUMN_LATITUDE, location.getLatitude());
@@ -94,11 +115,10 @@ public class ProblemContract {
                     values.put(Entry.COLUMN_ATTACHMENT_JSON, json);
                 }
 
-                Status status = problem.getStatus();
-                if (status != null) {
-                    values.put(Entry.COLUMN_STATUS_NAME, status.getName());
-                    values.put(Entry.COLUMN_STATUS_COLOR, status.getColor());
-                    values.put(Entry.COLUMN_STATUS_IS_OPEN, status.isOpen());
+                List<ChangeLog> changelog = problem.getChangeLog();
+                if (changelog != null && changelog.size() > 0) {
+                    String json = new Gson().toJson(changelog);
+                    values.put(Entry.COLUMN_CHANGELOG_JSON, json);
                 }
 
                 if(problem.getCreatedAt() != null)
@@ -137,13 +157,17 @@ public class ProblemContract {
                 Entry.COLUMN_ADDRESS,
                 Entry.COLUMN_DESCRIPTION,
                 Entry.COLUMN_ATTACHMENT_JSON,
-                Entry.COLUMN_STATUS_IS_OPEN,
+                Entry.COLUMN_STATUS_ID,
                 Entry.COLUMN_STATUS_NAME,
                 Entry.COLUMN_STATUS_COLOR,
+                Entry.COLUMN_PRIORITY_NAME,
+                Entry.COLUMN_PRIORITY_COLOR,
+                Entry.COLUMN_PRIORITY_ID,
+                Entry.COLUMN_PRIORITY_WEIGHT,
                 Entry.COLUMN_CREATED_AT,
                 Entry.COLUMN_UPDATED_AT,
                 Entry.COLUMN_RESOLVED_AT,
-                Entry.COLUMN_COMMENT_JSON,
+                Entry.COLUMN_CHANGELOG_JSON,
                 Entry.COLUMN_POSTED
         };
 
@@ -169,6 +193,17 @@ public class ProblemContract {
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_CATEGORY_PRIORITY));
             String categoryCode = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_CATEGORY_CODE);
 
+            // status
+            String statusId = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_STATUS_ID);
+            String statusName = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_STATUS_NAME);
+            String statusColor = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_STATUS_COLOR);
+
+            // priority
+            String priorityId = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_PRIORITY_ID);
+            String priorityName = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_PRIORITY_NAME);
+            String priorityColor = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_PRIORITY_COLOR);
+            int priorityWeight = cursor.getInt(cursor.getColumnIndexOrThrow(Entry.COLUMN_PRIORITY_WEIGHT));
+
             // location info
             Location location = new Location("");
             location.setLatitude(cursor.getDouble(
@@ -181,17 +216,16 @@ public class ProblemContract {
             // other
             String description = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_DESCRIPTION);
 
-            //TODO Implement attachments
+            // attachment
             String attachmentJson = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_ATTACHMENT_JSON);
+            Type attachmentType = new TypeToken<ArrayList<String>>(){}.getType();
+            List<String> attachments = new Gson().fromJson(attachmentJson, attachmentType);
 
-            Type listType = new TypeToken<ArrayList<String>>(){}.getType();
-            List<String> attachments = new Gson().fromJson(attachmentJson, listType);
+            // changelog
+            String timelineJson = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_CHANGELOG_JSON);
+            Type changelogType = new TypeToken<ArrayList<ChangeLog>>(){}.getType();
+            List<ChangeLog> changeLogs = new Gson().fromJson(timelineJson, changelogType);
 
-            // status
-            boolean isOpen = cursor.getInt(
-                    cursor.getColumnIndexOrThrow(Entry.COLUMN_STATUS_IS_OPEN)) > 0;
-            String statusName = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_STATUS_NAME);
-            String statusColor = DatabaseHelper.dbGetString(cursor, Entry.COLUMN_STATUS_COLOR);
 
             // dates
             Calendar createdAt = DateUtils.getCalendarFromDbMills(cursor.getLong(
@@ -201,15 +235,13 @@ public class ProblemContract {
             Calendar resolvedAt = DateUtils.getCalendarFromDbMills(cursor.getLong(
                     cursor.getColumnIndexOrThrow(Entry.COLUMN_RESOLVED_AT)));
 
-            // TODO Implement comments
-            //String commentIds = cursor.getString(
-            //        cursor.getColumnIndexOrThrow(Entry.COLUMN_COMMENT_JSON));
 
             Problem problem = builder.buildWithoutValidation(username, phone, email, accountNumber,
                     new Category(categoryName, categoryId, categoryPriority, categoryCode),
                     location, address, description, ticketNumber,
-                    new Status(isOpen, statusName, statusColor),
-                    createdAt, updatedAt, resolvedAt, attachments);
+                    new Status(statusId, statusName, statusColor),
+                    new Priority(priorityId, priorityName, priorityColor, priorityWeight),
+                    createdAt, updatedAt, resolvedAt, attachments, changeLogs);
 
             problems.add(problem);
         }
@@ -237,13 +269,17 @@ public class ProblemContract {
         static final String COLUMN_ADDRESS = "address";
         static final String COLUMN_DESCRIPTION = "description";
         static final String COLUMN_ATTACHMENT_JSON = "attachment_json";
-        static final String COLUMN_STATUS_IS_OPEN = "status_is_open";
+        static final String COLUMN_STATUS_ID = "status_id";
         static final String COLUMN_STATUS_NAME = "status_name";
+        static final String COLUMN_PRIORITY_NAME = "priority_name";
+        static final String COLUMN_PRIORITY_COLOR = "priority_color";
+        static final String COLUMN_PRIORITY_ID = "priority_id";
+        static final String COLUMN_PRIORITY_WEIGHT = "priority_weight";
         static final String COLUMN_STATUS_COLOR = "status_color";
         static final String COLUMN_CREATED_AT = "created_at";
         static final String COLUMN_UPDATED_AT = "updated_at";
         static final String COLUMN_RESOLVED_AT = "resolved_at";
-        static final String COLUMN_COMMENT_JSON = "comment_ids";
+        static final String COLUMN_CHANGELOG_JSON = "comment_ids";
         static final String COLUMN_POSTED = "is_posted";
     }
 }

@@ -13,4 +13,5 @@
     <dimen name="auth_signin_button_margin_top">30dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="tab_height">48dp</dimen>
+    <dimen name="heading_size">12dp</dimen>
 </resources>

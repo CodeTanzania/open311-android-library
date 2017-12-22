@@ -61,6 +61,8 @@
     <!--problem details fragment-->
     <string name="reporter_label">Reporter</string>
     <string name="category_label">Category</string>
+    <string name="status_label">Status</string>
+    <string name="priority_label">Priority</string>
     <string name="location_label">Location</string>
     <string name="description_label">Description</string>
     <string name="call_user">Call %s: %s</string>
@@ -71,4 +73,24 @@
     <string name="tab_all">All</string>
     <string name="refresh">TRY AGAIN</string>
     <string name="permission_required_list_view">Permission is required to retrieve issues</string>
+
+
+    <!--&lt;!&ndash;todo remove!&ndash;&gt;-->
+    <!--<string-array name="status_array">-->
+        <!--<item>Open</item>-->
+        <!--<item>In Progress</item>-->
+        <!--<item>Escallated</item>-->
+        <!--<item>Closed</item>-->
+    <!--</string-array>-->
+    <!--<string-array name="priority_array">-->
+        <!--<item>Low</item>-->
+        <!--<item>Medium</item>-->
+        <!--<item>High</item>-->
+    <!--</string-array>-->
+    <!--<string-array name="assignee_array">-->
+        <!--<item>Vivi</item>-->
+        <!--<item>Amir</item>-->
+        <!--<item>Jeff</item>-->
+    <!--</string-array>-->
 </resources>
+

@@ -46,7 +46,7 @@ public class ProblemListAdapter extends  RecyclerView.Adapter<RecyclerView.ViewH
             categoryIconColor = Color.parseColor(problem.getStatus().getColor());
         } catch (Exception e) {
             categoryIconColor = ContextCompat.getColor(srViewHolder.cardView.getContext(),
-                    problem.getStatus().isOpen() ? R.color.open : R.color.resolved);
+                    problem.isOpen() ? R.color.open : R.color.resolved);
         }
         DrawableCompat.setTint(srViewHolder.tvCategoryIcon.getBackground(), categoryIconColor);
 
@@ -76,11 +76,11 @@ public class ProblemListAdapter extends  RecyclerView.Adapter<RecyclerView.ViewH
         ProblemViewHolder(View itemView) {
             super(itemView);
             cardView = itemView;
-            tvCategoryIcon = (TextView) itemView.findViewById(R.id.tv_categoryIcon);
-            tvTitle = (TextView) itemView.findViewById(R.id.tv_problemTitle);
-            tvTicketID = (TextView) itemView.findViewById(R.id.tv_problemTicketID);
-            tvDescription = (TextView) itemView.findViewById(R.id.tv_problemDescription);
-            tvDateCreated = (TextView) itemView.findViewById(R.id.tv_problemDate);
+            tvCategoryIcon = itemView.findViewById(R.id.tv_categoryIcon);
+            tvTitle = itemView.findViewById(R.id.tv_problemTitle);
+            tvTicketID = itemView.findViewById(R.id.tv_problemTicketID);
+            tvDescription = itemView.findViewById(R.id.tv_problemDescription);
+            tvDateCreated = itemView.findViewById(R.id.tv_problemDate);
         }
 
         void bind(final Problem problem, final OnItemClickListener listener) {

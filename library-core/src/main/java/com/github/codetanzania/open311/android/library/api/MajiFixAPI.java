@@ -130,7 +130,7 @@ public class MajiFixAPI {
                         return ApiModelConverter.convert(apiServiceRequest);
                     }
                 })
-                .collectInto(new ArrayList<>(), new BiConsumer<List<Problem>, Problem>() {
+                .collectInto(new ArrayList<Problem>(), new BiConsumer<List<Problem>, Problem>() {
                     @Override
                     public void accept(List<Problem> list, Problem problem) throws Exception {
                         list.add(problem);

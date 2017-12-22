@@ -17,11 +17,14 @@
     </style>
 
     <style name="ItemCardTextView.Header">
-        <item name="android:layout_marginTop">24dp</item>
+        <item name="android:textSize">@dimen/heading_size</item>
+        <item name="android:textColor">@color/separator</item>
+        <item name="android:paddingTop">24dp</item>
     </style>
 
     <style name="ItemCardTextView.Medium">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/black</item>
     </style>
 
     <style name="MajifixButton" parent="Widget.AppCompat.Button.Borderless">

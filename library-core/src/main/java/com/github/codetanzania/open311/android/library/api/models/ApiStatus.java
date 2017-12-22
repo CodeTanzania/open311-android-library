@@ -15,8 +15,13 @@ package com.github.codetanzania.open311.android.library.api.models;
  */
 
 public class ApiStatus {
+    private String _id;
     private String name;
     private String color;
+
+    public String getId() {
+        return _id;
+    }
 
     public String getName() {
         return name;

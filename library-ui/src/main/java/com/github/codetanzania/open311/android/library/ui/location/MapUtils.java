@@ -1,10 +1,16 @@
 package com.github.codetanzania.open311.android.library.ui.location;
 
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.github.codetanzania.open311.android.library.ui.BuildConfig;
 import com.github.codetanzania.open311.android.library.ui.R;
 import com.mapbox.mapboxsdk.geometry.LatLng;

@@ -8,10 +8,11 @@ import com.github.codetanzania.open311.android.library.api.ApiModelConverter;
 import com.github.codetanzania.open311.android.library.api.models.ApiServiceRequestGet;
 import com.github.codetanzania.open311.android.library.api.models.ApiServiceRequestPost;
 import com.github.codetanzania.open311.android.library.models.Category;
+import com.github.codetanzania.open311.android.library.models.ChangeLog;
 import com.github.codetanzania.open311.android.library.models.Problem;
 import com.github.codetanzania.open311.android.library.utils.AttachmentUtils;
+import com.github.codetanzania.open311.android.library.utils.DateUtils;
 import com.github.codetanzania.open311.android.library.utils.ProblemCollections;
-import com.google.gson.Gson;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -159,16 +160,16 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
 
         Problem p1 = builder.buildWithoutValidation(null, null, null,
                 null, null, null, null, null,
-                "1", null, stoneage, null, null, null);
+                "1", null, null, stoneage, null, null, null, null);
         Problem p2 = builder.buildWithoutValidation(null, null, null,
                 null, null, null, null, null,
-                "1", null, skyscrapers, null, null, null);
+                "1", null, null, skyscrapers, null, null, null, null);
         Problem p3 = builder.buildWithoutValidation(null, null, null,
                 null, null, null, null, null,
-                "1", null, pyramids, null, null, null);
+                "1", null, null, pyramids, null, null, null, null);
         Problem p4 = builder.buildWithoutValidation(null, null, null,
                 null, null, null, null, null,
-                "1", null, castles, null, null, null);
+                "1", null, null, castles, null, null, null, null);
 
         List<Problem> problems = new ArrayList<>(2);
         problems.add(p1);
@@ -243,11 +244,64 @@ public class ProblemTest implements Problem.Builder.InvalidCallbacks {
         assertEquals("Ticket number should be correct", mockTicketNumber, problem.getTicketNumber());
         assertEquals("Status name should be correct", mockStatusName, problem.getStatus().getName());
         assertEquals("Status color should be correct", mockStatusColor, problem.getStatus().getColor());
-        assertEquals("Status boolean should be correct", false, problem.getStatus().isOpen());
+        assertEquals("Status boolean should be correct", false, problem.isOpen());
+        assertEquals("Priority name should be correct", mockPriorityId, problem.getPriority().getId());
+        assertEquals("Priority name should be correct", mockPriorityName, problem.getPriority().getName());
+        assertEquals("Priority name should be correct", mockPriorityWeight, problem.getPriority().getWeight());
+        assertEquals("Priority name should be correct", mockPriorityColor, problem.getPriority().getColor());
 
         DateUtilTest.testCalendar(problem.getCreatedAt(), 2015, Calendar.OCTOBER, 22, 9, 3, 46);
         DateUtilTest.testCalendar(problem.getUpdatedAt(), 2016, Calendar.OCTOBER, 22, 9, 3, 46);
         DateUtilTest.testCalendar(problem.getResolvedAt(), 2017, Calendar.OCTOBER, 22, 9, 3, 46);
+
+        assertChangelogsMatch(problem);
+    }
+
+    public static void assertChangelogsMatch(Problem problem) {
+        assertEquals("There should be one changelog", 4, problem.getChangeLog().size());
+
+        for (ChangeLog log : problem.getChangeLog()) {
+            assertEquals("Changelog changer name should be correct",
+                    mockChangelogChangerName, log.getChanger().getName());
+            assertEquals("Changelog changer phone should be correct",
+                    mockChangelogChangerPhone, log.getChanger().getPhone());
+            assertEquals("Changelog changer email should be correct",
+                    mockChangelogChangerEmail, log.getChanger().getEmail());
+            assertEquals("Changelog date created should be correct",
+                    DateUtils.getCalendarFromMajiFixApiString(mockChangelogDateCreatedString), log.getCreatedAt());
+            assertEquals("Changelog is public should be correct",
+                    mockChangelogIsPublic, log.isPublic());
+        }
+
+        ChangeLog statusLog = problem.getChangeLog().get(0);
+        assertEquals("Changelog status name should be correct",
+                mockChangelogStatusName, statusLog.getStatus().getName());
+        assertEquals("Changelog status color should be correct",
+                mockChangelogStatusColor, statusLog.getStatus().getColor());
+        assertEquals("Changelog status id should be correct",
+                mockChangelogStatusId, statusLog.getStatus().getId());
+
+        ChangeLog commentLog = problem.getChangeLog().get(1);
+        assertEquals("Changelog comment should be correct",
+                mockChangelogComment, commentLog.getComment());
+
+        ChangeLog assigneeLog = problem.getChangeLog().get(2);
+        assertEquals("Changelog assignee name be correct",
+                mockChangelogAssigneeName, assigneeLog.getAssignee().getName());
+        assertEquals("Changelog assignee name be correct",
+                mockChangelogAssigneePhone, assigneeLog.getAssignee().getPhone());
+        assertEquals("Changelog assignee name be correct",
+                mockChangelogAssigneeEmail, assigneeLog.getAssignee().getEmail());
+
+        ChangeLog priorityLog = problem.getChangeLog().get(3);
+        assertEquals("Changelog priority name should be correct",
+                mockChangelogPriorityName, priorityLog.getPriority().getName());
+        assertEquals("Changelog priority weight should be correct",
+                mockChangelogPriorityWeight, priorityLog.getPriority().getWeight());
+        assertEquals("Changelog priority color should be correct",
+                mockChangelogPriorityColor, priorityLog.getPriority().getColor());
+        assertEquals("Changelog priority id should be correct",
+                mockChangePriorityId, priorityLog.getPriority().getId());
     }
 
     private static void assertOneAttachmentMatches(Problem problem) {

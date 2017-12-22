@@ -32,9 +32,33 @@ public class Mocks {
     static String mockTicketNumber = "M123";
     static String mockStatusName = "Closed";
     static String mockStatusColor = "#0D47A1";
+    static String mockStatusId = "5968b633617399248a4307b9";
+    static String mockPriorityName = "Medium";
+    static int mockPriorityWeight = -4;
+    static String mockPriorityColor = "#1B5E21";
+    static String mockPriorityId = "5968b63c48dfc224bb477444";
     static String mockCreatedAtString = "2015-10-22T09:03:46.845Z";
     static String mockUpdatedAtString = "2016-10-22T09:03:46.845Z";
     static String mockResolvedAtString = "2017-10-22T09:03:46.845Z";
+
+    static String mockChangelogChangerName = "Lally Elias";
+    static String mockChangelogChangerPhone = "255714095061";
+    static String mockChangelogChangerEmail = "lallyelias87@gmail.com";
+    static String mockChangelogPriorityName = "Low";
+    static int mockChangelogPriorityWeight = -5;
+    static String mockChangelogPriorityColor = "#1B5E20";
+    static String mockChangePriorityId = "5968b63c48dfc224bb477443";
+    static String mockChangelogStatusName = "Open";
+    static String mockChangelogStatusColor = "#0D47A1";
+    static String mockChangelogStatusId = "5968b633617399248a4307b9";
+    static String mockChangelogDateCreatedString = "2017-12-05T12:58:11.325Z";
+    static boolean mockChangelogIsPublic = true;
+    static String mockChangelogComment = "can't find the darn thing!";
+    static String mockChangelogAssigneeName = "Blue Bird";
+    static String mockChangelogAssigneePhone = "890";
+    static String mockChangelogAssigneeEmail = "peanut@street.com";
+
+
     static String mockAttachmentTitle = "Sample Image";
     static String mockAttachmentCaption = "Sample Caption";
     static String mockAttachmentMime = "image/png";
@@ -71,20 +95,25 @@ public class Mocks {
             "    \"location\": {\n" +
             "        \"type\": \"Point\",\n" +
             "        \"coordinates\": [\n" +
-            "            "+latitude+",\n" +
-            "            "+longitude+"\n" +
+            "            "+longitude+",\n" +
+            "            "+latitude+"\n" +
             "        ]\n" +
             "    },\n" +
             "    \"status\": {\n" +
             "        \"name\": \""+mockStatusName+"\",\n" +
             "        \"weight\": -5,\n" +
             "        \"color\": \""+mockStatusColor+"\",\n" +
-            "        \"_id\": \"5968b633617399248a4307b9\",\n" +
+            "        \"_id\": \""+mockStatusId+"\",\n" +
             "        \"createdAt\": \"2017-07-14T12:16:51.788Z\",\n" +
             "        \"updatedAt\": \"2017-07-14T12:16:51.788Z\",\n" +
             "        \"uri\": \"https://dawasco.herokuapp.com/statuses/5968b633617399248a4307b9\"\n" +
             "    },\n" +
-            "    \"priority\": {},\n" +
+            "    \"priority\": {\n" +
+            "        \"name\": \""+mockPriorityName+"\",\n" +
+            "        \"weight\": "+mockPriorityWeight+",\n" +
+            "        \"color\": \""+mockPriorityColor+"\",\n" +
+            "        \"_id\": \""+ mockPriorityId +"\"\n" +
+            "    },\n" +
             "    \"attachments\": [\n" +
             "        {\n" +
             "            \"updatedAt\": \"2017-10-23T12:19:34.294Z\",\n" +
@@ -100,6 +129,42 @@ public class Mocks {
             "            \"uri\": \"\"\n" +
             "        }\n" +
             "    ],\n" +
+            "    \"changelogs\": [\n" +
+            "                {\n" +
+            "                    \"changer\": {\n" +
+            "                        \"name\": \""+mockChangelogChangerName+"\",\n" +
+            "                        \"phone\": \""+mockChangelogChangerPhone+"\",\n" +
+            "                        \"_id\": \"5968b64248dfc224bb4774a5\",\n" +
+            "                        \"email\": \""+mockChangelogChangerEmail+"\"\n" +
+            "                    },\n" +
+            "                    \"priority\": {\n" +
+            "                        \"name\": \""+mockChangelogPriorityName+"\",\n" +
+            "                        \"weight\": "+mockChangelogPriorityWeight+",\n" +
+            "                        \"color\": \""+mockChangelogPriorityColor+"\",\n" +
+            "                        \"_id\": \""+ mockChangePriorityId +"\"\n" +
+            "                    },\n" +
+            "                    \"status\": {\n" +
+            "                        \"name\": \""+mockChangelogStatusName+"\",\n" +
+            "                        \"weight\": -5,\n" +
+            "                        \"color\": \""+mockChangelogStatusColor+"\",\n" +
+            "                        \"_id\": \""+mockChangelogStatusId+"\"\n" +
+            "                    },\n" +
+            "                    \"comment\": \""+mockChangelogComment+"\","+
+            "                    \"assignee\": {"+
+            "                        \"name\": \""+mockChangelogAssigneeName+"\",\n" +
+            "                        \"phone\": \""+mockChangelogAssigneePhone+"\",\n" +
+            "                        \"_id\": \"5968b64248dfc224bb47745a\",\n" +
+            "                        \"email\": \""+mockChangelogAssigneeEmail+"\"\n" +
+            "                    },\n" +
+            "                    \"createdAt\": \""+mockChangelogDateCreatedString+"\",\n" +
+            "                    \"_id\": \"5a2697e33a2d6b00045e15e3\",\n" +
+            "                    \"visibility\": \"Public\",\n" +
+            "                    \"isPublic\": "+mockChangelogIsPublic+",\n" +
+            "                    \"wasNotificationSent\": false,\n" +
+            "                    \"shouldNotify\": false,\n" +
+            "                    \"id\": \"5a2697e33a2d6b00045e15e3\"\n" +
+            "                }\n" +
+            "    ],"+
             "    \"_id\": \"59edde56ae89b300040499b9\",\n" +
             "    \"createdAt\": \""+mockCreatedAtString+"\",\n" +
             "    \"updatedAt\": \""+mockUpdatedAtString+"\",\n" +
